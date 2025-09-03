@@ -119,7 +119,7 @@
       <a href="#" class="text-sm/6 font-semibold text-white">Company</a>
     </el-popover-group>
     <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-      <a href="view/landing/page/login.php" class="text-sm/6 font-semibold text-white">Log in <span aria-hidden="true">&rarr;</span></a>
+      <a href="index.php?page=login" class="text-sm/6 font-semibold text-white">Log in <span aria-hidden="true">&rarr;</span></a>
     </div>
   </nav>
   <el-dialog>
