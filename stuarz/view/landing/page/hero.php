@@ -1,6 +1,6 @@
 <!-- Hero Section -->
 <div class="bg-gray-900">
-  <div class="mx-auto max-w-7xl py-24 sm:px-6 sm:py-32 lg:px-8">
+  <div class="mx-auto max-w-7xl py-1 sm:px-6 sm:py-32 lg:px-8">
     <div class="relative isolate overflow-hidden bg-gray-800 px-6 pt-16 after:pointer-events-none after:absolute after:inset-0 after:inset-ring after:inset-ring-white/10 sm:rounded-3xl sm:px-16 after:sm:rounded-3xl md:pt-24 lg:flex lg:gap-x-20 lg:px-24 lg:pt-0">
       <svg viewBox="0 0 1024 1024" aria-hidden="true" class="absolute top-1/2 left-1/2 -z-10 size-256 -translate-y-1/2 mask-[radial-gradient(closest-side,white,transparent)] sm:left-full sm:-ml-80 lg:left-1/2 lg:ml-0 lg:-translate-x-1/2 lg:translate-y-0">
         <circle r="512" cx="512" cy="512" fill="url(#759c1415-0410-454c-8f7c-9a820de03641)" fill-opacity="0.7" />
@@ -13,23 +13,23 @@
       </svg>
       <div class="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
         <h2 class="text-3xl font-semibold tracking-tight text-balance text-white sm:text-4xl">
-          Boost your productivity. Start using our app today.
+          Tingkatkan pengalaman belajar Anda bersama Stuarz.
         </h2>
         <p class="mt-6 text-lg/8 text-pretty text-gray-300">
-          Ac euismod vel sit maecenas id pellentesque eu sed consectetur. Malesuada adipiscing sagittis vel nulla.
+          Stuarz memudahkan siswa untuk mendapatkan ilmu, mengirim tugas, dan absensi. Guru dan sekolah juga dapat bergabung untuk mendukung proses pendidikan yang lebih baik.
         </p>
         <div class="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
           <a href="#" class="rounded-md bg-gray-700 px-3.5 py-2.5 text-sm font-semibold text-white inset-ring inset-ring-white/5 hover:bg-gray-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-            Get started
+            Mulai Sekarang
           </a>
           <a href="#" class="text-sm/6 font-semibold text-white hover:text-gray-100">
-            Learn more
+            Pelajari lebih lanjut
             <span aria-hidden="true">→</span>
           </a>
         </div>
       </div>
       <div class="relative mt-16 h-80 lg:mt-8">
-        <img width="1824" height="1080" src="https://tailwindcss.com/plus-assets/img/component-images/dark-project-app-screenshot.png" alt="App screenshot" class="absolute top-0 left-0 w-228 max-w-none rounded-md bg-white/5 ring-1 ring-white/10" />
+        <img width="1824" height="1080" src="https://tailwindcss.com/plus-assets/img/component-images/dark-project-app-screenshot.png" alt="Tampilan aplikasi Stuarz" class="absolute top-0 left-0 w-228 max-w-none rounded-md bg-white/5 ring-1 ring-white/10" />
       </div>
     </div>
   </div>
@@ -41,9 +41,9 @@
 <!-- Features Section -->
 <div class="bg-gray-900 py-24 sm:py-32">
   <div class="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
-    <h2 class="text-center text-base/7 font-semibold text-indigo-400">Deploy faster</h2>
+    <h2 class="text-center text-base/7 font-semibold text-indigo-400">Belajar Lebih Mudah</h2>
     <p class="mx-auto mt-2 max-w-lg text-center text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">
-      Everything you need to deploy your app
+      Semua yang Anda butuhkan untuk pendidikan digital
     </p>
     <div class="mt-10 grid gap-4 sm:mt-16 lg:grid-cols-3 lg:grid-rows-2">
       <!-- Feature 1 -->
@@ -51,9 +51,9 @@
         <div class="absolute inset-px rounded-lg bg-gray-800 lg:rounded-l-4xl"></div>
         <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)] lg:rounded-l-[calc(2rem+1px)]">
           <div class="px-8 pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">
-            <p class="mt-2 text-lg font-medium tracking-tight text-white max-lg:text-center">Mobile friendly</p>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white max-lg:text-center">Akses Mobile</p>
             <p class="mt-2 max-w-lg text-sm/6 text-gray-400 max-lg:text-center">
-              Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.
+              Stuarz dapat diakses dari perangkat apapun, memudahkan siswa dan guru belajar dan mengajar di mana saja.
             </p>
           </div>
           <div class="@container relative min-h-120 w-full grow max-lg:mx-auto max-lg:max-w-sm">
@@ -69,9 +69,9 @@
         <div class="absolute inset-px rounded-lg bg-gray-800 max-lg:rounded-t-4xl"></div>
         <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)] max-lg:rounded-t-[calc(2rem+1px)]">
           <div class="px-8 pt-8 sm:px-10 sm:pt-10">
-            <p class="mt-2 text-lg font-medium tracking-tight text-white max-lg:text-center">Performance</p>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white max-lg:text-center">Kinerja Cepat</p>
             <p class="mt-2 max-w-lg text-sm/6 text-gray-400 max-lg:text-center">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit maiores impedit.
+              Proses belajar, pengiriman tugas, dan absensi berlangsung cepat dan efisien.
             </p>
           </div>
           <div class="flex flex-1 items-center justify-center px-8 max-lg:pt-10 max-lg:pb-12 sm:px-10 lg:pb-2">
@@ -85,9 +85,9 @@
         <div class="absolute inset-px rounded-lg bg-gray-800"></div>
         <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)]">
           <div class="px-8 pt-8 sm:px-10 sm:pt-10">
-            <p class="mt-2 text-lg font-medium tracking-tight text-white max-lg:text-center">Security</p>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white max-lg:text-center">Keamanan Data</p>
             <p class="mt-2 max-w-lg text-sm/6 text-gray-400 max-lg:text-center">
-              Morbi viverra dui mi arcu sed. Tellus semper adipiscing suspendisse semper morbi.
+              Data siswa, guru, dan sekolah terlindungi dengan sistem keamanan Stuarz.
             </p>
           </div>
           <div class="@container flex flex-1 items-center max-lg:py-6 lg:pb-2">
@@ -101,22 +101,43 @@
         <div class="absolute inset-px rounded-lg bg-gray-800 max-lg:rounded-b-4xl lg:rounded-r-4xl"></div>
         <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)] max-lg:rounded-b-[calc(2rem+1px)] lg:rounded-r-[calc(2rem+1px)]">
           <div class="px-8 pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">
-            <p class="mt-2 text-lg font-medium tracking-tight text-white max-lg:text-center">Powerful APIs</p>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white max-lg:text-center">API Terintegrasi</p>
             <p class="mt-2 max-w-lg text-sm/6 text-gray-400 max-lg:text-center">
-              Sit quis amet rutrum tellus ullamcorper ultricies libero dolor eget sem sodales gravida.
+              Stuarz menyediakan API untuk integrasi dengan sistem sekolah dan aplikasi lain.
             </p>
           </div>
           <div class="relative min-h-120 w-full grow">
             <div class="absolute top-10 right-0 bottom-0 left-10 overflow-hidden rounded-tl-xl bg-gray-900/60 outline outline-white/10">
               <div class="flex bg-gray-900 outline outline-white/5">
                 <div class="-mb-px flex text-sm/6 font-medium text-gray-400">
-                  <div class="border-r border-b border-r-white/10 border-b-white/20 bg-white/5 px-4 py-2 text-white">NotificationSetting.jsx</div>
-                  <div class="border-r border-gray-600/10 px-4 py-2">App.jsx</div>
+                  <div class="border-r border-b border-r-white/10 border-b-white/20 bg-white/5 px-4 py-2 text-white">StuarzAPI.php</div>
+                  <div class="border-r border-gray-600/10 px-4 py-2">Absensi.php</div>
                 </div>
               </div>
-              <div class="px-6 pt-6 pb-14">
-                <!-- Your code example -->
-              </div>
+                <div class="px-6 pt-6 pb-14 bg-[#1e1e1e] rounded-b-xl">
+                <pre class="overflow-x-auto text-xs leading-relaxed" style="background:#1e1e1e;color:#d4d4d4;padding:1em;border-radius:0.5em;">
+        <span style="color:#dcdcaa;">&lt;?php</span>
+        <span style="color:#9cdcfe;">$absensi</span> = [
+          [
+          <span style="color:#b5cea8;">'id'</span> =&gt; <span style="color:#b5cea8;">1</span>,
+          <span style="color:#b5cea8;">'nama'</span> =&gt; <span style="color:#b5cea8;">'Andi Wijaya'</span>,
+          <span style="color:#b5cea8;">'tanggal'</span> =&gt; <span style="color:#b5cea8;">'2024-06-01'</span>,
+          <span style="color:#b5cea8;">'status'</span> =&gt; <span style="color:#b5cea8;">'Hadir'</span>
+          ],
+          [
+          <span style="color:#b5cea8;">'id'</span> =&gt; <span style="color:#b5cea8;">2</span>,
+          <span style="color:#b5cea8;">'nama'</span> =&gt; <span style="color:#b5cea8;">'Siti Rahma'</span>,
+          <span style="color:#b5cea8;">'tanggal'</span> =&gt; <span style="color:#b5cea8;">'2024-06-01'</span>,
+          <span style="color:#b5cea8;">'status'</span> =&gt; <span style="color:#b5cea8;">'Izin'</span>
+          ]
+        ];
+        <span style="color:#dcdcaa;">echo</span> <span style="color:#d7ba7d;">json_encode</span>([
+          <span style="color:#b5cea8;">'success'</span> =&gt; <span style="color:#569cd6;">true</span>,
+          <span style="color:#b5cea8;">'data'</span> =&gt; <span style="color:#9cdcfe;">$absensi</span>
+        ]);
+        <span style="color:#dcdcaa;">?&gt;</span>
+                </pre>
+                </div>
             </div>
           </div>
         </div>
@@ -133,12 +154,12 @@
 <div class="bg-gray-900 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base/7 font-semibold text-indigo-400">Deploy faster</h2>
+      <h2 class="text-base/7 font-semibold text-indigo-400">Implementasi Mudah</h2>
       <p class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl lg:text-balance">
-        Everything you need to deploy your app
+        Semua fitur untuk mendukung pendidikan digital
       </p>
       <p class="mt-6 text-lg/8 text-gray-300">
-        Quis tellus eget adipiscing convallis sit sit eget aliquet quis. Suspendisse eget egestas a elementum pulvinar et feugiat blandit at. In mi viverra elit nunc.
+        Stuarz membantu siswa, guru, dan sekolah dalam proses belajar, pengiriman tugas, dan absensi secara digital dengan mudah dan aman.
       </p>
     </div>
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
@@ -151,10 +172,10 @@
                 <path d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            Push to deploy
+            Kirim Tugas Mudah
           </dt>
           <dd class="mt-2 text-base/7 text-gray-400">
-            Morbi viverra dui mi arcu sed. Tellus semper adipiscing suspendisse semper morbi. Odio urna massa nunc massa.
+            Siswa dapat mengirim tugas langsung melalui aplikasi, guru dapat memeriksa dan memberi nilai secara digital.
           </dd>
         </div>
         <!-- Deploy Feature 2 -->
@@ -165,10 +186,10 @@
                 <path d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            SSL certificates
+            Sertifikat Digital
           </dt>
           <dd class="mt-2 text-base/7 text-gray-400">
-            Sit quis amet rutrum tellus ullamcorper ultricies libero dolor eget. Sem sodales gravida quam turpis enim lacus amet.
+            Sekolah dapat memberikan sertifikat digital kepada siswa yang telah menyelesaikan tugas dan absensi dengan baik.
           </dd>
         </div>
         <!-- Deploy Feature 3 -->
@@ -179,10 +200,10 @@
                 <path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            Simple queues
+            Absensi Otomatis
           </dt>
           <dd class="mt-2 text-base/7 text-gray-400">
-            Quisque est vel vulputate cursus. Risus proin diam nunc commodo. Lobortis auctor congue commodo diam neque.
+            Siswa dan guru dapat melakukan absensi secara otomatis dan terintegrasi dengan sistem sekolah.
           </dd>
         </div>
         <!-- Deploy Feature 4 -->
@@ -193,10 +214,10 @@
                 <path d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a7.464 7.464 0 0 1-1.15 3.993m1.989 3.559A11.209 11.209 0 0 0 8.25 10.5a3.75 3.75 0 1 1 7.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 0 1-3.6 9.75m6.633-4.596a18.666 18.666 0 0 1-2.485 5.33" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            Advanced security
+            Keamanan Terjamin
           </dt>
           <dd class="mt-2 text-base/7 text-gray-400">
-            Arcu egestas dolor vel iaculis in ipsum mauris. Tincidunt mattis aliquet hac quis. Id hac maecenas ac donec pharetra eget.
+            Data pendidikan Anda aman bersama Stuarz, didukung sistem keamanan modern.
           </dd>
         </div>
       </dl>
@@ -218,33 +239,33 @@
   </div>
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:mx-0">
-      <h2 class="text-5xl font-semibold tracking-tight text-white sm:text-7xl">Work with us</h2>
+      <h2 class="text-5xl font-semibold tracking-tight text-white sm:text-7xl">Bergabung bersama Stuarz</h2>
       <p class="mt-8 text-lg font-medium text-pretty text-gray-300 sm:text-xl/8">
-        Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat fugiat.
+        Stuarz mengajak siswa, guru, dan sekolah untuk berkolaborasi dalam dunia pendidikan digital. Bersama kami, proses belajar menjadi lebih mudah dan menyenangkan.
       </p>
     </div>
     <div class="mx-auto mt-10 max-w-2xl lg:mx-0 lg:max-w-none">
       <div class="grid grid-cols-1 gap-x-8 gap-y-6 text-base/7 font-semibold text-white sm:grid-cols-2 md:flex lg:gap-x-10">
-        <a href="#">Open roles <span aria-hidden="true">&rarr;</span></a>
-        <a href="#">Internship program <span aria-hidden="true">&rarr;</span></a>
-        <a href="#">Our values <span aria-hidden="true">&rarr;</span></a>
-        <a href="#">Meet our leadership <span aria-hidden="true">&rarr;</span></a>
+        <a href="#">Peran terbuka <span aria-hidden="true">&rarr;</span></a>
+        <a href="#">Program magang <span aria-hidden="true">&rarr;</span></a>
+        <a href="#">Nilai-nilai kami <span aria-hidden="true">&rarr;</span></a>
+        <a href="#">Tim Stuarz <span aria-hidden="true">&rarr;</span></a>
       </div>
       <dl class="mt-16 grid grid-cols-1 gap-8 sm:mt-20 sm:grid-cols-2 lg:grid-cols-4">
         <div class="flex flex-col-reverse gap-1">
-          <dt class="text-base/7 text-gray-300">Offices worldwide</dt>
+          <dt class="text-base/7 text-gray-300">Sekolah bergabung</dt>
           <dd class="text-4xl font-semibold tracking-tight text-white">12</dd>
         </div>
         <div class="flex flex-col-reverse gap-1">
-          <dt class="text-base/7 text-gray-300">Full-time colleagues</dt>
+          <dt class="text-base/7 text-gray-300">Guru aktif</dt>
           <dd class="text-4xl font-semibold tracking-tight text-white">300+</dd>
         </div>
         <div class="flex flex-col-reverse gap-1">
-          <dt class="text-base/7 text-gray-300">Hours per week</dt>
+          <dt class="text-base/7 text-gray-300">Jam belajar per minggu</dt>
           <dd class="text-4xl font-semibold tracking-tight text-white">40</dd>
         </div>
         <div class="flex flex-col-reverse gap-1">
-          <dt class="text-base/7 text-gray-300">Paid time off</dt>
+          <dt class="text-base/7 text-gray-300">Access for study</dt>
           <dd class="text-4xl font-semibold tracking-tight text-white">Unlimited</dd>
         </div>
       </dl>
@@ -259,25 +280,25 @@
 <div class="bg-gray-900 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:mx-0">
-      <h2 class="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">From the blog</h2>
-      <p class="mt-2 text-lg/8 text-gray-300">Learn how to grow your business with our expert advice.</p>
+      <h2 class="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">Dari Blog Stuarz</h2>
+      <p class="mt-2 text-lg/8 text-gray-300">Dapatkan tips dan inspirasi seputar pendidikan digital bersama Stuarz.</p>
     </div>
     <div class="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-t border-gray-700 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
       <!-- Blog Post 1 -->
       <article class="flex max-w-xl flex-col items-start justify-between">
         <div class="flex items-center gap-x-4 text-xs">
           <time datetime="2020-03-16" class="text-gray-400">Mar 16, 2020</time>
-          <a href="#" class="relative z-10 rounded-full bg-gray-800/60 px-3 py-1.5 font-medium text-gray-300 hover:bg-gray-800">Marketing</a>
+          <a href="#" class="relative z-10 rounded-full bg-gray-800/60 px-3 py-1.5 font-medium text-gray-300 hover:bg-gray-800">Pendidikan</a>
         </div>
         <div class="group relative grow">
           <h3 class="mt-3 text-lg/6 font-semibold text-white group-hover:text-gray-300">
             <a href="#">
               <span class="absolute inset-0"></span>
-              Boost your conversion rate
+              Maksimalkan pembelajaran digital dengan Stuarz
             </a>
           </h3>
           <p class="mt-5 line-clamp-3 text-sm/6 text-gray-400">
-            Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.
+            Temukan cara mudah belajar, mengirim tugas, dan absensi online. Stuarz hadir untuk mendukung pendidikan modern di sekolah Anda.
           </p>
         </div>
         <div class="relative mt-8 flex items-center gap-x-4 justify-self-end">
@@ -289,7 +310,7 @@
                 Michael Foster
               </a>
             </p>
-            <p class="text-gray-400">Co-Founder / CTO</p>
+            <p class="text-gray-400">Guru Matematika</p>
           </div>
         </div>
       </article>
@@ -297,17 +318,17 @@
       <article class="flex max-w-xl flex-col items-start justify-between">
         <div class="flex items-center gap-x-4 text-xs">
           <time datetime="2020-03-10" class="text-gray-400">Mar 10, 2020</time>
-          <a href="#" class="relative z-10 rounded-full bg-gray-800/60 px-3 py-1.5 font-medium text-gray-300 hover:bg-gray-800">Sales</a>
+          <a href="#" class="relative z-10 rounded-full bg-gray-800/60 px-3 py-1.5 font-medium text-gray-300 hover:bg-gray-800">Teknologi</a>
         </div>
         <div class="group relative grow">
           <h3 class="mt-3 text-lg/6 font-semibold text-white group-hover:text-gray-300">
             <a href="#">
               <span class="absolute inset-0"></span>
-              How to use search engine optimization to drive sales
+              Cara mudah absensi online di sekolah
             </a>
           </h3>
           <p class="mt-5 line-clamp-3 text-sm/6 text-gray-400">
-            Optio cum necessitatibus dolor voluptatum provident commodi et. Qui aperiam fugiat nemo cumque.
+            Dengan Stuarz, absensi siswa dan guru menjadi lebih praktis dan terintegrasi dengan sistem sekolah.
           </p>
         </div>
         <div class="relative mt-8 flex items-center gap-x-4 justify-self-end">
@@ -319,7 +340,7 @@
                 Lindsay Walton
               </a>
             </p>
-            <p class="text-gray-400">Front-end Developer</p>
+            <p class="text-gray-400">Guru Bahasa Inggris</p>
           </div>
         </div>
       </article>
@@ -327,17 +348,17 @@
       <article class="flex max-w-xl flex-col items-start justify-between">
         <div class="flex items-center gap-x-4 text-xs">
           <time datetime="2020-02-12" class="text-gray-400">Feb 12, 2020</time>
-          <a href="#" class="relative z-10 rounded-full bg-gray-800/60 px-3 py-1.5 font-medium text-gray-300 hover:bg-gray-800">Business</a>
+          <a href="#" class="relative z-10 rounded-full bg-gray-800/60 px-3 py-1.5 font-medium text-gray-300 hover:bg-gray-800">Sekolah</a>
         </div>
         <div class="group relative grow">
           <h3 class="mt-3 text-lg/6 font-semibold text-white group-hover:text-gray-300">
             <a href="#">
               <span class="absolute inset-0"></span>
-              Improve your customer experience
+              Kolaborasi guru dan siswa di Stuarz
             </a>
           </h3>
           <p class="mt-5 line-clamp-3 text-sm/6 text-gray-400">
-            Cupiditate maiores ullam eveniet adipisci in doloribus nulla minus. Voluptas iusto libero adipisci rem et corporis. Nostrud sint anim sunt aliqua. Nulla eu labore irure incididunt velit cillum quis magna dolore.
+            Stuarz memudahkan komunikasi antara guru dan siswa, sehingga proses belajar menjadi lebih interaktif dan efektif.
           </p>
         </div>
         <div class="relative mt-8 flex items-center gap-x-4 justify-self-end">
@@ -349,7 +370,7 @@
                 Tom Cook
               </a>
             </p>
-            <p class="text-gray-400">Director of Product</p>
+            <p class="text-gray-400">Kepala Sekolah</p>
           </div>
         </div>
       </article>

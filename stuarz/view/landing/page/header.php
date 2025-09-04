@@ -1,10 +1,31 @@
+<?php
+require_once dirname(__DIR__) . '../../../app/config/config.php';
+?>
 <header class="bg-gray-900">
   <nav aria-label="Global" class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
     <div class="flex lg:flex-1">
-      <a href="#" class="-m-1.5 p-1.5">
-        <span class="sr-only">Your Company</span>
-        <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="" class="h-8 w-auto" />
-      </a>
+<a href="#" class="-m-1.5 p-1.5">
+  <span class="sr-only">Your Company</span>
+  <svg fill="#ffffff" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" 
+       xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 293.538 293.538" 
+       xml:space="preserve" stroke="#ffffff" class="h-8 w-8">
+    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+    <g id="SVGRepo_iconCarrier"> 
+      <g> 
+        <g> 
+          <polygon points="210.084,88.631 146.622,284.844 81.491,88.631 "></polygon> 
+          <polygon points="103.7,64.035 146.658,21.08 188.515,64.035 "></polygon> 
+          <polygon points="55.581,88.631 107.681,245.608 0,88.631 "></polygon> 
+          <polygon points="235.929,88.631 293.538,88.631 184.521,247.548 "></polygon> 
+          <polygon points="283.648,64.035 222.851,64.035 168.938,8.695 219.079,8.695 "></polygon> 
+          <polygon points="67.563,8.695 124.263,8.695 68.923,64.035 7.969,64.035 "></polygon> 
+        </g> 
+      </g> 
+    </g>
+  </svg>
+</a>
+
     </div>
     <div class="flex lg:hidden">
       <button type="button" command="show-modal" commandfor="mobile-menu" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-400">
@@ -115,7 +136,7 @@
       </div>
 
       <a href="#" class="text-sm/6 font-semibold text-white">Features</a>
-      <a href="#" class="text-sm/6 font-semibold text-white">Marketplace</a>
+      <a href="#" class="text-sm/6 font-semibold text-white">Documentation</a>
       <a href="#" class="text-sm/6 font-semibold text-white">Company</a>
     </el-popover-group>
     <div class="hidden lg:flex lg:flex-1 lg:justify-end">
@@ -127,10 +148,29 @@
       <div tabindex="0" class="fixed inset-0 focus:outline-none">
         <el-dialog-panel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10">
           <div class="flex items-center justify-between">
-            <a href="#" class="-m-1.5 p-1.5">
-              <span class="sr-only">Your Company</span>
-              <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="" class="h-8 w-auto" />
-            </a>
+      <a href="#" class="-m-1.5 p-1.5">
+  <span class="sr-only">Your Company</span>
+  <svg fill="#ffffff" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" 
+       xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 293.538 293.538" 
+       xml:space="preserve" stroke="#ffffff" class="h-8 w-8">
+    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+    <g id="SVGRepo_iconCarrier"> 
+      <g> 
+        <g> 
+          <polygon points="210.084,88.631 146.622,284.844 81.491,88.631 "></polygon> 
+          <polygon points="103.7,64.035 146.658,21.08 188.515,64.035 "></polygon> 
+          <polygon points="55.581,88.631 107.681,245.608 0,88.631 "></polygon> 
+          <polygon points="235.929,88.631 293.538,88.631 184.521,247.548 "></polygon> 
+          <polygon points="283.648,64.035 222.851,64.035 168.938,8.695 219.079,8.695 "></polygon> 
+          <polygon points="67.563,8.695 124.263,8.695 68.923,64.035 7.969,64.035 "></polygon> 
+        </g> 
+      </g> 
+    </g>
+  </svg>
+</a>
+
+
             <button type="button" command="close" commandfor="mobile-menu" class="-m-2.5 rounded-md p-2.5 text-gray-400">
               <span class="sr-only">Close menu</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
@@ -159,7 +199,7 @@
                   </el-disclosure>
                 </div>
                 <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5">Features</a>
-                <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5">Marketplace</a>
+                <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5">Documentation</a>
                 <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5">Company</a>
               </div>
               <div class="py-6">

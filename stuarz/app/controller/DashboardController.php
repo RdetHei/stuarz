@@ -5,8 +5,8 @@ class DashboardController {
         $description = "Welcome to your dashboard";
 
         // Tentukan file view utama
-        $content = '../view/dashboard/page/dashboard.php';
+        $content = '../view/landing/page/dashboard.php';
         
-        include '../view/layout.php';
+        include '../view/dLayout.php';
     }
 }

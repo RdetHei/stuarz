@@ -1,34 +1,44 @@
 <?php
-// SELALU pakai dirname(__DIR__) biar aman
-require_once dirname(__DIR__) . '/config/config.php'; // D:\...\app\config\config.php
+require_once dirname(__DIR__) . '/config/config.php';
 
-class LoginController {
-
-    public function login() {
+class LoginController
+{
+    public function login()
+    {
         global $config;
+        $error = '';
 
-        // Jika POST (submit form)
+        // Proses login jika form disubmit
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = mysqli_real_escape_string($config, $_POST['username'] ?? '');
             $password = mysqli_real_escape_string($config, $_POST['password'] ?? '');
 
+            // Query user berdasarkan username dan password
             $sql = "SELECT * FROM users WHERE username='$username' AND password='$password'";
             $result = mysqli_query($config, $sql);
 
             if ($result && mysqli_num_rows($result) > 0) {
+                $user = mysqli_fetch_assoc($result);
+
                 if (session_status() === PHP_SESSION_NONE) session_start();
-                $_SESSION['username'] = $username;
-                header('Location: /stuarz/public/index.php?page=dashboard'); // arahkan ke dashboard
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['level'] = $user['level']; // Pastikan kolom 'level' ada di tabel users
+
+                // Redirect sesuai level
+                if ($user['level'] === 'admin') {
+                    header('Location: /stuarz/public/index.php?page=dashboard');
+                } else {
+                    header('Location: /stuarz/public/index.php?page=dashboard');
+                }
                 exit;
             } else {
                 $error = 'Username atau password salah.';
             }
         }
 
-        // **TAMPILKAN VIEW LOGIN** (cek file-nya ada dulu)
-        $view = dirname(__DIR__) . '/../view/landing/page/login.php'; // D:\...\app\view\landing\page\login.php
+        // Tampilkan view login
+        $view = dirname(__DIR__) . '/../view/landing/page/login.php';
         if (!is_file($view)) {
-            // Bantuan debug biar jelas kalau path-nya beda
             echo 'View tidak ditemukan di: ' . $view;
             return;
         }
