@@ -59,8 +59,8 @@
                 </div>
             </form>
             <p class="mt-10 text-center text-sm text-gray-400">
-                Not a member?
-                <a href="#" class="font-semibold text-indigo-400 hover:text-indigo-300">Start a 14 day free trial</a>
+                Doesn't have an account?
+                <a href="../../../public/index.php?page=home" class="font-semibold text-indigo-400 hover:text-indigo-300">Register</a>
             </p>
         </div>
     </div>
