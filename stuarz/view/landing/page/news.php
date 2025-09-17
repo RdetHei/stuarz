@@ -16,7 +16,7 @@ if (!isset($baseUrl)) {
     </div>
 
   <!-- Search -->
-  <section class="px-6 py-6">
+  <section class="px-6 pb-6 pl-0">
     <form method="GET" action="index.php" class="max-w-3xl">
       <input type="hidden" name="page" value="news">
       <div class="relative flex items-stretch">
@@ -36,7 +36,7 @@ if (!isset($baseUrl)) {
   </section>
 
   <!-- News Grid -->
-  <section class="px-6 pb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+  <section class="px-6 pb-12 pl-0 grid grid-cols-1 md:grid-cols-3 gap-6">
     <?php if (!empty($allNews)): ?>
       <?php $first = $allNews[0]; ?>
       <a href="index.php?page=news_show&id=<?= (int)$first['id'] ?>" class="md:col-span-2 relative rounded-xl overflow-hidden shadow-lg bg-[#313338] border border-gray-800 block group">
