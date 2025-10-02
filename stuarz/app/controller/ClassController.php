@@ -1,0 +1,107 @@
+<?php
+require_once dirname(__DIR__) . '/model/ClassModel.php';
+require_once dirname(__DIR__) . '/config/config.php';
+
+class ClassController {
+    private $model;
+    public function __construct() {
+        global $config;
+        $this->model = new ClassModel($config);
+        if (session_status() === PHP_SESSION_NONE) session_start();
+    }
+
+    public function index() {
+        $classes = $this->model->getAll();
+        $content = dirname(__DIR__) . '/views/pages/class_list.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    public function create() {
+        $content = dirname(__DIR__) . '/views/pages/class_form.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    public function store() {
+        $data = [
+            'name' => trim($_POST['name'] ?? ''),
+            'code' => trim($_POST['code'] ?? ''),
+            'description' => trim($_POST['description'] ?? ''),
+            'created_by' => $_SESSION['user']['id'] ?? 0
+        ];
+        $errors = $this->model->validate($data);
+        if ($errors) {
+            $_SESSION['flash'] = implode(' ', $errors);
+            header('Location: index.php?page=class_create');
+            exit;
+        }
+        $ok = $this->model->create($data);
+        $_SESSION['flash'] = $ok ? 'Kelas berhasil ditambah.' : 'Gagal menambah kelas.';
+        header('Location: index.php?page=class');
+        exit;
+    }
+
+    public function edit() {
+        $id = intval($_GET['id'] ?? 0);
+        $class = $this->model->getById($id);
+        if (!$class) {
+            $_SESSION['flash'] = 'Kelas tidak ditemukan.';
+            header('Location: index.php?page=class');
+            exit;
+        }
+        $content = dirname(__DIR__) . '/views/pages/class_form.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    public function update() {
+        $id = intval($_POST['id'] ?? 0);
+        $data = [
+            'name' => trim($_POST['name'] ?? ''),
+            'code' => trim($_POST['code'] ?? ''),
+            'description' => trim($_POST['description'] ?? '')
+        ];
+        $errors = $this->model->validate($data, true, $id);
+        if ($errors) {
+            $_SESSION['flash'] = implode(' ', $errors);
+            header('Location: index.php?page=class_edit&id=' . $id);
+            exit;
+        }
+        $ok = $this->model->update($id, $data);
+        $_SESSION['flash'] = $ok ? 'Kelas diperbarui.' : 'Gagal memperbarui kelas.';
+        header('Location: index.php?page=class');
+        exit;
+    }
+
+    public function delete() {
+        $id = intval($_POST['id'] ?? 0);
+        $ok = $this->model->delete($id);
+        $_SESSION['flash'] = $ok ? 'Kelas dihapus.' : 'Gagal menghapus kelas.';
+        header('Location: index.php?page=class');
+        exit;
+    }
+
+    // Anggota kelas
+    public function members() {
+        $class_id = intval($_GET['id'] ?? 0);
+        $class = $this->model->getById($class_id);
+        $members = $this->model->getMembers($class_id);
+        $content = dirname(__DIR__) . '/views/pages/class_members.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+    public function addMember() {
+        $class_id = intval($_POST['class_id'] ?? 0);
+        $user_id = intval($_POST['user_id'] ?? 0);
+        $role = trim($_POST['role'] ?? 'member');
+        $ok = $this->model->addMember($class_id, $user_id, $role);
+        $_SESSION['flash'] = $ok ? 'Anggota ditambah.' : 'Gagal menambah anggota.';
+        header('Location: index.php?page=class_members&id=' . $class_id);
+        exit;
+    }
+    public function removeMember() {
+        $class_id = intval($_POST['class_id'] ?? 0);
+        $user_id = intval($_POST['user_id'] ?? 0);
+        $ok = $this->model->removeMember($class_id, $user_id);
+        $_SESSION['flash'] = $ok ? 'Anggota dihapus.' : 'Gagal menghapus anggota.';
+        header('Location: index.php?page=class_members&id=' . $class_id);
+        exit;
+    }
+}
