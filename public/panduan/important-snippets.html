@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kumpulan Codingan Penting & Fungsinya</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        pre { background: #f4f4f4; padding: 1em; border-radius: 5px; }
+        h2 { color: #2c3e50; }
+        .desc { color: #555; margin-bottom: 0.5em; }
+    </style>
+</head>
+<body>
+    <h1>Kumpulan Codingan Penting & Fungsinya</h1>
+
+    <h2>1. Membaca Data dari Database (PHP MySQLi)</h2>
+    <div class="desc">Mengambil semua data dari tabel <code>users</code> dan menampilkannya.</div>
+    <pre><code>
+&lt;?php
+$conn = new mysqli("localhost", "root", "", "stuarz");
+$result = $conn-&gt;query("SELECT * FROM users");
+while($row = $result-&gt;fetch_assoc()) {
+    echo $row['name'] . "&lt;br&gt;";
+}
+?&gt;
+    </code></pre>
+
+    <h2>2. Validasi Form HTML</h2>
+    <div class="desc">Form dengan validasi wajib diisi dan email valid.</div>
+    <pre><code>
+&lt;form method="post"&gt;
+    Nama: &lt;input type="text" name="nama" required&gt;&lt;br&gt;
+    Email: &lt;input type="email" name="email" required&gt;&lt;br&gt;
+    &lt;button type="submit"&gt;Kirim&lt;/button&gt;
+&lt;/form&gt;
+    </code></pre>
+
+    <h2>3. AJAX Request (Fetch API)</h2>
+    <div class="desc">Mengirim data ke server tanpa reload halaman.</div>
+    <pre><code>
+&lt;script&gt;
+fetch('/api/data', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({id: 1})
+})
+.then(res =&gt; res.json())
+.then(data =&gt; console.log(data));
+&lt;/script&gt;
+    </code></pre>
+
+    <h2>4. Membuat Tabel Responsive dengan CSS</h2>
+    <div class="desc">Tabel tetap rapi di layar kecil.</div>
+    <pre><code>
+&lt;style&gt;
+table { width: 100%; border-collapse: collapse; }
+th, td { border: 1px solid #ccc; padding: 8px; }
+@media (max-width:600px) {
+    table, thead, tbody, th, td, tr { display: block; }
+    th { background: #eee; }
+}
+&lt;/style&gt;
+    </code></pre>
+
+    <h2>5. Membatasi Akses Halaman dengan Session (PHP)</h2>
+    <div class="desc">Redirect jika user belum login.</div>
+    <pre><code>
+&lt;?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+?&gt;
+    </code></pre>
+
+    <h2>6. Menampilkan Data Dinamis dengan Loop (PHP)</h2>
+    <div class="desc">Menampilkan daftar nama dari array.</div>
+    <pre><code>
+&lt;?php
+$nama = ['Andi', 'Budi', 'Cici'];
+foreach ($nama as $n) {
+    echo "&lt;li&gt;$n&lt;/li&gt;";
+}
+?&gt;
+    </code></pre>
+
+    <h2>7. Membuat Modal Sederhana (HTML + CSS + JS)</h2>
+    <div class="desc">Popup modal untuk konfirmasi atau info.</div>
+    <pre><code>
+&lt;button onclick="document.getElementById('modal').style.display='block'"&gt;Buka Modal&lt;/button&gt;
+&lt;div id="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0008;"&gt;
+  &lt;div style="background:#fff;padding:2em;margin:10% auto;width:300px;"&gt;
+    Ini modal! &lt;button onclick="document.getElementById('modal').style.display='none'"&gt;Tutup&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+    </code></pre>
+
+    <h2>8. Fungsi JavaScript Validasi Angka</h2>
+    <div class="desc">Cek apakah input hanya angka.</div>
+    <pre><code>
+function hanyaAngka(evt) {
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    if (charCode &lt; 48 || charCode &gt; 57) return false;
+    return true;
+}
+    </code></pre>
+
+    <h2>9. Membuat Redirect Otomatis (HTML Meta)</h2>
+    <div class="desc">Redirect ke halaman lain setelah 3 detik.</div>
+    <pre><code>
+&lt;meta http-equiv="refresh" content="3;url=dashboard.html"&gt;
+    </code></pre>
+
+    <h2>10. Membuat Alert Sukses (Bootstrap)</h2>
+    <div class="desc">Pesan sukses dengan Bootstrap.</div>
+    <pre><code>
+&lt;div class="alert alert-success"&gt;Data berhasil disimpan!&lt;/div&gt;
+    </code></pre>
+</body>
+</html>
