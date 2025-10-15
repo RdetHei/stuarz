@@ -8,7 +8,7 @@ if (!isset($_GET['page'])) {
     exit;
 }
 
-// Auto login jika session kosong tapi cookie tersedia
+
 if (
     empty($_SESSION['user_id']) &&
     isset($_COOKIE['user_id'], $_COOKIE['username'], $_COOKIE['level'])
@@ -19,7 +19,7 @@ if (
     // Tambahkan validasi ke database jika perlu
 }
 
-// Simple PSR-4-like autoloader for App\* and legacy controllers without namespace
+
 spl_autoload_register(function ($class) {
     $root = dirname(__DIR__);
     $appDir = $root . '/app/';
