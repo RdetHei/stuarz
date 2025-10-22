@@ -19,19 +19,21 @@ class ScheduleController {
         $filters = [];
         if (!empty($_GET['class_id'])) $filters['class_id'] = intval($_GET['class_id']);
         if (!empty($_GET['teacher_id'])) $filters['teacher_id'] = intval($_GET['teacher_id']);
-        $schedules = $this->model->getAll($filters);
-        require __DIR__ . '/../views/pages/schedule.php';
+    $schedules = $this->model->getAll($filters);
+    $content = dirname(__DIR__) . '/views/pages/schedule/schedule.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function create() {
         $mode = 'create';
         $item = null;
         $days = $this->allowedDays;
-        // load helper lists
-        $classes = $this->db->query("SELECT id, name FROM classes")->fetch_all(MYSQLI_ASSOC) ?? [];
-        $subjects = $this->db->query("SELECT id, name FROM subjects")->fetch_all(MYSQLI_ASSOC) ?? [];
-        $teachers = $this->db->query("SELECT id, name FROM users WHERE role='teacher'")->fetch_all(MYSQLI_ASSOC) ?? [];
-        require __DIR__ . '/../view/pages/scheduleform.php';
+    // load helper lists
+    $classes = $this->db->query("SELECT id, name FROM classes")->fetch_all(MYSQLI_ASSOC) ?? [];
+    $subjects = $this->db->query("SELECT id, name FROM subjects")->fetch_all(MYSQLI_ASSOC) ?? [];
+    $teachers = $this->db->query("SELECT id, name FROM users WHERE level='teacher'")->fetch_all(MYSQLI_ASSOC) ?? [];
+    $content = dirname(__DIR__) . '/views/pages/schedule/form.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function store() {
@@ -61,10 +63,11 @@ class ScheduleController {
         $item = $this->model->getById($id);
         if (!$item) { header('Location: /schedule'); exit; }
         $days = $this->allowedDays;
-        $classes = $this->db->query("SELECT id, name FROM classes")->fetch_all(MYSQLI_ASSOC) ?? [];
-        $subjects = $this->db->query("SELECT id, name FROM subjects")->fetch_all(MYSQLI_ASSOC) ?? [];
-        $teachers = $this->db->query("SELECT id, name FROM users WHERE role='teacher'")->fetch_all(MYSQLI_ASSOC) ?? [];
-        require __DIR__ . '/../views/pages/scheduleform.php';
+    $classes = $this->db->query("SELECT id, name FROM classes")->fetch_all(MYSQLI_ASSOC) ?? [];
+    $subjects = $this->db->query("SELECT id, name FROM subjects")->fetch_all(MYSQLI_ASSOC) ?? [];
+    $teachers = $this->db->query("SELECT id, name FROM users WHERE level='teacher'")->fetch_all(MYSQLI_ASSOC) ?? [];
+    $content = dirname(__DIR__) . '/views/pages/schedule/form.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function update($id) {

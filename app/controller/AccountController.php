@@ -36,7 +36,7 @@ class AccountController
     public function account()
     {
         $users = $this->model->getAll();
-        $content = dirname(__DIR__) . '/views/pages/account.php';
+        $content = dirname(__DIR__) . '/views/pages/users/account.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
@@ -47,7 +47,7 @@ class AccountController
             header('Location: index.php?page=account');
             exit;
         }
-        $content = dirname(__DIR__) . '/views/pages/create_user.php';
+        $content = dirname(__DIR__) . '/views/pages/users/create_user.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
@@ -166,7 +166,7 @@ class AccountController
         }
 
         // pastikan $user yang di-include view berasal dari sini (tidak ditimpa di view)
-        $content = dirname(__DIR__) . '/views/pages/edit_user.php';
+        $content = dirname(__DIR__) . '/views/pages/users/edit_user.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 

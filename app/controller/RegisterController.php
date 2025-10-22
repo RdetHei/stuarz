@@ -46,7 +46,7 @@ class RegisterController
                 $stmt->close();
             }
         }
-        $view = dirname(__DIR__) . '/views/pages/register.php';
+        $view = dirname(__DIR__) . '/views/pages/auth/register.php';
         include $view;
     }
 }

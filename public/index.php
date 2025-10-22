@@ -164,5 +164,5 @@ $matched = $router->dispatch($method, $requestUri);
 
 if (!$matched) {
         http_response_code(404);
-        include __DIR__ . '/../app/views/pages/notFound.php';
+        include __DIR__ . '/../app/views/pages/errors/notFound.php';
 }

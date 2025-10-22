@@ -59,7 +59,7 @@ class AuthController
         }
 
         // Panggil view login
-        $view = dirname(__DIR__) . '/views/pages/login.php';
+        $view = dirname(__DIR__) . '/views/pages/auth/login.php';
         if (!is_file($view)) {
             echo 'View tidak ditemukan di: ' . $view;
             return;

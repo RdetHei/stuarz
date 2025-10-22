@@ -5,8 +5,8 @@ class HomeController {
         $description = "Blablabla blebleble blublublu";
 
         // Tentukan file view utama
-        $content = '../app/views/pages/home.php';
+        $content = dirname(__DIR__) . '/views/pages/landing/home.php';
         
-        include '../app/views/layouts/layout.php';
+        include dirname(__DIR__) . '/views/layouts/layout.php';
     }
 }

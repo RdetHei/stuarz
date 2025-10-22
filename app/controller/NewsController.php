@@ -30,7 +30,8 @@ class NewsController{
         $newsItem = $id ? $model->find($id) : null;
         if (!$newsItem) {
             http_response_code(404);
-            header('Location: ../app/views/pages/notFound.php');
+            $content = dirname(__DIR__) . '/views/pages/errors/notFound.php';
+            include dirname(__DIR__) . '/views/layouts/layout.php';
             return;
         }
         $title = htmlspecialchars($newsItem['title']) . ' - News - Stuarz';

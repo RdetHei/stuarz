@@ -88,16 +88,13 @@
         const sidebar = document.getElementById('sidebar');
         const toggleInternal = document.getElementById('sidebarToggle');
         const logoToggle = document.getElementById('sidebarLogoToggle');
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
         const logo = document.getElementById('sidebarLogo');
-        const menuIcon = document.getElementById('sidebarMenuIcon');
         const menuTexts = document.querySelectorAll('.menu-text');
         const profileBtn = document.getElementById('profileBtn');
         const profileModal = document.getElementById('profileModal');
         const header = document.getElementById('dHeader');
         const content = document.getElementById('content');
-        const chevron = document.getElementById('sidebarChevron');
-        const iconClose = document.getElementById('iconClose');
-        const iconMenu = document.getElementById('iconMenu');
 
         if (sidebar) {
             let modalMoved = false;
@@ -195,20 +192,14 @@
 
                     if (collapsed) {
                         // apply classes for target state so CSS rules for collapsed take effect
-                        sidebar.classList.remove('w-64'); sidebar.classList.add('w-16');
                         sidebar.classList.add('collapsed');
-                        if (logo) logo.classList.add('opacity-0');
-                        if (menuIcon) { menuIcon.classList.remove('hidden'); menuIcon.classList.remove('opacity-0'); }
-                        if (chevron) chevron.style.transform = 'rotate(180deg)';
+                        if (logo) logo.style.opacity = '0';
                         localStorage.setItem('sidebarCollapsed', '1');
                         if (window.__sidebarDebug) console.log('[sidebar] collapsed -> true');
                         showDebugOverlay && showDebugOverlay('collapsed');
                     } else {
-                        sidebar.classList.remove('w-16'); sidebar.classList.add('w-64');
                         sidebar.classList.remove('collapsed');
-                        if (logo) logo.classList.remove('opacity-0');
-                        if (menuIcon) { menuIcon.classList.add('hidden'); menuIcon.classList.add('opacity-0'); }
-                        if (chevron) chevron.style.transform = 'rotate(0deg)';
+                        if (logo) logo.style.opacity = '1';
                         localStorage.setItem('sidebarCollapsed', '0');
                         if (window.__sidebarDebug) console.log('[sidebar] collapsed -> false');
                         showDebugOverlay && showDebugOverlay('expanded');
@@ -222,19 +213,38 @@
 
                     // animate menu-text max-width: to 0 when collapsed, to measured width when expanded
                     menuTexts.forEach((el, idx) => {
-                        if (collapsed) el.style.maxWidth = '0px';
-                        else el.style.maxWidth = (menuTextWidths[idx] || 0) + 'px';
+                        if (collapsed) {
+                            el.style.maxWidth = '0px';
+                            el.style.opacity = '0';
+                            el.style.visibility = 'hidden';
+                        } else {
+                            el.style.maxWidth = (menuTextWidths[idx] || 0) + 'px';
+                            el.style.opacity = '1';
+                            el.style.visibility = 'visible';
+                        }
                     });
 
                     // cleanup after CSS transition
                     setTimeout(() => {
                         // remove inline widths so responsive CSS works later
                         sidebar.style.width = '';
-                        menuTexts.forEach(el => { if (!collapsed) el.style.maxWidth = ''; else el.style.maxWidth = '0px'; });
-                        // leave collapsed class in correct state
-                        if (collapsed) sidebar.classList.add('collapsed'); else sidebar.classList.remove('collapsed');
-                        // clear inline margins when expanded
-                        if (!collapsed) {
+                        menuTexts.forEach(el => {
+                            if (!collapsed) {
+                                el.style.maxWidth = '';
+                                el.style.opacity = '';
+                                el.style.visibility = '';
+                            } else {
+                                el.style.maxWidth = '0px';
+                                el.style.opacity = '0';
+                                el.style.visibility = 'hidden';
+                            }
+                        });
+                        // ensure collapsed class is in correct state
+                        if (collapsed) {
+                            sidebar.classList.add('collapsed');
+                        } else {
+                            sidebar.classList.remove('collapsed');
+                            // clear inline margins when expanded
                             if (header) header.style.marginLeft = '';
                             if (content) content.style.marginLeft = '';
                         }
@@ -251,8 +261,45 @@
             const collapsed = localStorage.getItem('sidebarCollapsed') === '1';
             setCollapsed(collapsed);
 
-            if (toggleInternal) toggleInternal.addEventListener('click', (e) => { const newState = !sidebar.classList.contains('collapsed'); setCollapsed(newState); toggleInternal.setAttribute('aria-expanded', newState ? 'true' : 'false'); });
-            if (logoToggle) logoToggle.addEventListener('click', () => { const newState = !sidebar.classList.contains('collapsed'); setCollapsed(newState); if (toggleInternal) toggleInternal.setAttribute('aria-expanded', newState ? 'true' : 'false'); });
+            if (toggleInternal) toggleInternal.addEventListener('click', (e) => {
+                const newState = !sidebar.classList.contains('collapsed');
+                setCollapsed(newState);
+                toggleInternal.setAttribute('aria-expanded', newState ? 'true' : 'false');
+            });
+            if (logoToggle) logoToggle.addEventListener('click', () => {
+                const newState = !sidebar.classList.contains('collapsed');
+                setCollapsed(newState);
+                if (toggleInternal) toggleInternal.setAttribute('aria-expanded', newState ? 'true' : 'false');
+            });
+
+            // Mobile menu toggle
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('mobile-open');
+                    const isOpen = sidebar.classList.contains('mobile-open');
+                    mobileMenuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                });
+            }
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 1023.98 &&
+                    sidebar.classList.contains('mobile-open') &&
+                    !sidebar.contains(e.target) &&
+                    !mobileMenuToggle.contains(e.target)) {
+                    sidebar.classList.remove('mobile-open');
+                    mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 1023.98) {
+                    sidebar.classList.remove('mobile-open');
+                    if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                }
+                setTimeout(positionProfileModal, 50);
+            });
 
             if (profileBtn) {
                 profileBtn.addEventListener('click', (e) => {
@@ -266,18 +313,17 @@
                 });
             }
 
-            window.addEventListener('resize', () => setTimeout(positionProfileModal, 50));
             window.addEventListener('scroll', () => setTimeout(positionProfileModal, 50), true);
         }
     });
 })();
 
 // Debug overlay helper (shows small indicator when debug mode is ON)
-(function(){
+(function () {
     const dbg = localStorage.getItem('sidebarDebug') === '1';
     window.__sidebarDebug = dbg;
     let overlayEl = null;
-    function createOverlay(){
+    function createOverlay() {
         if (overlayEl) return overlayEl;
         overlayEl = document.createElement('div');
         overlayEl.id = 'sidebar-debug-overlay';
@@ -295,18 +341,18 @@
         document.body.appendChild(overlayEl);
         return overlayEl;
     }
-    function showDebugOverlay(state){
+    function showDebugOverlay(state) {
         if (!window.__sidebarDebug) return;
         const el = createOverlay();
         el.textContent = 'sidebar: ' + state;
         el.style.opacity = '1';
-        setTimeout(()=>{ if (el) el.style.opacity = '0.85'; }, 200);
+        setTimeout(() => { if (el) el.style.opacity = '0.85'; }, 200);
     }
     // expose helper so main code can call it
     window.__showSidebarDebug = showDebugOverlay;
     // quick keyboard toggle: Ctrl+Shift+S to toggle overlay/debug logs
-    window.addEventListener('keydown', function(e){
-        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's'){
+    window.addEventListener('keydown', function (e) {
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
             const now = localStorage.getItem('sidebarDebug') === '1';
             localStorage.setItem('sidebarDebug', now ? '0' : '1');
             window.__sidebarDebug = !now;

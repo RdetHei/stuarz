@@ -64,9 +64,22 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
   /* animated width/margin transitions for smooth collapse */
   #sidebar {
     /* slower, smoother collapse */
-    transition: width 520ms cubic-bezier(.2,.8,.2,1), min-width 520ms cubic-bezier(.2,.8,.2,1);
+    transition: width 520ms cubic-bezier(.2,.8,.2,1), min-width 520ms cubic-bezier(.2,.8,.2,1), max-width 520ms cubic-bezier(.2,.8,.2,1);
     will-change: width;
+    box-sizing: border-box; /* ensure background and borders follow width */
+    overflow: hidden; /* prevent inner content from overflowing during animation */
+    width: 16rem; /* w-64 equivalent */
+    min-width: 16rem;
+    max-width: 16rem;
   }
+  
+  /* collapsed state */
+  #sidebar.collapsed {
+    width: 4rem !important; /* w-16 equivalent */
+    min-width: 4rem !important;
+    max-width: 4rem !important;
+  }
+  
   /* prefer transitions on the layout containers that move when sidebar changes */
   main, #content, #dHeader {
     transition: margin-left 520ms cubic-bezier(.2,.8,.2,1);
@@ -90,12 +103,52 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
     margin-left: 4rem;
   }
 
-  /* collapsed enforced width (fallback) */
-  #sidebar.collapsed {
-    width: 4rem !important;
-    min-width: 4rem !important;
-    max-width: 4rem !important;
+  /* Responsive: on small screens, sidebar becomes off-canvas */
+  /* Use 1023.98px to avoid clash at exactly 1024px where lg breakpoint begins */
+  @media (max-width: 1023.98px) {
+    #sidebar {
+      position: fixed;
+      left: -16rem; /* hidden off screen by default */
+      top: 0;
+      bottom: 0;
+      width: 16rem !important; /* fixed width for slide-in */
+      min-width: 16rem !important;
+      max-width: 16rem !important;
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+      transition: left 420ms cubic-bezier(.2,.8,.2,1), box-shadow 240ms ease;
+      z-index: 50;
+    }
+    /* when mobile-open class is applied, slide in */
+    #sidebar.mobile-open {
+      left: 0;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.45); /* backdrop via big shadow, no extra element needed */
+    }
+
+    /* subtle fade/slide-in for the inner nav on mobile open */
+    #sidebar nav { opacity: 0; transform: translateX(-6px); transition: opacity 280ms ease, transform 280ms ease; }
+    #sidebar.mobile-open nav { opacity: 1; transform: none; }
+    /* hide internal toggles on small screens to avoid double burger with header button */
+    #sidebar #sidebarLogoToggle,
+    #sidebar #sidebarToggle { display: none; }
+
+    /* content should not be pushed on small screens */
+    #content { margin-left: 0 !important; }
+    #dHeader { margin-left: 0 !important; }
+
+    /* ensure internal sidebar header icons adapt sizing */
+    #sidebar .hamburger { width: 20px; height: 20px; }
+    #sidebar .hamburger-line { height: 2px; }
+    #sidebar .hamburger-line-1, #sidebar .hamburger-line-2, #sidebar .hamburger-line-3 { top: 9px; }
+    
+    /* disable collapsed state on mobile */
+    #sidebar.collapsed {
+      width: 16rem !important;
+      min-width: 16rem !important;
+      max-width: 16rem !important;
+    }
   }
+
+  /* let JS control width transition; avoid forcing width here to prevent snap */
 
   /* menu text: animate opacity + horizontal slide so it appears to collapse gracefully */
   .menu-text {
@@ -104,43 +157,51 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
     white-space: nowrap;
     overflow: hidden;
     vertical-align: middle;
-    transition: max-width 520ms cubic-bezier(.2,.8,.2,1), opacity 420ms ease, transform 420ms ease;
+    transition: max-width 520ms cubic-bezier(.2,.8,.2,1), opacity 360ms ease, transform 360ms ease, visibility 360ms ease;
     transform-origin: left center;
+    opacity: 1;
+    visibility: visible;
   }
   /* when collapsed, force the text to occupy zero width so it no longer affects layout */
   #sidebar.collapsed .menu-text {
     opacity: 0;
-    transform: translateX(-6px) scaleX(.95);
+    transform: translateX(-8px) scaleX(.96);
     max-width: 0;
     margin: 0;
     padding: 0;
     pointer-events: none;
+    visibility: hidden;
+  }
+  
+  /* ensure menu text is visible when not collapsed */
+  #sidebar:not(.collapsed) .menu-text {
+    opacity: 1 !important;
+    visibility: visible !important;
+    max-width: 160px !important;
+    transform: none !important;
+  }
+
+  /* also animate the menu icon subtle scale for a smoother feel */
+  #sidebar nav a .material-symbols-outlined {
+    transition: transform 360ms ease, opacity 360ms ease;
+    transform-origin: center;
+  }
+  #sidebar.collapsed nav a .material-symbols-outlined {
+    transform: scale(.96);
+    opacity: .92;
   }
 
   /* logo/menu icon: use transforms and opacity instead of toggling 'hidden' */
-  #sidebarMenuIcon, #sidebarLogo {
-    transition: opacity 200ms ease, transform 200ms ease;
-  }
-  #sidebarMenuIcon.hidden {
-    opacity: 0;
-    transform: scale(.9);
-    pointer-events: none;
-  }
-  #sidebar.collapsed #sidebarMenuIcon {
-    opacity: 1;
-    transform: none;
-  }
-  #sidebar.collapsed #sidebarLogo {
-    opacity: 0;
-    transform: scale(.9);
-    pointer-events: none;
-  }
+  #sidebarLogo { transition: opacity 200ms ease, transform 200ms ease; }
+  /* default (expanded): show logo */
+  /* collapsed: hide logo */
+  #sidebar.collapsed #sidebarLogo { opacity: 0; transform: scale(.9); pointer-events: none; }
 
   /* animated hamburger -> X for sidebar toggle (smoother) */
   #sidebar .hamburger {
     position: relative;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
   #sidebar .hamburger-line {
     position: absolute;
@@ -152,22 +213,24 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
     transition: transform 520ms cubic-bezier(.2,.8,.2,1), opacity 520ms ease, top 520ms ease;
   }
   /* default state (expanded): X */
-  #sidebar .hamburger-line-1 { top: 11px; transform: rotate(45deg); }
-  #sidebar .hamburger-line-2 { top: 11px; opacity: 0; transform: scaleX(0.4); }
-  #sidebar .hamburger-line-3 { top: 11px; transform: rotate(-45deg); }
+  #sidebar .hamburger-line-1 { top: 9px; transform: rotate(45deg); }
+  #sidebar .hamburger-line-2 { top: 9px; opacity: 0; transform: scaleX(0.4); }
+  #sidebar .hamburger-line-3 { top: 9px; transform: rotate(-45deg); }
   /* collapsed state: hamburger */
-  #sidebar.collapsed .hamburger-line-1 { top: 6px; transform: rotate(0deg); }
-  #sidebar.collapsed .hamburger-line-2 { top: 11px; opacity: 1; transform: none; }
-  #sidebar.collapsed .hamburger-line-3 { top: 16px; transform: rotate(0deg); }
+  #sidebar.collapsed .hamburger-line-1 { top: 4px; transform: rotate(0deg); }
+  #sidebar.collapsed .hamburger-line-2 { top: 9px; opacity: 1; transform: none; }
+  #sidebar.collapsed .hamburger-line-3 { top: 14px; transform: rotate(0deg); }
+
 </style>
 
 <!-- Sidebar -->
-<div id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-[#0f172a] text-white flex flex-col transition-all duration-300 z-50">
+<div id="sidebar" class="fixed inset-y-0 left-0 bg-[#0f172a] text-white flex flex-col z-50">
 
   <!-- Header -->
   <div class="relative flex items-center justify-center h-16 border-b border-gray-700">
     <button id="sidebarLogoToggle" class="absolute left-6 top-4 text-white focus:outline-none" aria-label="Toggle sidebar logo/menu">
-      <svg id="sidebarLogo" fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 293.538 293.538" class="w-8 h-8">
+      <!-- Treat this as a brand mark; keep it visible only when expanded -->
+      <svg id="sidebarLogo" fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 293.538 293.538" class="w-8 h-8" aria-hidden="true">
         <g>
           <polygon points="210.084,88.631 146.622,284.844 81.491,88.631" />
           <polygon points="103.7,64.035 146.658,21.08 188.515,64.035" />
@@ -177,18 +240,16 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
           <polygon points="67.563,8.695 124.263,8.695 68.923,64.035 7.969,64.035" />
         </g>
       </svg>
-      <svg id="sidebarMenuIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
     </button>
 
-    <button id="sidebarToggle" class="absolute right-2 text-white focus:outline-none" aria-label="Toggle sidebar internal">
+    <button id="sidebarToggle" class="absolute right-4 top-4 text-white focus:outline-none hover:bg-gray-700 rounded p-1" aria-label="Toggle sidebar">
       <div class="hamburger" aria-hidden="true">
         <span class="hamburger-line hamburger-line-1"></span>
         <span class="hamburger-line hamburger-line-2"></span>
         <span class="hamburger-line hamburger-line-3"></span>
       </div>
     </button>
+
   </div>
 
   <!-- Navigation -->

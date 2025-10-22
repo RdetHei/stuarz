@@ -31,7 +31,7 @@ class CertificatesController
             if ($baseUrl === '/') $baseUrl = '';
         }
 
-        $content = dirname(__DIR__) . '/views/pages/certificate.php';
+        $content = dirname(__DIR__) . '/views/pages/certificates/certificate.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
@@ -56,7 +56,7 @@ class CertificatesController
             if ($baseUrl === '/') $baseUrl = '';
         }
 
-        $content = dirname(__DIR__) . '/views/pages/certificate.php';
+        $content = dirname(__DIR__) . '/views/pages/certificates/certificate.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 

@@ -106,8 +106,8 @@ class DocsController
         // Data for layout
         $title = "Documentation - Stuarz";
         $description = "Panduan penggunaan Stuarz documentation";
-        $content = dirname(__DIR__) . '/views/pages/docs.php';
-        include dirname(__DIR__) . '/views/layouts/layout.php';
+        $content = dirname(__DIR__) . '/views/pages/docs/docs.php';
+        include dirname(__DIR__) . '/views/layouts/dlayout.php';
     }
 
     public function create()
@@ -172,12 +172,11 @@ class DocsController
 
         $title = "Edit Documentation";
         $description = "Ubah dokumentasi";
-        $content = dirname(__DIR__) . '/views/pages/docs_form.php';
-        include dirname(__DIR__) . '/views/layouts/layout.php';
+        $content = dirname(__DIR__) . '/views/pages/docs/form.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
-    public function update()
-    {
+    public function update($id) {
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
             header('Location: index.php?page=docs');

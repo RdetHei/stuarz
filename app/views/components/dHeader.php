@@ -32,8 +32,16 @@ if ($currentPage === 'dashboard' && $currentSub) {
     $title = $pageTitles[$currentPage] ?? '-';
 }
 ?>
-<header id="dHeader" class="bg-slate-900 text-white h-14 flex items-center justify-between px-4 transition-all duration-300 ml-64">
-    <div class="font-bold"><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></div>
+<header id="dHeader" class="bg-slate-900 text-white h-14 flex items-center justify-between px-4 transition-all duration-300">
+    <div class="flex items-center gap-4">
+        <!-- Mobile menu button -->
+        <button id="mobileMenuToggle" class="lg:hidden p-2 hover:bg-slate-700 rounded" aria-label="Toggle mobile menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <div class="font-bold"><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></div>
+    </div>
     <div class="relative">
         <button id="supportDropdownBtn" class="p-2 hover:bg-slate-700 rounded flex items-center gap-2" aria-haspopup="true" aria-expanded="false">
             Support

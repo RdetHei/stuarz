@@ -7,20 +7,20 @@ class DashboardController
     {
         $title = "Dashboard - Stuarz";
         $description = "Welcome to your dashboard";
-        $content = dirname(__DIR__) . '/views/pages/dashboard.php';
+        $content = dirname(__DIR__) . '/views/pages/dashboard/dashboard.php';
 
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
-        public function dashboardAdmin() {
+    public function dashboardAdmin()
+    {
         $title = "Dashboard - Stuarz";
         $description = "Welcome to your dashboard";
 
         // Tentukan file view utama
-        $content = '../app/views/pages/dashboard.php';
+        $content = dirname(__DIR__) . '/views/pages/dashboard/dashboard.php';
         
-        include '../app/views/layouts/dLayout.php';
-   
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 }
 

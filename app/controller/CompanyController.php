@@ -5,8 +5,8 @@ class CompanyController {
         $description = "Blablabla blebleble blublublu";
 
         // Tentukan file view utama
-        $content = '../app/views/pages/company.php';
+        $content = dirname(__DIR__) . '/views/pages/organization/company.php';
         
-        include '../app/views/layouts/layout.php';
+        include dirname(__DIR__) . '/views/layouts/layout.php';
     }
 }

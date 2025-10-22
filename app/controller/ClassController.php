@@ -12,12 +12,12 @@ class ClassController {
 
     public function index() {
         $classes = $this->model->getAll();
-        $content = dirname(__DIR__) . '/views/pages/class_list.php';
+        $content = dirname(__DIR__) . '/views/pages/classes/class_list.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function create() {
-        $content = dirname(__DIR__) . '/views/pages/class_form.php';
+        $content = dirname(__DIR__) . '/views/pages/classes/class_form.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
@@ -48,7 +48,7 @@ class ClassController {
             header('Location: index.php?page=class');
             exit;
         }
-        $content = dirname(__DIR__) . '/views/pages/class_form.php';
+        $content = dirname(__DIR__) . '/views/pages/classes/class_form.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
@@ -84,7 +84,7 @@ class ClassController {
         $class_id = intval($_GET['id'] ?? 0);
         $class = $this->model->getById($class_id);
         $members = $this->model->getMembers($class_id);
-        $content = dirname(__DIR__) . '/views/pages/class_members.php';
+        $content = dirname(__DIR__) . '/views/pages/classes/class_members.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
     public function addMember() {

@@ -12,12 +12,12 @@ class AnnouncementController {
 
     public function index() {
         $announcements = $this->model->getAll();
-        $content = dirname(__DIR__) . '/views/pages/announcement_list.php';
+        $content = dirname(__DIR__) . '/views/pages/announcements/list.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function create() {
-        $content = dirname(__DIR__) . '/views/pages/announcement_form.php';
+        $content = dirname(__DIR__) . '/views/pages/announcements/form.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
@@ -39,7 +39,7 @@ class AnnouncementController {
         $id = intval($_GET['id'] ?? 0);
         $announcement = $this->model->getById($id);
         $comments = $this->model->getComments($id);
-        $content = dirname(__DIR__) . '/views/pages/announcement_detail.php';
+        $content = dirname(__DIR__) . '/views/pages/announcements/detail.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 

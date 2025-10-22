@@ -17,9 +17,10 @@ class AttendanceController {
         $filters = [];
         if (!empty($_GET['class_id'])) $filters['class_id'] = intval($_GET['class_id']);
         if (!empty($_GET['date'])) $filters['date'] = $this->db->real_escape_string($_GET['date']);
-        $records = $this->model->getAll($filters);
-        $classes = $this->db->query("SELECT id, name FROM classes")->fetch_all(MYSQLI_ASSOC) ?? [];
-        require __DIR__ . '/../views/pages/attendance/index.php';
+    $records = $this->model->getAll($filters);
+    $classes = $this->db->query("SELECT id, name FROM classes")->fetch_all(MYSQLI_ASSOC) ?? [];
+    $content = dirname(__DIR__) . '/views/pages/attendance/index.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function mark() {
@@ -30,8 +31,9 @@ class AttendanceController {
             $cid = intval($_GET['class_id']);
             $students = $this->db->query("SELECT id, name FROM users WHERE class_id=$cid AND role='student'")->fetch_all(MYSQLI_ASSOC) ?? [];
         }
-        $date = $_GET['date'] ?? date('Y-m-d');
-        require __DIR__ . '/../views/pages/attendance/form.php';
+    $date = $_GET['date'] ?? date('Y-m-d');
+    $content = dirname(__DIR__) . '/views/pages/attendance/form.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function store() {
@@ -52,8 +54,9 @@ class AttendanceController {
         $user_id = intval($_GET['user_id'] ?? 0);
         $from = $_GET['from'] ?? null;
         $to = $_GET['to'] ?? null;
-        $report = $user_id ? $this->model->reportByUser($user_id, $from, $to) : null;
-        $students = $this->db->query("SELECT id, name FROM users WHERE role='student'")->fetch_all(MYSQLI_ASSOC) ?? [];
-        require __DIR__ . '/../views/pages/attendance/report.php';
+    $report = $user_id ? $this->model->reportByUser($user_id, $from, $to) : null;
+    $students = $this->db->query("SELECT id, name FROM users WHERE role='student'")->fetch_all(MYSQLI_ASSOC) ?? [];
+    $content = dirname(__DIR__) . '/views/pages/attendance/report.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 }

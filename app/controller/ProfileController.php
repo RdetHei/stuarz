@@ -26,7 +26,7 @@ class ProfileController
 
         $title = "Profile - Stuarz";
         $description = "Your profile details";
-        $content = dirname(__DIR__) . '/views/pages/profile.php';
+        $content = dirname(__DIR__) . '/views/pages/users/profile.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 }

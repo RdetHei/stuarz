@@ -6,10 +6,10 @@ class DashboardAdminController
         $title = "Documentations - Stuarz";
         $description = "Welcome to your dashboard";
 
-        // Tentukan file view utama
-        $content = '../app/views/pages/dashboard.php';
+    // Tentukan file view utama
+    $content = dirname(__DIR__) . '/views/pages/dashboard/dashboard.php';
 
-        include '../app/views/layouts/dLayout.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function docsIndex()
@@ -22,8 +22,8 @@ class DashboardAdminController
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $docs[] = $r;
         }
-        $content = '../app/views/pages/admin_docs_list.php';
-        include '../app/views/layouts/dLayout.php';
+    $content = dirname(__DIR__) . '/views/pages/admin/admin_docs_list.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function docsCreate()
@@ -31,8 +31,8 @@ class DashboardAdminController
         $title = "Buat Dokumentasi";
         $description = "Tambah dokumentasi baru";
         $doc = null;
-        $content = '../app/views/pages/docs_form.php';
-        include '../app/views/layouts/dLayout.php';
+    $content = dirname(__DIR__) . '/views/pages/docs/docs_form.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function docsStore()
@@ -72,8 +72,8 @@ class DashboardAdminController
         mysqli_stmt_close($stmt);
         $title = "Edit Dokumentasi";
         $description = "Ubah dokumentasi";
-        $content = '../app/views/pages/docs_form.php';
-        include '../app/views/layouts/dLayout.php';
+    $content = dirname(__DIR__) . '/views/pages/docs/docs_form.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function docsUpdate()
@@ -129,8 +129,8 @@ class DashboardAdminController
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $news[] = $r;
         }
-        $content = '../app/views/pages/admin_news_list.php';
-        include '../app/views/layouts/dLayout.php';
+    $content = dirname(__DIR__) . '/views/pages/admin/admin_news_list.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function newsCreate()
@@ -138,8 +138,8 @@ class DashboardAdminController
         $title = "Buat Berita";
         $description = "Tambah berita baru";
         $newsItem = null;
-        $content = '../app/views/pages/news_form.php';
-        include '../app/views/layouts/dLayout.php';
+    $content = dirname(__DIR__) . '/views/pages/news/news_form.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function newsStore()
@@ -188,8 +188,8 @@ class DashboardAdminController
         mysqli_stmt_close($stmt);
         $title = "Edit Berita";
         $description = "Ubah berita";
-        $content = '../app/views/pages/news_form.php';
-        include '../app/views/layouts/dLayout.php';
+    $content = dirname(__DIR__) . '/views/pages/news/news_form.php';
+    include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function newsUpdate()
