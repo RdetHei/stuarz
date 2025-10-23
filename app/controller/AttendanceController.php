@@ -24,16 +24,42 @@ class AttendanceController {
     }
 
     public function mark() {
-        // teacher marks; show list of students in a class & date
+        // Get list of classes
         $classes = $this->db->query("SELECT id, name FROM classes")->fetch_all(MYSQLI_ASSOC) ?? [];
         $students = [];
-        if (!empty($_GET['class_id'])) {
+        $attendance = [];
+        
+        if (!empty($_GET['class_id']) && !empty($_GET['date'])) {
             $cid = intval($_GET['class_id']);
-            $students = $this->db->query("SELECT id, name FROM users WHERE class_id=$cid AND role='student'")->fetch_all(MYSQLI_ASSOC) ?? [];
+            $date = $this->db->real_escape_string($_GET['date']);
+            
+            // Get students with their attendance status
+            $sql = "SELECT 
+                    u.id, 
+                    u.username,
+                    u.email,
+                    COALESCE(a.status, 'belum') as status,
+                    a.notes
+                FROM class_members cm 
+                JOIN users u ON cm.user_id = u.id 
+                LEFT JOIN attendance a ON a.user_id = u.id 
+                    AND a.class_id = cm.class_id 
+                    AND a.date = ?
+                WHERE cm.class_id = ? 
+                AND cm.role = 'member'
+                ORDER BY u.username";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param('si', $date, $cid);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $students = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
         }
-    $date = $_GET['date'] ?? date('Y-m-d');
-    $content = dirname(__DIR__) . '/views/pages/attendance/form.php';
-    include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        
+        $date = $_GET['date'] ?? date('Y-m-d');
+        $content = dirname(__DIR__) . '/views/pages/attendance/form.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function store() {
@@ -45,7 +71,14 @@ class AttendanceController {
         foreach ($user_ids as $i => $uid) {
             $uid = intval($uid);
             $status = $this->db->real_escape_string($statuses[$i] ?? 'Absen');
-            $this->model->store(['user_id'=>$uid,'date'=>$date,'status'=>$status,'class_id'=>$class_id]);
+            $notes = $this->db->real_escape_string($_POST['notes'][$i] ?? '');
+            $this->model->store([
+                'user_id' => $uid,
+                'date' => $date,
+                'status' => $status,
+                'class_id' => $class_id,
+                'notes' => $notes
+            ]);
         }
         header('Location: index.php?page=attendance'); exit;
     }

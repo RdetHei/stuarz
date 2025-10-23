@@ -45,3 +45,17 @@
         </div>
     </div>
 </div>
+
+<?php if (!empty($announcement)): ?>
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title"><?= htmlspecialchars($announcement['title']) ?></h5>
+            <p class="card-text"><?= nl2br(htmlspecialchars($announcement['content'])) ?></p>
+            <p class="text-muted">
+                Kelas: <?= htmlspecialchars($announcement['class_name'] ?? 'Semua Kelas') ?><br>
+                Dibuat oleh: <?= htmlspecialchars($announcement['creator'] ?? 'Unknown') ?><br>
+                Tanggal: <?= date('d/m/Y H:i', strtotime($announcement['created_at'])) ?>
+            </p>
+        </div>
+    </div>
+<?php endif; ?>

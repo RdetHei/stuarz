@@ -18,7 +18,7 @@ class NewsController{
         $total = $res['total'];
         $totalPages = max(1, (int)ceil($total / $perPage));
 
-        $content = dirname(__DIR__) . '/views/pages/news.php';
+        $content = dirname(__DIR__) . '/views/pages/news/news.php';
         include dirname(__DIR__) . '/views/layouts/layout.php';
     }
 
@@ -36,7 +36,7 @@ class NewsController{
         }
         $title = htmlspecialchars($newsItem['title']) . ' - News - Stuarz';
         $description = mb_substr(strip_tags($newsItem['content']), 0, 140);
-        $content = dirname(__DIR__) . '/views/pages/news_single.php';
+        $content = dirname(__DIR__) . '/views/pages/news/news_single.php';
         include dirname(__DIR__) . '/views/layouts/layout.php';
     }
 

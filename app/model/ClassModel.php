@@ -85,12 +85,51 @@ class ClassModel {
         $stmt->close();
         return $result;
     }
-    public function addMember($class_id, $user_id, $role) {
-        $stmt = $this->db->prepare('INSERT INTO class_members (class_id, user_id, role) VALUES (?, ?, ?)');
-        $stmt->bind_param('iis', $class_id, $user_id, $role);
-        $ok = $stmt->execute();
-        $stmt->close();
-        return $ok;
+    public function addMember($classId, $userId, $role) {
+        try {
+            // Validate class exists
+            $stmt = $this->db->prepare("SELECT id FROM classes WHERE id = ?");
+            $stmt->bind_param("i", $classId);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows === 0) {
+                $stmt->close();
+                throw new \Exception("Class ID {$classId} not found");
+            }
+            $stmt->close();
+
+            // Validate user exists
+            $stmt = $this->db->prepare("SELECT id FROM users WHERE id = ?");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows === 0) {
+                $stmt->close();
+                throw new \Exception("User ID {$userId} not found");
+            }
+            $stmt->close();
+
+            // Check if member already exists
+            $stmt = $this->db->prepare("SELECT id FROM class_members WHERE class_id = ? AND user_id = ?");
+            $stmt->bind_param("ii", $classId, $userId);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows > 0) {
+                $stmt->close();
+                throw new \Exception("User is already a member of this class");
+            }
+            $stmt->close();
+
+            // Add member
+            $stmt = $this->db->prepare("INSERT INTO class_members (class_id, user_id, role) VALUES (?, ?, ?)");
+            $stmt->bind_param("iis", $classId, $userId, $role);
+            $result = $stmt->execute();
+            $stmt->close();
+
+            return $result;
+        } catch (\Exception $e) {
+            throw new \Exception("Failed to add member: " . $e->getMessage());
+        }
     }
     public function removeMember($class_id, $user_id) {
         $stmt = $this->db->prepare('DELETE FROM class_members WHERE class_id = ? AND user_id = ?');

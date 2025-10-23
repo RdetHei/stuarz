@@ -10,18 +10,26 @@ class AnnouncementModel
 
     public function getAll()
     {
-        $sql = "SELECT a.*, u.username, u.avatar 
-                FROM announcements a
-                LEFT JOIN users u ON a.created_by = u.id
-                ORDER BY a.created_at DESC";
-        $result = $this->db->query($sql);
-        $data = [];
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $data[] = $row;
+        $sql = "SELECT 
+            a.*,
+            c.name as class_name,
+            u.username as creator
+        FROM announcements a
+        LEFT JOIN classes c ON a.class_id = c.id
+        LEFT JOIN users u ON a.created_by = u.id
+        ORDER BY a.created_at DESC";
+
+        $result = [];
+        $query = $this->db->query($sql);
+        
+        if ($query) {
+            while ($row = $query->fetch_assoc()) {
+                $result[] = $row;
             }
+            $query->free();
         }
-        return $data;
+        
+        return $result;
     }
 
     public function getByUserId($userId)
@@ -50,28 +58,50 @@ class AnnouncementModel
 
     public function getById($id)
     {
-        $sql = "SELECT a.*, u.username, u.avatar
-                FROM announcements a
-                LEFT JOIN users u ON a.created_by = u.id
-                WHERE a.id = ?
-                LIMIT 1";
+        $sql = "SELECT 
+            a.*,
+            c.name as class_name,
+            u.username as creator
+        FROM announcements a
+        LEFT JOIN classes c ON a.class_id = c.id
+        LEFT JOIN users u ON a.created_by = u.id
+        WHERE a.id = ?";
+
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        
+        $stmt->close();
+        return $row;
     }
 
     public function create($data)
     {
-        $sql = "INSERT INTO announcements (created_by, title, content, class_id, photo, created_at) 
-                VALUES (:created_by, :title, :content, :class_id, :photo, NOW())";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':created_by' => $data['user_id'],
-            ':title'      => $data['title'],
-            ':content'    => $data['content'],
-            ':class_id'   => $data['class_id'],
-            ':photo'      => $data['photo']
-        ]);
+        try {
+            $sql = "INSERT INTO announcements 
+                    (created_by, title, content, class_id, photo, created_at) 
+                    VALUES (?, ?, ?, ?, ?, NOW())";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param(
+                "issss", 
+                $data['created_by'],
+                $data['title'],
+                $data['content'],
+                $data['class_id'],
+                $data['photo']
+            );
+            
+            $result = $stmt->execute();
+            $stmt->close();
+            
+            return $result;
+        } catch (\Exception $e) {
+            throw new \Exception("Failed to create announcement: " . $e->getMessage());
+        }
     }
 
     public function update($id, $data)

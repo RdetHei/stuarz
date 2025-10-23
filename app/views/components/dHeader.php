@@ -12,6 +12,9 @@ $pageTitles = [
     'announcement' => 'Pengumuman',
     'subjects' => 'Mata Pelajar',
     'grades' => 'Grades',
+    'schedule' => 'Jadwal',
+    'tasks' => 'Tugas',
+    'attendance' => 'Kehadiran',
 ];
 
 $dashboardTitles = [

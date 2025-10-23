@@ -107,7 +107,7 @@ class DocsController
         $title = "Documentation - Stuarz";
         $description = "Panduan penggunaan Stuarz documentation";
         $content = dirname(__DIR__) . '/views/pages/docs/docs.php';
-        include dirname(__DIR__) . '/views/layouts/dlayout.php';
+        include dirname(__DIR__) . '/views/layouts/layout.php';
     }
 
     public function create()
@@ -116,7 +116,7 @@ class DocsController
         $description = "Tambah dokumentasi baru";
         $doc = null;
         $content = dirname(__DIR__) . '/views/pages/docs_form.php';
-        include dirname(__DIR__) . '/views/layouts/layout.php';
+        include dirname(__DIR__) . '/views/layouts/dlayout.php';
     }
 
     public function store()

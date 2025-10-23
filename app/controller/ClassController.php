@@ -88,12 +88,27 @@ class ClassController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
     public function addMember() {
-        $class_id = intval($_POST['class_id'] ?? 0);
-        $user_id = intval($_POST['user_id'] ?? 0);
-        $role = trim($_POST['role'] ?? 'member');
-        $ok = $this->model->addMember($class_id, $user_id, $role);
-        $_SESSION['flash'] = $ok ? 'Anggota ditambah.' : 'Gagal menambah anggota.';
-        header('Location: index.php?page=class_members&id=' . $class_id);
+        try {
+            $classId = intval($_POST['class_id'] ?? 0);
+            $userId = intval($_POST['user_id'] ?? 0);
+            $role = $_POST['role'] ?? 'member';
+
+            if (!$classId || !$userId) {
+                throw new \Exception("Invalid class or user ID");
+            }
+
+            $result = $this->model->addMember($classId, $userId, $role);
+            
+            if ($result) {
+                $_SESSION['success'] = "Member added successfully";
+            } else {
+                $_SESSION['error'] = "Failed to add member";
+            }
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+        
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
     public function removeMember() {

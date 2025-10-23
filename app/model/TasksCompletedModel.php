@@ -15,14 +15,28 @@ class TasksCompletedModel {
         return $result ? $result->fetch_assoc() : null;
     }
     public function create($data) {
-        $user_id = intval($data['user_id']);
-        $title = $this->db->real_escape_string($data['title']);
-        $desc = $this->db->real_escape_string($data['description']);
-        $status = $this->db->real_escape_string($data['status']);
-        $deadline = $this->db->real_escape_string($data['deadline']);
-        $class_id = intval($data['class_id']);
-        $subject_id = intval($data['subject_id']);
-        return $this->db->query("INSERT INTO tasks_completed (user_id, title, description, status, deadline, class_id, subject_id) VALUES ($user_id, '$title', '$desc', '$status', '$deadline', $class_id, $subject_id)");
+        try {
+            $sql = "INSERT INTO tasks_completed 
+                    (user_id, class_id, task_name, description, file_path) 
+                    VALUES (?, ?, ?, ?, ?)";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param(
+                "iisss",
+                $data['user_id'],
+                $data['class_id'],
+                $data['task_name'],
+                $data['description'],
+                $data['file_path']
+            );
+            
+            $result = $stmt->execute();
+            $stmt->close();
+            
+            return $result;
+        } catch (\Exception $e) {
+            throw new \Exception("Failed to create task submission: " . $e->getMessage());
+        }
     }
     public function update($id, $data) {
         $id = intval($id);
