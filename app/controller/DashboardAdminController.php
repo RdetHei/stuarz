@@ -1,15 +1,281 @@
 <?php
 class DashboardAdminController
 {
+    private $db;
+
+    public function __construct($db = null) {
+        if ($db === null) {
+            global $config;
+            $db = $config ?? null;
+        }
+        $this->db = $db;
+    }
+
     public function dashboardAdmin()
     {
-        $title = "Documentations - Stuarz";
+        // Cek apakah user adalah admin
+        if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'admin') {
+            header('Location: index.php?page=dashboard-admon');
+            exit;
+        }
+
+        $title = "Admin Dashboard - Stuarz";
         $description = "Welcome to your dashboard";
 
-    // Tentukan file view utama
-    $content = dirname(__DIR__) . '/views/pages/dashboard/dashboard.php';
+        // Ambil data untuk stats cards
+        $stats = $this->getStats();
+        
+        // Ambil data untuk grafik
+        $data = [
+            'attendance' => $this->getAttendanceData(),
+            'grades' => $this->getGradesData(),
+            'tasks' => $this->getTasksData(),
+            'students' => $this->getStudentsPerClass(),
+            'teaching' => $this->getTeachingSchedules(),
+            'newStudents' => $this->getNewStudents(),
+            'certificates' => $this->getCertificatesData(),
+            'documentation' => $this->getDocumentationData()
+        ];
 
-    include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        // Tentukan file view utama
+        $content = dirname(__DIR__) . '/views/pages/admin/dashboard.php';
+
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    private function getStats() {
+        $stats = [
+            'total_users' => 0,
+            'total_students' => 0,
+            'total_certificates' => 0,
+            'average_grade' => 0
+        ];
+
+        // Total Users
+        $result = $this->db->query("SELECT COUNT(*) as total FROM users");
+        if ($result && $row = $result->fetch_assoc()) {
+            $stats['total_users'] = $row['total'];
+        }
+
+        // Total Students
+        $result = $this->db->query("SELECT COUNT(*) as total FROM student");
+        if ($result && $row = $result->fetch_assoc()) {
+            $stats['total_students'] = $row['total'];
+        }
+
+        // Total Certificates
+        $result = $this->db->query("SELECT COUNT(*) as total FROM certificates");
+        if ($result && $row = $result->fetch_assoc()) {
+            $stats['total_certificates'] = $row['total'];
+        }
+
+        // Average Grade
+        $result = $this->db->query("SELECT AVG(grade) as avg FROM average_grade");
+        if ($result && $row = $result->fetch_assoc()) {
+            $stats['average_grade'] = round($row['avg'], 1);
+        }
+
+        return $stats;
+    }
+
+    private function getAttendanceData() {
+        // Ambil data kehadiran 7 hari terakhir
+        $data = [
+            'labels' => [],
+            'hadir' => [],
+            'absen' => [],
+            'terlambat' => []
+        ];
+
+        $sql = "SELECT 
+                    DATE(date) as tanggal,
+                    SUM(CASE WHEN status = 'hadir' THEN 1 ELSE 0 END) as hadir,
+                    SUM(CASE WHEN status = 'absen' THEN 1 ELSE 0 END) as absen,
+                    SUM(CASE WHEN status = 'terlambat' THEN 1 ELSE 0 END) as terlambat
+                FROM attendance 
+                WHERE date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                GROUP BY DATE(date)
+                ORDER BY date";
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data['labels'][] = date('d M', strtotime($row['tanggal']));
+                $data['hadir'][] = (int)$row['hadir'];
+                $data['absen'][] = (int)$row['absen'];
+                $data['terlambat'][] = (int)$row['terlambat'];
+            }
+        }
+
+        return $data;
+    }
+
+    private function getGradesData() {
+        $data = [
+            'labels' => [],
+            'values' => []
+        ];
+
+        $sql = "SELECT subject, AVG(grade) as average_grade 
+                FROM average_grade 
+                GROUP BY subject 
+                ORDER BY average_grade DESC";
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data['labels'][] = $row['subject'];
+                $data['values'][] = round($row['average_grade'], 1);
+            }
+        }
+
+        return $data;
+    }
+
+    private function getTasksData() {
+        $data = ['completed' => 0, 'pending' => 0];
+
+        $sql = "SELECT 
+                    status,
+                    COUNT(*) as total
+                FROM tasks_completed
+                GROUP BY status";
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                if ($row['status'] === 'completed') {
+                    $data['completed'] = (int)$row['total'];
+                } else {
+                    $data['pending'] = (int)$row['total'];
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    private function getStudentsPerClass() {
+        $data = [
+            'labels' => [],
+            'values' => []
+        ];
+
+        $sql = "SELECT class, COUNT(*) as total 
+                FROM student 
+                GROUP BY class 
+                ORDER BY class";
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data['labels'][] = $row['class'];
+                $data['values'][] = (int)$row['total'];
+            }
+        }
+
+        return $data;
+    }
+
+    private function getTeachingSchedules() {
+        $data = [
+            'labels' => [],
+            'values' => []
+        ];
+
+        $sql = "SELECT 
+                    u.name,
+                    COUNT(s.id) as total_schedules
+                FROM users u
+                LEFT JOIN schedule s ON u.id = s.teacher_id
+                WHERE u.level = 'teacher'
+                GROUP BY u.id
+                ORDER BY total_schedules DESC
+                LIMIT 10";
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data['labels'][] = $row['name'];
+                $data['values'][] = (int)$row['total_schedules'];
+            }
+        }
+
+        return $data;
+    }
+
+    private function getNewStudents() {
+        $data = [
+            'labels' => [],
+            'values' => []
+        ];
+
+        $sql = "SELECT 
+                    DATE_FORMAT(join_date, '%b') as month,
+                    COUNT(*) as total
+                FROM student
+                WHERE join_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                GROUP BY YEAR(join_date), MONTH(join_date)
+                ORDER BY join_date";
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data['labels'][] = $row['month'];
+                $data['values'][] = (int)$row['total'];
+            }
+        }
+
+        return $data;
+    }
+
+    private function getCertificatesData() {
+        $data = [
+            'labels' => [],
+            'values' => []
+        ];
+
+        $sql = "SELECT 
+                    DATE_FORMAT(issued_at, '%b') as month,
+                    COUNT(*) as total
+                FROM certificates
+                WHERE issued_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                GROUP BY YEAR(issued_at), MONTH(issued_at)
+                ORDER BY issued_at";
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data['labels'][] = $row['month'];
+                $data['values'][] = (int)$row['total'];
+            }
+        }
+
+        return $data;
+    }
+
+    private function getDocumentationData() {
+        $data = [
+            'labels' => [],
+            'values' => []
+        ];
+
+        $sql = "SELECT 
+                    section,
+                    COUNT(*) as total
+                FROM documentation
+                GROUP BY section
+                ORDER BY total DESC";
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data['labels'][] = $row['section'];
+                $data['values'][] = (int)$row['total'];
+            }
+        }
+
+        return $data;
     }
 
     public function docsIndex()

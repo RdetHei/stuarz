@@ -254,7 +254,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
 
   <!-- Navigation -->
   <nav class="flex-1 px-2 py-4 space-y-2">
-    <a href="index.php?page=dashboard" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg <?= navActive('dashboard', $page, $sub) ?>">
+    <a href="index.php?page=dashboard-admin" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg <?= navActive('dashboard', $page, $sub) ?>">
       <span class="material-symbols-outlined mr-3">home</span>
       <span class="menu-text">Dashboard</span>
     </a>

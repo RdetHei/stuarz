@@ -182,6 +182,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                                 class="w-full px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors duration-200">
                                 <option value="user" <?= (isset($user['level']) && $user['level']==='user') ? 'selected' : '' ?>>User</option>
                                 <option value="admin" <?= (isset($user['level']) && $user['level']==='admin') ? 'selected' : '' ?>>Admin</option>
+                                <option value="guru" <?= (isset($user['level']) && $user['level']==='guru') ? 'selected' : '' ?>>Guru</option>
                             </select>
                         </div>
                     </div>

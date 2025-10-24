@@ -36,7 +36,32 @@ class RegisterController
                     $stmt2 = $config->prepare($sql);
                     $stmt2->bind_param('ssss', $username, $email, $hash, $level);
                     if ($stmt2->execute()) {
-                        header('Location: index.php?page=login');
+                        // Get the new user ID
+                        $newUserId = $config->insert_id;
+                        
+                        // Start session and set user data
+                        if (session_status() === PHP_SESSION_NONE) session_start();
+                        
+                        // Get user data for session
+                        $userStmt = $config->prepare('SELECT * FROM users WHERE id = ?');
+                        $userStmt->bind_param('i', $newUserId);
+                        $userStmt->execute();
+                        $userResult = $userStmt->get_result();
+                        $user = $userResult->fetch_assoc();
+                        
+                        // Set session data
+                        $_SESSION['user'] = $user;
+                        $_SESSION['user_id'] = $user['id'];
+                        $_SESSION['username'] = $user['username'];
+                        $_SESSION['level'] = $user['level'];
+                        
+                        // Set cookies
+                        setcookie('user_id', $user['id'], time() + 3600, '/');
+                        setcookie('username', $user['username'], time() + 3600, '/');
+                        setcookie('level', $user['level'], time() + 3600, '/');
+                        
+                        // Redirect to setup profile
+                        header('Location: index.php?page=setup-profile');
                         exit;
                     } else {
                         $error = 'Gagal mendaftar. Silakan coba lagi.';

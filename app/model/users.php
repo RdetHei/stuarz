@@ -11,7 +11,7 @@ class users
     public function getAll()
     {
         $rows = [];
-        $sql = "SELECT id, username, name, email, `level`, avatar, banner, join_date, phone, address, bio FROM users ORDER BY id DESC";
+        $sql = "SELECT id, username, name, email, `level`, avatar, banner, join_date, phone, address, `class`, bio FROM users ORDER BY id DESC";
         $res = mysqli_query($this->conn, $sql);
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $rows[] = $r;
@@ -22,7 +22,7 @@ class users
 
     public function getUserById($id)
     {
-        $sql = "SELECT id, username, name, email, `level`, avatar, banner, join_date, phone, address, bio FROM users WHERE id = ? LIMIT 1";
+        $sql = "SELECT id, username, name, email, `level`, avatar, banner, join_date, phone, address, `class`, bio FROM users WHERE id = ? LIMIT 1";
         $stmt = mysqli_prepare($this->conn, $sql);
         if (!$stmt) return null;
         mysqli_stmt_bind_param($stmt, "i", $id);
@@ -79,6 +79,73 @@ class users
         );
         $ok = mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
+        return (bool)$ok;
+    }
+
+    public function updateProfile($id, array $data)
+    {
+        $fields = [];
+        $types = "";
+        $params = [];
+        
+        // Build dynamic update query
+        if (isset($data['name'])) {
+            $fields[] = "name = ?";
+            $types .= "s";
+            $params[] = $data['name'];
+        }
+        
+        if (isset($data['phone'])) {
+            $fields[] = "phone = ?";
+            $types .= "s";
+            $params[] = $data['phone'];
+        }
+        
+        if (isset($data['address'])) {
+            $fields[] = "address = ?";
+            $types .= "s";
+            $params[] = $data['address'];
+        }
+        
+        if (isset($data['class'])) {
+            $fields[] = "`class` = ?";
+            $types .= "s";
+            $params[] = $data['class'];
+        }
+        
+        if (isset($data['bio'])) {
+            $fields[] = "bio = ?";
+            $types .= "s";
+            $params[] = $data['bio'];
+        }
+        
+        if (isset($data['avatar'])) {
+            $fields[] = "avatar = ?";
+            $types .= "s";
+            $params[] = $data['avatar'];
+        }
+        
+        if (isset($data['banner'])) {
+            $fields[] = "banner = ?";
+            $types .= "s";
+            $params[] = $data['banner'];
+        }
+        
+        if (empty($fields)) {
+            return false;
+        }
+        
+        $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE id = ?";
+        $types .= "i";
+        $params[] = $id;
+        
+        $stmt = mysqli_prepare($this->conn, $sql);
+        if (!$stmt) return false;
+        
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        
         return (bool)$ok;
     }
 

@@ -83,7 +83,7 @@ $selectedTeacher = $_GET['teacher_id'] ?? '';
           <select name="teacher_id" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
             <option value="">Semua Guru</option>
             <?php
-            $teacherQuery = $config->query("SELECT id, name FROM users WHERE role='teacher' ORDER BY name");
+            $teacherQuery = $config->query("SELECT id, name FROM users WHERE level='teacher' ORDER BY name");
             while ($teacher = $teacherQuery->fetch_assoc()):
             ?>
             <option value="<?= $teacher['id'] ?>" <?= $selectedTeacher == $teacher['id'] ? 'selected' : '' ?>>

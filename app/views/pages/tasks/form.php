@@ -38,9 +38,20 @@ $subjects = $subjects ?? [];
     </div>
   </div>
 
+  <!-- Flash Messages -->
+  <?php if (isset($_SESSION['error'])): ?>
+    <div class="mb-6 bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <?= htmlspecialchars($_SESSION['error']) ?>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+  <?php endif; ?>
+
   <!-- Form Card -->
   <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
-    <form method="post" action="<?= $action ?>" enctype="multipart/form-data" class="space-y-6">
+    <form method="post" action="<?= $action ?>" enctype="multipart/form-data" class="space-y-6" id="taskForm">
       <?php if ($edit): ?>
         <input type="hidden" name="id" value="<?= $id ?>">
       <?php endif; ?>
@@ -225,17 +236,26 @@ $subjects = $subjects ?? [];
 </div>
 
 <script>
-// File input preview
 document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('taskForm');
     const fileInput = document.getElementById('file');
     const label = fileInput?.closest('label');
     
+    // File input preview
     if (fileInput && label) {
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const fileName = file.name;
                 const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File terlalu besar. Maksimal 5MB.');
+                    fileInput.value = '';
+                    return;
+                }
+                
                 label.innerHTML = `
                     <div class="flex items-center gap-2 text-indigo-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,6 +266,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             }
         });
+    }
+    
+    // Form validation
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const classId = document.getElementById('class_id').value;
+            const subjectId = document.getElementById('subject_id').value;
+            const deadline = document.getElementById('deadline').value;
+            
+            let errors = [];
+            
+            if (!title) {
+                errors.push('Judul task wajib diisi');
+            }
+            
+            if (!description) {
+                errors.push('Deskripsi task wajib diisi');
+            }
+            
+            if (!classId) {
+                errors.push('Kelas wajib dipilih');
+            }
+            
+            if (!subjectId) {
+                errors.push('Mata pelajaran wajib dipilih');
+            }
+            
+            if (!deadline) {
+                errors.push('Deadline wajib diisi');
+            } else if (deadline < new Date().toISOString().split('T')[0]) {
+                errors.push('Deadline tidak boleh lebih awal dari hari ini');
+            }
+            
+            if (errors.length > 0) {
+                e.preventDefault();
+                alert('Error:\n' + errors.join('\n'));
+                return false;
+            }
+        });
+    }
+    
+    // Set minimum date to today
+    const deadlineInput = document.getElementById('deadline');
+    if (deadlineInput) {
+        deadlineInput.min = new Date().toISOString().split('T')[0];
     }
 });
 </script>

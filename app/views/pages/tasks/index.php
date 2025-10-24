@@ -1,5 +1,26 @@
 <!-- Tasks List UI - Discord/GitHub dark style -->
 <div class="max-w-7xl mx-auto p-6">
+  <!-- Flash Messages -->
+  <?php if (isset($_SESSION['success'])): ?>
+    <div class="mb-6 bg-green-500/20 border border-green-500/30 text-green-300 px-4 py-3 rounded-lg flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+      <?= htmlspecialchars($_SESSION['success']) ?>
+    </div>
+    <?php unset($_SESSION['success']); ?>
+  <?php endif; ?>
+  
+  <?php if (isset($_SESSION['error'])): ?>
+    <div class="mb-6 bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <?= htmlspecialchars($_SESSION['error']) ?>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+  <?php endif; ?>
+
   <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center justify-between flex-wrap gap-4">
@@ -15,6 +36,10 @@
         </div>
       </div>
 
+      <?php 
+      $userLevel = $_SESSION['level'] ?? 'user';
+      if ($userLevel === 'admin' || $userLevel === 'guru'): 
+      ?>
       <a href="index.php?page=tasks/create" 
          class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,6 +47,7 @@
         </svg>
         Add Task
       </a>
+      <?php endif; ?>
     </div>
   </div>
 
@@ -35,6 +61,7 @@
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Title</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Subject</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Class</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Teacher</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Deadline</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
             <th class="px-6 py-4 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</th>
@@ -53,6 +80,27 @@
             </td>
             <td class="px-6 py-4 text-gray-400"><?= htmlspecialchars($t['subject_name'] ?? '') ?></td>
             <td class="px-6 py-4 text-gray-400"><?= htmlspecialchars($t['class_name'] ?? '') ?></td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
+                  <span class="text-white text-xs font-bold">
+                    <?= strtoupper(substr($t['teacher_name'] ?? 'N/A', 0, 1)) ?>
+                  </span>
+                </div>
+                <div>
+                  <div class="text-white text-sm font-medium"><?= htmlspecialchars($t['teacher_name'] ?? 'N/A') ?></div>
+                  <div class="text-gray-400 text-xs">
+                    <?php if (($t['teacher_level'] ?? '') === 'guru'): ?>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Guru</span>
+                    <?php elseif (($t['teacher_level'] ?? '') === 'admin'): ?>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Admin</span>
+                    <?php else: ?>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">User</span>
+                    <?php endif; ?>
+                  </div>
+                </div>
+              </div>
+            </td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-2 text-gray-400">
                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,6 +128,13 @@
             </td>
             <td class="px-6 py-4">
               <div class="flex items-center justify-end gap-2">
+                <?php 
+                $userLevel = $_SESSION['level'] ?? 'user';
+                $userId = $_SESSION['user_id'] ?? 0;
+                $canEdit = ($userLevel === 'admin') || ($userLevel === 'guru' && $t['user_id'] == $userId);
+                ?>
+                
+                <?php if ($canEdit): ?>
                 <a href="index.php?page=tasks/edit&id=<?= $t['id'] ?>" 
                    class="p-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-600/30 text-indigo-400 rounded-lg transition-all duration-200" 
                    title="Edit">
@@ -97,6 +152,33 @@
                     </svg>
                   </button>
                 </form>
+                <?php endif; ?>
+                
+                <?php if ($userLevel === 'user' && !empty($_SESSION['user_id'])): ?>
+                <!-- Submission form for students -->
+                <form method="post" action="index.php?page=tasks/submit" enctype="multipart/form-data" class="inline" onsubmit="return confirm('Submit your file for this task?')">
+                  <input type="hidden" name="task_id" value="<?= $t['id'] ?>">
+                  <input type="hidden" name="class_id" value="<?= $t['class_id'] ?? '' ?>">
+                  <label class="p-2 bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 text-green-400 rounded-lg transition-all duration-200 cursor-pointer">
+                    <input type="file" name="file" class="hidden file-input" required>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                  </label>
+                </form>
+                <?php endif; ?>
+                
+                <?php if (($userLevel === 'admin' || $userLevel === 'guru') && $canEdit): ?>
+                <!-- View submissions button for teachers -->
+                <button onclick="viewSubmissions(<?= $t['id'] ?>)" 
+                        class="p-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/30 text-blue-400 rounded-lg transition-all duration-200" 
+                        title="View Submissions">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                </button>
+                <?php endif; ?>
               </div>
             </td>
           </tr>
@@ -127,6 +209,10 @@
     </div>
     <h3 class="text-xl font-bold text-white mb-2">Belum Ada Tasks</h3>
     <p class="text-gray-400 mb-6 max-w-md mx-auto">Belum ada tugas yang tersedia. Mulai tambahkan tugas pertama untuk siswa.</p>
+    <?php 
+    $userLevel = $_SESSION['level'] ?? 'user';
+    if ($userLevel === 'admin' || $userLevel === 'guru'): 
+    ?>
     <a href="index.php?page=tasks/create" 
        class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,6 +220,7 @@
       </svg>
       Add First Task
     </a>
+    <?php endif; ?>
   </div>
   <?php endif; ?>
 
@@ -165,3 +252,52 @@
     </div>
   </div>
 </div>
+
+<!-- Submissions Modal -->
+<div id="submissionsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+    <div class="flex items-center justify-between p-6 border-b border-gray-700">
+      <h3 class="text-xl font-bold text-white">Task Submissions</h3>
+      <button onclick="closeSubmissionsModal()" class="text-gray-400 hover:text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div id="submissionsContent" class="p-6 overflow-y-auto max-h-[60vh]">
+      <!-- Content will be loaded here -->
+    </div>
+  </div>
+</div>
+
+<script>
+function viewSubmissions(taskId) {
+  const modal = document.getElementById('submissionsModal');
+  const content = document.getElementById('submissionsContent');
+  
+  // Show loading
+  content.innerHTML = '<div class="text-center text-gray-400">Loading submissions...</div>';
+  modal.classList.remove('hidden');
+  
+  // Fetch submissions (you'll need to implement this endpoint)
+  fetch(`index.php?page=tasks/submissions&task_id=${taskId}`)
+    .then(response => response.text())
+    .then(data => {
+      content.innerHTML = data;
+    })
+    .catch(error => {
+      content.innerHTML = '<div class="text-center text-red-400">Error loading submissions</div>';
+    });
+}
+
+function closeSubmissionsModal() {
+  document.getElementById('submissionsModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('submissionsModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeSubmissionsModal();
+  }
+});
+</script>

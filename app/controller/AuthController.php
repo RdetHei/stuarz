@@ -37,6 +37,12 @@ class AuthController
                     setcookie('username', $user['username'], time() + 3600, '/');
                     setcookie('level', $user['level'], time() + 3600, '/');
 
+                    // Check if profile is complete
+                    if (!$this->isProfileComplete($user)) {
+                        header('Location: index.php?page=setup-profile');
+                        exit;
+                    }
+
                     // Redirect sesuai level
                     switch ($user['level']) {
                         case 'admin':
@@ -83,5 +89,18 @@ class AuthController
     // Redirect ke halaman login
     header("Location: index.php?page=login");
     exit;
+    }
+    
+    private function isProfileComplete($user) {
+        // Check if essential fields are filled
+        $requiredFields = ['name', 'phone', 'address', 'class'];
+        
+        foreach ($requiredFields as $field) {
+            if (empty($user[$field])) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 }
