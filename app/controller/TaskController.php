@@ -49,6 +49,24 @@ class TaskController {
         $classes = $classModel->getAll();
         $subjects = $subjectModel->getAll();
 
+        // fetch teachers for assignment (users with level 'guru')
+        $teachers = [];
+        $res = mysqli_query($config, "SELECT id, name FROM users WHERE `level` = 'guru' ORDER BY name ASC");
+        if ($res) {
+            while ($r = mysqli_fetch_assoc($res)) $teachers[] = $r;
+        }
+
+        // fetch schedules so tasks can be linked to a schedule entry
+        require_once dirname(__DIR__) . '/model/ScheduleModel.php';
+        $scheduleModel = new ScheduleModel($config);
+        // if current user is guru, limit schedules to their own
+        $schedules = [];
+        if (isset($_SESSION['level']) && $_SESSION['level'] === 'guru') {
+            $schedules = $scheduleModel->getAll(['teacher_id' => intval($_SESSION['user_id'] ?? 0)]);
+        } else {
+            $schedules = $scheduleModel->getAll();
+        }
+
         $content = dirname(__DIR__) . '/views/pages/tasks/form.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -63,14 +81,23 @@ class TaskController {
         
         // Create a new task (assignment). File uploads belong to submissions.
         try {
+            // Determine teacher (task owner). Admins may set teacher_id in the form.
+            $currentUserId = $_SESSION['user_id'] ?? 0;
+            $currentLevel = $_SESSION['level'] ?? 'user';
+            $teacherId = $currentUserId;
+            if ($currentLevel === 'admin' && !empty($_POST['teacher_id'])) {
+                $teacherId = intval($_POST['teacher_id']);
+            }
+
             $data = [
-                'user_id' => $_SESSION['user_id'] ?? 0,
+                'user_id' => $teacherId,
                 'title' => trim($_POST['title'] ?? ''),
                 'description' => trim($_POST['description'] ?? ''),
                 'status' => strtolower(trim($_POST['status'] ?? 'pending')),
                 'deadline' => trim($_POST['deadline'] ?? null),
                 'class_id' => intval($_POST['class_id'] ?? 0),
-                'subject_id' => intval($_POST['subject_id'] ?? 0)
+                'subject_id' => intval($_POST['subject_id'] ?? 0),
+                'schedule_id' => !empty($_POST['schedule_id']) ? intval($_POST['schedule_id']) : null
             ];
 
             // Enhanced validation
@@ -258,6 +285,22 @@ class TaskController {
         $classes = $classModel->getAll();
         $subjects = $subjectModel->getAll();
 
+        // fetch teachers for assignment (users with level 'guru')
+        $teachers = [];
+        $res = mysqli_query($config, "SELECT id, name FROM users WHERE `level` = 'guru' ORDER BY name ASC");
+        if ($res) {
+            while ($r = mysqli_fetch_assoc($res)) $teachers[] = $r;
+        }
+
+        // fetch schedules for edit form as well
+        require_once dirname(__DIR__) . '/model/ScheduleModel.php';
+        $scheduleModel = new ScheduleModel($config);
+        if (isset($_SESSION['level']) && $_SESSION['level'] === 'guru') {
+            $schedules = $scheduleModel->getAll(['teacher_id' => intval($_SESSION['user_id'] ?? 0)]);
+        } else {
+            $schedules = $scheduleModel->getAll();
+        }
+
         $content = dirname(__DIR__) . '/views/pages/tasks/form.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -269,8 +312,14 @@ class TaskController {
             'status' => trim($_POST['status'] ?? ''),
             'deadline' => trim($_POST['deadline'] ?? ''),
             'class_id' => intval($_POST['class_id'] ?? 0),
-            'subject_id' => intval($_POST['subject_id'] ?? 0)
+            'subject_id' => intval($_POST['subject_id'] ?? 0),
+            'schedule_id' => isset($_POST['schedule_id']) ? intval($_POST['schedule_id']) : null
         ];
+        // allow admin to reassign teacher
+        $currentLevel = $_SESSION['level'] ?? 'user';
+        if ($currentLevel === 'admin' && !empty($_POST['teacher_id'])) {
+            $data['user_id'] = intval($_POST['teacher_id']);
+        }
         if ($data['title'] === '' || $data['description'] === '' || $data['status'] === '' || $data['deadline'] === '' || !$data['class_id'] || !$data['subject_id']) {
             $_SESSION['flash'] = 'Semua field wajib diisi!';
             header('Location: index.php?page=tasks/edit&id='.$id); exit;

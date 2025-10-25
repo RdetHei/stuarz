@@ -79,10 +79,11 @@ class CertificatesController
             $issued_at = mysqli_real_escape_string($config, $_POST['issued_at'] ?? '');
 
             // Handle file upload
-            $uploadDir = __DIR__ . '/../../public/uploads/certificates/';
+            $uploadDir = str_replace('/', DIRECTORY_SEPARATOR, dirname(__DIR__, 2) . '/public/uploads/certificates');
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
+            $uploadDir = $uploadDir . DIRECTORY_SEPARATOR;
 
             $fileName = '';
             if (isset($_FILES['certificate_file']) && $_FILES['certificate_file']['error'] === UPLOAD_ERR_OK) {
@@ -91,6 +92,10 @@ class CertificatesController
                 $filePath = $uploadDir . $fileName;
 
                 if (move_uploaded_file($_FILES['certificate_file']['tmp_name'], $filePath)) {
+                    // Debug: log file upload info
+                    error_log("Certificate Upload - fileName: " . $fileName);
+                    error_log("Certificate Upload - filePath: " . $filePath);
+                    
                     $certificatesModel = new certificates($config);
                     $data = [
                         'user_id' => $me['id'],
@@ -100,6 +105,8 @@ class CertificatesController
                         'issued_by' => $issued_by,
                         'issued_at' => $issued_at
                     ];
+                    
+                    error_log("Certificate Upload - saved path: " . $data['file_path']);
 
                     if ($certificatesModel->create($data)) {
                         $_SESSION['success'] = 'Sertifikat berhasil diupload!';

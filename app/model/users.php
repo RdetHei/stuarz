@@ -11,7 +11,7 @@ class users
     public function getAll()
     {
         $rows = [];
-        $sql = "SELECT id, username, name, email, `level`, avatar, banner, join_date, phone, address, `class`, bio FROM users ORDER BY id DESC";
+        $sql = "SELECT id, username, name, email, `level`, COALESCE(role, '') AS role, avatar, banner, join_date, phone, address, `class`, bio FROM users ORDER BY id DESC";
         $res = mysqli_query($this->conn, $sql);
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $rows[] = $r;
@@ -22,7 +22,7 @@ class users
 
     public function getUserById($id)
     {
-        $sql = "SELECT id, username, name, email, `level`, avatar, banner, join_date, phone, address, `class`, bio FROM users WHERE id = ? LIMIT 1";
+        $sql = "SELECT id, username, name, email, `level`, COALESCE(role, '') AS role, avatar, banner, join_date, phone, address, `class`, bio FROM users WHERE id = ? LIMIT 1";
         $stmt = mysqli_prepare($this->conn, $sql);
         if (!$stmt) return null;
         mysqli_stmt_bind_param($stmt, "i", $id);
@@ -61,15 +61,17 @@ class users
 
     public function createUser(array $data)
     {
-        $sql = "INSERT INTO users (username, name, email, password, `level`, avatar, banner, join_date, phone, address, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // include optional role column
+        $sql = "INSERT INTO users (username, name, email, password, `level`, role, avatar, banner, join_date, phone, address, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
         if (!$stmt) return false;
-        mysqli_stmt_bind_param($stmt, "sssssssssss",
+        mysqli_stmt_bind_param($stmt, "ssssssssssss",
             $data['username'],
             $data['name'],
             $data['email'],
             $data['password'],
             $data['level'],
+            $data['role'],
             $data['avatar'],
             $data['banner'],
             $data['join_date'],
@@ -152,13 +154,14 @@ class users
     public function updateUser($id, array $data)
     {
         // build dynamic update (password optional)
-        $fields = ['username = ?', 'name = ?', 'email = ?', 'level = ?', 'avatar = ?', 'banner = ?', 'phone = ?', 'address = ?', 'bio = ?'];
-        $types = "sssssssss";
+        $fields = ['username = ?', 'name = ?', 'email = ?', 'level = ?', 'role = ?', 'avatar = ?', 'banner = ?', 'phone = ?', 'address = ?', 'bio = ?'];
+        $types = "ssssssssss";
         $params = [
             $data['username'],
             $data['name'],
             $data['email'],
             $data['level'],
+            $data['role'],
             $data['avatar'],
             $data['banner'],
             $data['phone'],

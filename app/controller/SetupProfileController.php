@@ -175,3 +175,4 @@ class SetupProfileController {
         return false;
     }
 }
+

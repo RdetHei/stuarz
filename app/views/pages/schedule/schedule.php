@@ -10,9 +10,12 @@ foreach ($days as $day) {
 }
 foreach ($schedules as $schedule) {
     $day = $schedule['day'] ?? '';
-    if (isset($groupedSchedules[$day])) {
-        $groupedSchedules[$day][] = $schedule;
-    }
+  // Ensure schedules with unexpected or differently-cased day values still appear
+  if (!isset($groupedSchedules[$day])) {
+    // create a bucket for unknown/new day values so they will be displayed
+    $groupedSchedules[$day] = [];
+  }
+  $groupedSchedules[$day][] = $schedule;
 }
 
 // Ambil filter dari query string
@@ -83,7 +86,8 @@ $selectedTeacher = $_GET['teacher_id'] ?? '';
           <select name="teacher_id" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
             <option value="">Semua Guru</option>
             <?php
-            $teacherQuery = $config->query("SELECT id, name FROM users WHERE level='teacher' ORDER BY name");
+            // list users who can be teachers (guru or admin)
+            $teacherQuery = $config->query("SELECT id, name FROM users WHERE level='guru' OR level='admin' ORDER BY name");
             while ($teacher = $teacherQuery->fetch_assoc()):
             ?>
             <option value="<?= $teacher['id'] ?>" <?= $selectedTeacher == $teacher['id'] ? 'selected' : '' ?>>

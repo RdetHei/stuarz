@@ -18,6 +18,17 @@ $desc = $edit ? $subject['description'] : '';
         <label class="block text-gray-300 mb-1">Deskripsi</label>
         <input type="text" name="description" value="<?= htmlspecialchars($desc) ?>" required class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
+      <div>
+        <label class="block text-gray-300 mb-1">Guru Pengajar</label>
+        <select name="teacher_id" required class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <option value="">Pilih Guru</option>
+          <?php foreach ($teachers as $teacher): ?>
+            <option value="<?= $teacher['id'] ?>" <?= isset($subject) && $subject['teacher_id'] == $teacher['id'] ? 'selected' : '' ?>>
+              <?= htmlspecialchars($teacher['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
       <div class="flex gap-2 mt-6">
         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 font-medium transition">Simpan</button>
         <a href="index.php?page=subjects" class="bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg px-4 py-2 font-medium transition">Batal</a>

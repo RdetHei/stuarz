@@ -63,6 +63,7 @@ class AccountController
         $name     = trim($_POST['name'] ?? '');
         $email    = trim($_POST['email'] ?? '');
         $level    = $_POST['level'] ?? 'user';
+        $role     = trim($_POST['role'] ?? '');
         $password = $_POST['password'] ?? '';
 
         $phone    = trim($_POST['phone'] ?? '');
@@ -121,6 +122,7 @@ class AccountController
             'email'      => $email,
             'password'   => password_hash($password, PASSWORD_DEFAULT),
             'level'      => $level,
+            'role'       => $role,
             'avatar'     => $avatarUrl,
             'banner'     => $bannerUrl,
             'join_date'  => date('Y-m-d H:i:s'),
@@ -189,7 +191,8 @@ class AccountController
         $name     = trim($_POST['name'] ?? '');
         $email    = trim($_POST['email'] ?? '');
         $level    = $_POST['level'] ?? 'user';
-        $password = $_POST['password'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $role     = trim($_POST['role'] ?? '');
 
         $phone    = trim($_POST['phone'] ?? '');
         $address  = trim($_POST['address'] ?? '');
@@ -275,6 +278,7 @@ class AccountController
             'email'    => $email,
             'password' => $password ? password_hash($password, PASSWORD_DEFAULT) : '',
             'level'    => $level,
+            'role'     => $role,
             'avatar'   => $avatarUrl,
             'banner'   => $bannerUrl,
             'phone'    => $phone,

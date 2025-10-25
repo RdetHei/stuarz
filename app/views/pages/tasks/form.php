@@ -10,6 +10,7 @@ $class_id = $edit ? $task['class_id'] : '';
 $subject_id = $edit ? $task['subject_id'] : '';
 $classes = $classes ?? [];
 $subjects = $subjects ?? [];
+$schedules = $schedules ?? [];
 ?>
 
 <div class="max-w-4xl mx-auto p-6">
@@ -96,6 +97,23 @@ $subjects = $subjects ?? [];
           </select>
         </div>
 
+        <!-- Teacher (assignment) -->
+        <div>
+          <label for="teacher_id" class="block text-sm font-medium text-gray-300 mb-2">Guru (penanggung jawab)</label>
+          <?php $currentLevel = $_SESSION['level'] ?? 'user'; ?>
+          <?php if ($currentLevel === 'admin'): ?>
+            <select name="teacher_id" id="teacher_id" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
+              <option value="">Pilih Guru</option>
+              <?php foreach ($teachers ?? [] as $t): ?>
+                <option value="<?= $t['id'] ?>" <?= (isset($task['user_id']) && $task['user_id']==$t['id']) ? 'selected' : '' ?>><?= htmlspecialchars($t['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          <?php else: ?>
+            <input type="hidden" name="teacher_id" value="<?= intval($_SESSION['user_id'] ?? 0) ?>">
+            <div class="px-3 py-2 text-sm text-gray-300 bg-gray-900 border border-gray-700 rounded-lg">Anda: <?= htmlspecialchars($_SESSION['user']['name'] ?? 'Saya') ?></div>
+          <?php endif; ?>
+        </div>
+
         <!-- Subject -->
         <div>
           <label for="subject_id" class="block text-sm font-medium text-gray-300 mb-2">
@@ -112,6 +130,22 @@ $subjects = $subjects ?? [];
             </option>
             <?php endforeach; ?>
           </select>
+        </div>
+
+        <!-- Schedule (optional link) -->
+        <div>
+          <label for="schedule_id" class="block text-sm font-medium text-gray-300 mb-2">
+            Hubungkan ke Jadwal (opsional)
+          </label>
+          <select name="schedule_id" id="schedule_id" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
+            <option value="">Tidak terkait jadwal</option>
+            <?php foreach ($schedules as $sch): ?>
+              <option value="<?= $sch['id'] ?>" <?= (isset($task['schedule_id']) && $task['schedule_id'] == $sch['id']) ? 'selected' : '' ?>>
+                <?= htmlspecialchars($sch['class']) ?> - <?= htmlspecialchars($sch['subject']) ?> (<?= htmlspecialchars($sch['day']) ?> <?= htmlspecialchars($sch['start_time']) ?>-<?= htmlspecialchars($sch['end_time']) ?>)
+              </option>
+            <?php endforeach; ?>
+          </select>
+          <p class="text-xs text-gray-500 mt-2">Opsional: jika tugas terkait sesi jadwal tertentu, pilih di sini.</p>
         </div>
 
         <!-- Deadline -->

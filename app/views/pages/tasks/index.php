@@ -61,6 +61,7 @@
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Title</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Subject</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Class</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Schedule</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Teacher</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Deadline</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
@@ -80,6 +81,14 @@
             </td>
             <td class="px-6 py-4 text-gray-400"><?= htmlspecialchars($t['subject_name'] ?? '') ?></td>
             <td class="px-6 py-4 text-gray-400"><?= htmlspecialchars($t['class_name'] ?? '') ?></td>
+            <td class="px-6 py-4 text-gray-400">
+              <?php if (!empty($t['schedule_subject'])): ?>
+                <div class="text-sm text-white font-medium"><?= htmlspecialchars($t['schedule_subject']) ?></div>
+                <div class="text-xs text-gray-400"><?= htmlspecialchars(($t['schedule_day'] ?? '') . ' ' . ($t['schedule_start'] ?? '') . '-' . ($t['schedule_end'] ?? '')) ?></div>
+              <?php else: ?>
+                <div class="text-xs text-gray-400">-</div>
+              <?php endif; ?>
+            </td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">

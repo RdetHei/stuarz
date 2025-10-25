@@ -185,6 +185,16 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                                 <option value="guru" <?= (isset($user['level']) && $user['level']==='guru') ? 'selected' : '' ?>>Guru</option>
                             </select>
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Role</label>
+                            <select name="role" class="w-full px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors duration-200">
+                                <option value="" <?= empty($user['role']) ? 'selected' : '' ?>>-- Tidak ada --</option>
+                                <option value="student" <?= (isset($user['role']) && $user['role']==='student') ? 'selected' : '' ?>>Student</option>
+                                <option value="teacher" <?= (isset($user['role']) && $user['role']==='teacher') ? 'selected' : '' ?>>Teacher</option>
+                                <option value="assistant" <?= (isset($user['role']) && $user['role']==='assistant') ? 'selected' : '' ?>>Assistant</option>
+                                <option value="class_leader" <?= (isset($user['role']) && $user['role']==='class_leader') ? 'selected' : '' ?>>Class Leader</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Action Buttons -->

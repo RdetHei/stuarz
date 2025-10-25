@@ -10,6 +10,7 @@
         <tr>
           <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
           <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Description</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Guru Pengajar</th>
           <th class="px-6 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</th>
         </tr>
       </thead>
@@ -18,6 +19,7 @@
         <tr class="hover:bg-gray-800 group transition">
           <td class="px-6 py-4 whitespace-nowrap text-gray-300"> <?= htmlspecialchars($s['name'] ?? '') ?> </td>
           <td class="px-6 py-4 whitespace-nowrap text-gray-400"> <?= htmlspecialchars($s['description'] ?? '') ?> </td>
+          <td class="px-6 py-4 whitespace-nowrap text-gray-400"> <?= htmlspecialchars($s['teacher_name'] ?? 'Belum ditentukan') ?> </td>
           <td class="px-6 py-4 whitespace-nowrap text-right">
             <a href="index.php?page=subjects/edit&id=<?= $s['id'] ?>" class="inline-flex items-center text-indigo-400 hover:text-indigo-200 mr-2" title="Edit"><svg xmlns='http://www.w3.org/2000/svg' class='lucide lucide-pencil' width='18' height='18' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15.232 5.232l-1.464-1.464a2 2 0 0 0-2.828 0l-6.536 6.536a2 2 0 0 0-.586 1.414V15h3.182a2 2 0 0 0 1.414-.586l6.536-6.536a2 2 0 0 0 0-2.828z'/><path d='M13.5 6.5l-7 7'/></svg></a>
             <form method="post" action="index.php?page=subjects/delete" class="inline" onsubmit="return confirm('Delete this subject?')">

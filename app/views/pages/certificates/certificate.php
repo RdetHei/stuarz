@@ -124,18 +124,42 @@ if (!isset($baseUrl)) {
                onclick="viewCertificate(<?= $cert['id'] ?>)" 
                aria-label="Lihat sertifikat">
             <?php
-            $publicPath = dirname(__DIR__, 3) . '/public/';
+            // Debug: tampilkan informasi path
+            error_log("Certificate Debug - file_path from DB: " . $cert['file_path']);
+            
+            // Normalize path untuk sistem file Windows
+            // gunakan dirname(..., 4) agar naik sampai project root (sebelum folder "app")
+            $publicPath = str_replace('/', DIRECTORY_SEPARATOR, dirname(__DIR__, 4) . '/public');
             $webSrc = ($baseUrl ? $baseUrl . '/' : '') . ltrim((string)$cert['file_path'], '/');
-            $fsPath = $publicPath . ltrim((string)$cert['file_path'], '/');
+            $fsPath = $publicPath . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, ltrim((string)$cert['file_path'], '/'));
+            
+            error_log("Certificate Debug - publicPath: " . $publicPath);
+            error_log("Certificate Debug - webSrc: " . $webSrc);
+            error_log("Certificate Debug - fsPath: " . $fsPath);
             ?>
-            <?php if (!empty($cert['file_path']) && is_file($fsPath)): ?>
-              <img src="<?= htmlspecialchars($webSrc) ?>"
-                alt="<?= htmlspecialchars($cert['title']) ?>"
-                class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+            <?php if (!empty($cert['file_path'])): ?>
+              <?php
+              $debugInfo = "";
+              if (!is_file($fsPath)) {
+                  $debugInfo = "File tidak ditemukan di: " . $fsPath;
+              }
+              if (is_file($fsPath)): ?>
+                <img src="<?= htmlspecialchars($webSrc) ?>"
+                  alt="<?= htmlspecialchars($cert['title']) ?>"
+                  class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+              <?php else: ?>
+                <div class="text-center">
+                  <span class="material-symbols-outlined text-6xl text-gray-600">workspace_premium</span>
+                  <p class="text-gray-500 mt-2 text-sm">Preview tidak tersedia</p>
+                  <?php if ($debugInfo): ?>
+                    <p class="text-xs text-red-400 mt-1"><?= htmlspecialchars($debugInfo) ?></p>
+                  <?php endif; ?>
+                </div>
+              <?php endif; ?>
             <?php else: ?>
               <div class="text-center">
                 <span class="material-symbols-outlined text-6xl text-gray-600">workspace_premium</span>
-                <p class="text-gray-500 mt-2 text-sm">Preview tidak tersedia</p>
+                <p class="text-gray-500 mt-2 text-sm">File path kosong</p>
               </div>
             <?php endif; ?>
 

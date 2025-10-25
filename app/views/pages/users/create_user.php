@@ -171,6 +171,16 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                                 <option value="guru">Guru</option>
                             </select>
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Role</label>
+                            <select name="role" class="w-full px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors duration-200">
+                                <option value="">-- Pilih role --</option>
+                                <option value="student">Student</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="assistant">Assistant</option>
+                                <option value="class_leader">Class Leader</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Action Buttons -->

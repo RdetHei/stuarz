@@ -16,20 +16,19 @@ class TasksCompletedModel {
     public function getAll($filters = []) {
         $data = [];
         $hasSubject = $this->hasColumn('tasks_completed', 'subject_id');
+        $hasSchedule = $this->hasColumn('tasks_completed', 'schedule_id');
         
         // Base query with teacher information
-        if ($hasSubject) {
-            $sql = "SELECT t.*, c.name AS class_name, s.name AS subject_name, u.name AS teacher_name, u.level AS teacher_level 
-                    FROM tasks_completed t 
-                    LEFT JOIN classes c ON t.class_id = c.id 
-                    LEFT JOIN subjects s ON t.subject_id = s.id 
-                    LEFT JOIN users u ON t.user_id = u.id";
-        } else {
-            $sql = "SELECT t.*, c.name AS class_name, u.name AS teacher_name, u.level AS teacher_level 
-                    FROM tasks_completed t 
-                    LEFT JOIN classes c ON t.class_id = c.id 
-                    LEFT JOIN users u ON t.user_id = u.id";
-        }
+    // Build base select with optional joins for subject and schedule
+    $selects = "t.*, c.name AS class_name, u.name AS teacher_name, u.level AS teacher_level";
+    if ($hasSubject) $selects .= ", s.name AS subject_name";
+    if ($hasSchedule) $selects .= ", sch.subject AS schedule_subject, sch.day AS schedule_day, sch.start_time AS schedule_start, sch.end_time AS schedule_end";
+
+    $sql = "SELECT " . $selects . " FROM tasks_completed t 
+            LEFT JOIN classes c ON t.class_id = c.id 
+            LEFT JOIN users u ON t.user_id = u.id";
+    if ($hasSubject) $sql .= " LEFT JOIN subjects s ON t.subject_id = s.id";
+    if ($hasSchedule) $sql .= " LEFT JOIN schedule sch ON t.schedule_id = sch.id";
         
         // Add filters
         $whereConditions = [];
@@ -53,6 +52,11 @@ class TasksCompletedModel {
             $params[] = $filters['subject_id'];
             $paramTypes .= 'i';
         }
+        if (!empty($filters['schedule_id'])) {
+            $whereConditions[] = "t.schedule_id = ?";
+            $params[] = $filters['schedule_id'];
+            $paramTypes .= 'i';
+        }
         
         if (!empty($whereConditions)) {
             $sql .= " WHERE " . implode(" AND ", $whereConditions);
@@ -74,6 +78,12 @@ class TasksCompletedModel {
                 // Normalize status to capitalized for view
                 if (isset($row['status'])) $row['status'] = ucfirst($row['status']);
                 if (!$hasSubject) $row['subject_name'] = '';
+                if (!$hasSchedule) {
+                    $row['schedule_subject'] = '';
+                    $row['schedule_day'] = '';
+                    $row['schedule_start'] = '';
+                    $row['schedule_end'] = '';
+                }
                 $data[] = $row;
             }
         }
@@ -114,11 +124,16 @@ class TasksCompletedModel {
     public function getById($id) {
         $id = intval($id);
         $hasSubject = $this->hasColumn('tasks_completed', 'subject_id');
-        if ($hasSubject) {
-            $stmt = $this->db->prepare("SELECT t.*, c.name AS class_name, s.name AS subject_name FROM tasks_completed t LEFT JOIN classes c ON t.class_id = c.id LEFT JOIN subjects s ON t.subject_id = s.id WHERE t.id = ? LIMIT 1");
-        } else {
-            $stmt = $this->db->prepare("SELECT t.*, c.name AS class_name FROM tasks_completed t LEFT JOIN classes c ON t.class_id = c.id WHERE t.id = ? LIMIT 1");
-        }
+        $hasSchedule = $this->hasColumn('tasks_completed', 'schedule_id');
+        $selects = "t.*, c.name AS class_name";
+        if ($hasSubject) $selects .= ", s.name AS subject_name";
+        if ($hasSchedule) $selects .= ", sch.subject AS schedule_subject, sch.day AS schedule_day, sch.start_time AS schedule_start, sch.end_time AS schedule_end, t.schedule_id";
+
+        $sql = "SELECT " . $selects . " FROM tasks_completed t LEFT JOIN classes c ON t.class_id = c.id";
+        if ($hasSubject) $sql .= " LEFT JOIN subjects s ON t.subject_id = s.id";
+        if ($hasSchedule) $sql .= " LEFT JOIN schedule sch ON t.schedule_id = sch.id";
+        $sql .= " WHERE t.id = ? LIMIT 1";
+        $stmt = $this->db->prepare($sql);
         $stmt->bind_param('i', $id);
         $stmt->execute();
         $res = $stmt->get_result();
@@ -126,39 +141,35 @@ class TasksCompletedModel {
         $stmt->close();
         if ($row && isset($row['status'])) $row['status'] = ucfirst($row['status']);
         if ($row && !$hasSubject) $row['subject_name'] = '';
+        if ($row && !$hasSchedule) {
+            $row['schedule_subject'] = '';
+            $row['schedule_day'] = '';
+            $row['schedule_start'] = '';
+            $row['schedule_end'] = '';
+            $row['schedule_id'] = null;
+        }
         return $row;
     }
     public function create($data) {
         try {
             $hasSubject = $this->hasColumn('tasks_completed', 'subject_id');
+            $hasSchedule = $this->hasColumn('tasks_completed', 'schedule_id');
+            // Build insert with optional subject_id and schedule_id
+            $cols = ['user_id','title','description','status','deadline','class_id'];
+            $placeholders = ['?','?','?','?','?','?'];
+            $types = 'issssi';
+            $values = [ $data['user_id'], $data['title'], $data['description'], $data['status'], $data['deadline'], $data['class_id'] ];
+
             if ($hasSubject) {
-                // Tasks table uses columns: user_id, title, description, status, deadline, class_id, subject_id
-                $sql = "INSERT INTO tasks_completed (user_id, title, description, status, deadline, class_id, subject_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                $stmt = $this->db->prepare($sql);
-                $stmt->bind_param(
-                    'issssii',
-                    $data['user_id'],
-                    $data['title'],
-                    $data['description'],
-                    $data['status'],
-                    $data['deadline'],
-                    $data['class_id'],
-                    $data['subject_id']
-                );
-            } else {
-                // Without subject_id column
-                $sql = "INSERT INTO tasks_completed (user_id, title, description, status, deadline, class_id) VALUES (?, ?, ?, ?, ?, ?)";
-                $stmt = $this->db->prepare($sql);
-                $stmt->bind_param(
-                    'issssi',
-                    $data['user_id'],
-                    $data['title'],
-                    $data['description'],
-                    $data['status'],
-                    $data['deadline'],
-                    $data['class_id']
-                );
+                $cols[] = 'subject_id'; $placeholders[] = '?'; $types .= 'i'; $values[] = $data['subject_id'];
             }
+            if ($hasSchedule && isset($data['schedule_id']) && $data['schedule_id'] !== null) {
+                $cols[] = 'schedule_id'; $placeholders[] = '?'; $types .= 'i'; $values[] = $data['schedule_id'];
+            }
+
+            $sql = "INSERT INTO tasks_completed (" . implode(',', $cols) . ") VALUES (" . implode(',', $placeholders) . ")";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param($types, ...$values);
             $result = $stmt->execute();
             $stmt->close();
             return $result;
@@ -169,13 +180,27 @@ class TasksCompletedModel {
     public function update($id, $data) {
         $id = intval($id);
         $hasSubject = $this->hasColumn('tasks_completed', 'subject_id');
-        if ($hasSubject) {
-            $stmt = $this->db->prepare("UPDATE tasks_completed SET title = ?, description = ?, status = ?, deadline = ?, class_id = ?, subject_id = ? WHERE id = ?");
-            $stmt->bind_param('ssssiii', $data['title'], $data['description'], $data['status'], $data['deadline'], $data['class_id'], $data['subject_id'], $id);
-        } else {
-            $stmt = $this->db->prepare("UPDATE tasks_completed SET title = ?, description = ?, status = ?, deadline = ?, class_id = ? WHERE id = ?");
-            $stmt->bind_param('ssssii', $data['title'], $data['description'], $data['status'], $data['deadline'], $data['class_id'], $id);
-        }
+        $hasSchedule = $this->hasColumn('tasks_completed', 'schedule_id');
+        // Build UPDATE dynamically to include optional subject_id, schedule_id, and user_id
+        $setParts = [];
+        $types = '';
+        $values = [];
+
+        $setParts[] = 'title = ?'; $types .= 's'; $values[] = $data['title'];
+        $setParts[] = 'description = ?'; $types .= 's'; $values[] = $data['description'];
+        $setParts[] = 'status = ?'; $types .= 's'; $values[] = $data['status'];
+        $setParts[] = 'deadline = ?'; $types .= 's'; $values[] = $data['deadline'];
+        $setParts[] = 'class_id = ?'; $types .= 'i'; $values[] = $data['class_id'];
+
+        if ($hasSubject) { $setParts[] = 'subject_id = ?'; $types .= 'i'; $values[] = $data['subject_id']; }
+        if ($hasSchedule) { $setParts[] = 'schedule_id = ?'; $types .= 'i'; $values[] = isset($data['schedule_id']) ? $data['schedule_id'] : null; }
+        if (isset($data['user_id'])) { $setParts[] = 'user_id = ?'; $types .= 'i'; $values[] = $data['user_id']; }
+
+        $sql = "UPDATE tasks_completed SET " . implode(', ', $setParts) . " WHERE id = ?";
+        $types .= 'i'; $values[] = $id;
+        $stmt = $this->db->prepare($sql);
+        // bind params dynamically
+        $stmt->bind_param($types, ...$values);
         $ok = $stmt->execute();
         $stmt->close();
         return $ok;

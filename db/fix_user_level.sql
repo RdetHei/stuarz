@@ -26,3 +26,4 @@ SELECT COUNT(*) as subject_column_exists FROM information_schema.columns
 WHERE table_schema = DATABASE() 
 AND table_name = 'tasks_completed' 
 AND column_name = 'subject_id';
+

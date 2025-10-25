@@ -4,7 +4,10 @@ class SubjectsModel {
     public function __construct($db) { $this->db = $db; }
     public function getAll() {
         $data = [];
-        $result = $this->db->query("SELECT * FROM subjects ORDER BY name ASC");
+        $result = $this->db->query("SELECT s.*, u.name as teacher_name 
+                                   FROM subjects s 
+                                   LEFT JOIN users u ON s.teacher_id = u.id 
+                                   ORDER BY s.name ASC");
         if ($result) while ($row = $result->fetch_assoc()) $data[] = $row;
         return $data;
     }
@@ -16,13 +19,15 @@ class SubjectsModel {
     public function create($data) {
         $name = $this->db->real_escape_string($data['name']);
         $desc = $this->db->real_escape_string($data['description']);
-        return $this->db->query("INSERT INTO subjects (name, description) VALUES ('$name', '$desc')");
+        $teacherId = intval($data['teacher_id']);
+        return $this->db->query("INSERT INTO subjects (name, description, teacher_id) VALUES ('$name', '$desc', $teacherId)");
     }
     public function update($id, $data) {
         $id = intval($id);
         $name = $this->db->real_escape_string($data['name']);
         $desc = $this->db->real_escape_string($data['description']);
-        return $this->db->query("UPDATE subjects SET name='$name', description='$desc' WHERE id=$id");
+        $teacherId = intval($data['teacher_id']);
+        return $this->db->query("UPDATE subjects SET name='$name', description='$desc', teacher_id=$teacherId WHERE id=$id");
     }
     public function delete($id) {
         $id = intval($id);
