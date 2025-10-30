@@ -1,4 +1,4 @@
--- Fix user level to support 'guru' level
+ -- Fix user level to support 'guru' level
 -- Run this in phpMyAdmin or MySQL command line
 
 USE stuarz;

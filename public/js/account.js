@@ -1,6 +1,6 @@
-// ...new file...
+
 document.addEventListener('DOMContentLoaded', () => {
-  // add sort buttons for "Level" header and implement sort
+
   const ths = Array.from(document.querySelectorAll('table thead th'));
   let levelIndex = -1;
   ths.forEach((th, idx) => {

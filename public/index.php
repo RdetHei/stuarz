@@ -34,7 +34,7 @@ spl_autoload_register(function ($class) {
         }
     }
 
-    // Legacy global controllers like HomeController (no namespace)
+    // Legacy global controllers seperti HomeController (no namespace)
     if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*Controller$/', $class)) {
         $file = $appDir . 'controller/' . $class . '.php';
         if (is_file($file)) {

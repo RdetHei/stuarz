@@ -4,14 +4,37 @@ require_once dirname(__DIR__) . '/config/config.php';
 
 class ClassController {
     private $model;
+    private $db;
     public function __construct() {
         global $config;
+        $this->db = $config;
         $this->model = new ClassModel($config);
         if (session_status() === PHP_SESSION_NONE) session_start();
     }
 
     public function index() {
         $classes = $this->model->getAll();
+        
+        // Get statistics
+        $totalClasses = count($classes);
+        // safe student count (class_members may be missing or empty)
+        $totalStudents = 0;
+        $res = $this->db->query("SELECT COUNT(DISTINCT user_id) as count FROM class_members");
+        if ($res) {
+            $row = $res->fetch_assoc();
+            $totalStudents = intval($row['count'] ?? 0);
+        }
+        // Some schemas don't have an `is_active` column — fallback to total classes
+        $totalActiveClasses = $totalClasses;
+        $averageStudentsPerClass = $totalClasses > 0 ? round($totalStudents / $totalClasses) : 0;
+        
+        $stats = [
+            'classes' => $totalClasses,
+            'students' => $totalStudents,
+            'activeClasses' => $totalActiveClasses,
+            'averageStudents' => $averageStudentsPerClass
+        ];
+        
         $content = dirname(__DIR__) . '/views/pages/classes/class_list.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }

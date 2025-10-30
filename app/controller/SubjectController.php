@@ -12,8 +12,22 @@ class SubjectController {
     }
     public function index() {
         $subjects = $this->model->getAll();
-    $content = dirname(__DIR__) . '/views/pages/subjects/index.php';
-    include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        $totalSubjects = count($subjects);
+        
+        // Get counts from other tables
+        $totalStudents = $this->db->query("SELECT COUNT(*) as count FROM users WHERE level='siswa'")->fetch_assoc()['count'];
+        $totalTeachers = $this->db->query("SELECT COUNT(*) as count FROM users WHERE level='guru'")->fetch_assoc()['count'];
+        $totalClasses = $this->db->query("SELECT COUNT(*) as count FROM classes")->fetch_assoc()['count'];
+        
+        $stats = [
+            'subjects' => $totalSubjects,
+            'students' => $totalStudents,
+            'teachers' => $totalTeachers,
+            'classes' => $totalClasses
+        ];
+        
+        $content = dirname(__DIR__) . '/views/pages/subjects/index.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
     public function create() {
         // Get list of teachers

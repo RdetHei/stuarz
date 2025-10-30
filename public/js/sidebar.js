@@ -1,4 +1,4 @@
-// ...new file...
+
 (() => {
     'use strict';
 
