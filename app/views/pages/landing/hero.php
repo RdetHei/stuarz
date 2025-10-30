@@ -39,7 +39,7 @@
         </div>
       </div>
       <div class="relative mt-16 h-80 lg:mt-8 animate-scale-in" style="animation-delay: 0.3s;">
-        <img width="1824" height="1080" src="https://tailwindcss.com/plus-assets/img/component-images/dark-project-app-screenshot.png" alt="Tampilan aplikasi Stuarz" class="absolute top-0 left-0 w-228 max-w-none rounded-xl bg-gray-800/50 ring-1 ring-[#7775D6]/40 shadow-2xl shadow-[#7775D6]/20 hover:ring-[#7775D6]/60 hover:shadow-[#7775D6]/40 transition-all duration-300 transform hover:scale-105" />
+        <img width="1824" height="1080" src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES, 'UTF-8') ?>" alt="Tampilan aplikasi Stuarz" class="absolute top-0 left-0 w-228 max-w-none rounded-xl bg-gray-800/50 ring-1 ring-[#7775D6]/40 shadow-2xl shadow-[#7775D6]/20 hover:ring-[#7775D6]/60 hover:shadow-[#7775D6]/40 transition-all duration-300 transform hover:scale-105" />
       </div>
     </div>
   </div>
@@ -79,7 +79,7 @@
           </div>
           <div class="@container relative min-h-120 w-full grow max-lg:mx-auto max-lg:max-w-sm">
             <div class="absolute inset-x-10 top-10 bottom-0 overflow-hidden rounded-t-[12cqw] border-x-[3cqw] border-t-[3cqw] border-gray-800 bg-gray-950 outline outline-[#7775D6]/30 shadow-xl shadow-[#7775D6]/10 group-hover:outline-[#7775D6]/50 transition-all duration-300">
-              <img src="https://tailwindcss.com/plus-assets/img/component-images/bento-03-mobile-friendly.png" alt="" class="size-full object-cover object-top" />
+              <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/mobile-apps.png', ENT_QUOTES, 'UTF-8') ?>" alt="" class="size-full object-cover object-top" />
             </div>
           </div>
         </div>

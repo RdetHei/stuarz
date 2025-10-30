@@ -3,8 +3,10 @@ require_once dirname(__DIR__) . '/config/config.php';
 require_once dirname(__DIR__) . '/model/TasksCompletedModel.php';
 class TaskController {
     private $model;
+    private $db;
     public function __construct() {
         global $config;
+        $this->db = $config;
         $this->model = new TasksCompletedModel($config);
         if (session_status() === PHP_SESSION_NONE) session_start();
     }
@@ -28,6 +30,94 @@ class TaskController {
         // Admin melihat semua task (tidak ada filter)
         
         $tasks = $this->model->getAll($filters);
+
+        // If the tasks table doesn't store schedule_id/subject_id, try to enrich tasks
+        // with a best-effort schedule lookup. Use a batched approach to avoid one DB
+        // query per task: 1) collect (class,teacher) pairs and class ids, 2) query
+        // schedules for those pairs, 3) fallback to class-only schedules for classes
+        // without a teacher-specific schedule.
+        if (!empty($tasks)) {
+            $pairs = [];
+            $classIds = [];
+            foreach ($tasks as $tk) {
+                if (!empty($tk['schedule_subject'])) continue; // already provided
+                $classId = intval($tk['class_id'] ?? 0);
+                $teacherId = intval($tk['user_id'] ?? 0);
+                if ($classId <= 0) continue;
+                $key = $classId . '_' . $teacherId;
+                $pairs[$key] = ['class' => $classId, 'teacher' => $teacherId];
+                $classIds[$classId] = $classId;
+            }
+
+            $mapByPair = []; // map: "class_teacher" => schedule row
+            $mapByClass = []; // map: class_id => schedule row (fallback)
+
+            // Query schedules matching specific (class, teacher) pairs
+            if (!empty($pairs)) {
+                $conds = [];
+                foreach ($pairs as $p) {
+                    $c = intval($p['class']);
+                    $t = intval($p['teacher']);
+                    $conds[] = "(class_id = " . $c . " AND teacher_id = " . $t . ")";
+                }
+                $sql = "SELECT class_id, teacher_id, subject, day, start_time, end_time FROM schedule WHERE " . implode(' OR ', $conds);
+                $res = $this->db->query($sql);
+                if ($res && $res->num_rows > 0) {
+                    while ($r = $res->fetch_assoc()) {
+                        $k = intval($r['class_id']) . '_' . intval($r['teacher_id']);
+                        if (!isset($mapByPair[$k])) $mapByPair[$k] = $r;
+                    }
+                }
+            }
+
+            // For classes that still lack a schedule match, query one schedule per class (fallback)
+            $missingClassIds = [];
+            foreach ($classIds as $cid) {
+                // check if any pair for this class has a schedule
+                $found = false;
+                foreach ($pairs as $p) {
+                    if ($p['class'] == $cid) {
+                        $k = $p['class'] . '_' . $p['teacher'];
+                        if (isset($mapByPair[$k])) { $found = true; break; }
+                    }
+                }
+                if (!$found) $missingClassIds[] = intval($cid);
+            }
+
+            if (!empty($missingClassIds)) {
+                $ids = implode(',', array_map('intval', $missingClassIds));
+                $sql2 = "SELECT class_id, subject, day, start_time, end_time FROM schedule WHERE class_id IN (" . $ids . ")";
+                $res2 = $this->db->query($sql2);
+                if ($res2 && $res2->num_rows > 0) {
+                    while ($r = $res2->fetch_assoc()) {
+                        $cid = intval($r['class_id']);
+                        if (!isset($mapByClass[$cid])) $mapByClass[$cid] = $r;
+                    }
+                }
+            }
+
+            // Merge schedules into tasks
+            foreach ($tasks as &$tk) {
+                if (!empty($tk['schedule_subject'])) continue;
+                $classId = intval($tk['class_id'] ?? 0);
+                $teacherId = intval($tk['user_id'] ?? 0);
+                if ($classId <= 0) continue;
+                $pairKey = $classId . '_' . $teacherId;
+                $sch = null;
+                if (isset($mapByPair[$pairKey])) {
+                    $sch = $mapByPair[$pairKey];
+                } elseif (isset($mapByClass[$classId])) {
+                    $sch = $mapByClass[$classId];
+                }
+                if ($sch) {
+                    $tk['schedule_subject'] = $sch['subject'] ?? '';
+                    $tk['schedule_day'] = $sch['day'] ?? '';
+                    $tk['schedule_start'] = $sch['start_time'] ?? '';
+                    $tk['schedule_end'] = $sch['end_time'] ?? '';
+                }
+            }
+            unset($tk);
+        }
         $content = dirname(__DIR__) . '/views/pages/tasks/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -49,9 +139,9 @@ class TaskController {
         $classes = $classModel->getAll();
         $subjects = $subjectModel->getAll();
 
-        // fetch teachers for assignment (users with level 'guru')
+        // fetch teachers for assignment (users from users table with role guru or admin)
         $teachers = [];
-        $res = mysqli_query($config, "SELECT id, name FROM users WHERE `level` = 'guru' ORDER BY name ASC");
+        $res = mysqli_query($config, "SELECT id, name, username, `level` FROM users WHERE `level` IN ('guru','admin') ORDER BY name ASC");
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $teachers[] = $r;
         }
@@ -285,9 +375,9 @@ class TaskController {
         $classes = $classModel->getAll();
         $subjects = $subjectModel->getAll();
 
-        // fetch teachers for assignment (users with level 'guru')
+        // fetch teachers for assignment (users from users table with role guru or admin)
         $teachers = [];
-        $res = mysqli_query($config, "SELECT id, name FROM users WHERE `level` = 'guru' ORDER BY name ASC");
+        $res = mysqli_query($config, "SELECT id, name, username, `level` FROM users WHERE `level` IN ('guru','admin') ORDER BY name ASC");
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $teachers[] = $r;
         }

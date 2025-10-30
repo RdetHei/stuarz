@@ -46,6 +46,7 @@ spl_autoload_register(function ($class) {
 
 use App\Core\Router;
 
+
 $router = new Router();
 
 //Routes

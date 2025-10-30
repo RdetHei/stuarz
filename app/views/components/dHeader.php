@@ -2,6 +2,7 @@
 // Title maps
 $pageTitles = [
     'dashboard' => 'Dashboard',
+    'dashboard-admin' => 'Admin Dashboard',
     'profile' => 'Profile',
     'account' => 'Account Management',
     'certificates' => 'Sertifikat',

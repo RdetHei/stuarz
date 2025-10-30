@@ -79,14 +79,15 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
       </a>
     </el-popover-group>
 
-    <!-- Login Button -->
-    <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+    <!-- Auth Buttons -->
+    <div class="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-4">
       <a href="index.php?page=login" 
-         class="text-sm font-semibold text-gray-300 hover:text-white transition-colors duration-200 flex items-center gap-1">
-        Log in 
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-        </svg>
+         class="text-sm font-semibold text-gray-300 hover:text-white transition-colors duration-200">
+        Sign in
+      </a>
+      <a href="index.php?page=register" 
+         class="border-2 border-gray-300 hover:border-white hover:text-white rounded-lg px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors duration-200">
+        Register
       </a>
     </div>
   </nav>
@@ -145,10 +146,14 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
                   Company
                 </a>
               </div>
-              <div class="py-6">
+              <div class="py-6 space-y-4">
                 <a href="index.php?page=login" 
                    class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors duration-200">
-                  Log in
+                  Sign in
+                </a>
+                <a href="index.php?page=register" 
+                   class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors duration-200 text-center mx-2">
+                  Register
                 </a>
               </div>
             </div>

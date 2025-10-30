@@ -105,7 +105,8 @@ $schedules = $schedules ?? [];
             <select name="teacher_id" id="teacher_id" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
               <option value="">Pilih Guru</option>
               <?php foreach ($teachers ?? [] as $t): ?>
-                <option value="<?= $t['id'] ?>" <?= (isset($task['user_id']) && $task['user_id']==$t['id']) ? 'selected' : '' ?>><?= htmlspecialchars($t['name']) ?></option>
+                <?php $label = $t['name'] . (isset($t['username']) ? ' (' . $t['username'] . ')' : ''); ?>
+                <option value="<?= $t['id'] ?>" <?= (isset($task['user_id']) && $task['user_id']==$t['id']) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
               <?php endforeach; ?>
             </select>
           <?php else: ?>

@@ -14,6 +14,7 @@
     <title>Stuarz</title>
      <link rel="icon" type="image/png" sizes="32x32" href="assets/diamond.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/diamond.png">
+    
 </head>
 <body>
     <?php include __DIR__ . '/../components/header.php'; ?>
@@ -25,3 +26,4 @@
     <?php include __DIR__ . '/../components/footer.php'; ?>
 </body>
 </html>
+
