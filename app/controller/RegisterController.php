@@ -23,19 +23,21 @@ class RegisterController
                 $error = 'Password dan konfirmasi tidak cocok.';
             } else {
                 // Cek duplikasi username/email
-                $stmt = $config->prepare('SELECT id FROM users WHERE username = ? OR email = ?');
-                $stmt->bind_param('ss', $username, $email);
-                $stmt->execute();
-                $stmt->store_result();
-                if ($stmt->num_rows > 0) {
-                    $error = 'Username atau email sudah digunakan.';
-                } else {
-                    $hash = password_hash($password, PASSWORD_BCRYPT);
-                    $level = 'user';
-                    $sql = 'INSERT INTO users (username, email, password, level, join_date) VALUES (?, ?, ?, ?, CURDATE())';
-                    $stmt2 = $config->prepare($sql);
-                    $stmt2->bind_param('ssss', $username, $email, $hash, $level);
-                    if ($stmt2->execute()) {
+                try {
+                    $stmt = $config->prepare('SELECT id FROM users WHERE username = ? OR email = ?');
+                    $stmt->bind_param('ss', $username, $email);
+                    $stmt->execute();
+                    $stmt->store_result();
+                    if ($stmt->num_rows > 0) {
+                        $error = 'Username atau email sudah digunakan.';
+                    } else {
+                        $hash = password_hash($password, PASSWORD_BCRYPT);
+                        $level = 'user';
+                        $role = 'student';
+                        $sql = 'INSERT INTO users (username, email, password, level, role, join_date) VALUES (?, ?, ?, ?, ?, CURDATE())';
+                        $stmt2 = $config->prepare($sql);
+                        $stmt2->bind_param('sssss', $username, $email, $hash, $level, $role);
+                        if ($stmt2->execute()) {
                         // Get the new user ID
                         $newUserId = $config->insert_id;
                         
@@ -63,12 +65,21 @@ class RegisterController
                         // Redirect to setup profile
                         header('Location: index.php?page=setup-profile');
                         exit;
-                    } else {
-                        $error = 'Gagal mendaftar. Silakan coba lagi.';
+                        } else {
+                            $error = 'Gagal mendaftar. Silakan coba lagi.';
+                        }
+                        $stmt2->close();
                     }
-                    $stmt2->close();
+                    $stmt->close();
+                } catch (mysqli_sql_exception $e) {
+                    // Log detailed error for debugging and present a friendly message
+                    $logDir = dirname(__DIR__) . '/logs';
+                    if (!is_dir($logDir)) @mkdir($logDir, 0777, true);
+                    $logFile = $logDir . '/register_errors.log';
+                    $log = '[' . date('Y-m-d H:i:s') . "] Register error: " . $e->getMessage() . "\n";
+                    @file_put_contents($logFile, $log, FILE_APPEND);
+                    $error = 'Terjadi kesalahan pada server saat mendaftar. Silakan hubungi administrator.';
                 }
-                $stmt->close();
             }
         }
         $view = dirname(__DIR__) . '/views/pages/auth/register.php';

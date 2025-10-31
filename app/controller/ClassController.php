@@ -58,6 +58,26 @@ class ClassController {
             exit;
         }
         $ok = $this->model->create($data);
+        if ($ok) {
+            // Auto-generate default schedules for this class (Mon-Sat) so it appears in schedule table
+            $newClassId = $this->db->insert_id;
+            $creatorId = intval($data['created_by']);
+            // Fetch class name for logging if needed (optional)
+            // Prepare insert statement
+            $stmt = $this->db->prepare("INSERT INTO schedule (`class`,`subject`,`teacher_id`,`class_id`,`day`,`start_time`,`end_time`) VALUES (?,?,?,?,?,?,?)");
+            $days = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+            foreach ($days as $d) {
+                // Defaults: empty room, subject TBD, teacher = creator/admin, times placeholder
+                $room = '';
+                $subject = 'TBD';
+                $teacherId = $creatorId; // ensure FK satisfied
+                $start = '07:00:00';
+                $end = '08:00:00';
+                $stmt->bind_param('ssiiiss', $room, $subject, $teacherId, $newClassId, $d, $start, $end);
+                $stmt->execute();
+            }
+            $stmt->close();
+        }
         $_SESSION['flash'] = $ok ? 'Kelas berhasil ditambah.' : 'Gagal menambah kelas.';
         header('Location: index.php?page=class');
         exit;

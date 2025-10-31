@@ -15,7 +15,7 @@ class DashboardAdminController
     {
         // Cek apakah user adalah admin
         if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'admin') {
-            header('Location: index.php?page=dashboard-admon');
+            header('Location: index.php?page=dashboard-admin');
             exit;
         }
 

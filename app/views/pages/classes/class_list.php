@@ -76,7 +76,7 @@
             <table class="min-w-full">
                 <thead class="bg-[#1f2937] text-gray-200 text-xs uppercase tracking-wide">
                     <tr>
-                        <th class="px-6 py-3 text-left">Nama</th>
+                        <th class="px-6 py-3 text-left">Kelas</th>
                         <th class="px-6 py-3 text-left">Kode</th>
                         <th class="px-6 py-3 text-left">Deskripsi</th>
                         <th class="px-6 py-3 text-left">Dibuat Oleh</th>

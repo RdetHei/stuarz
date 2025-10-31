@@ -21,6 +21,7 @@ foreach ($schedules as $schedule) {
 // Ambil filter dari query string
 $selectedClass = $_GET['class_id'] ?? '';
 $selectedTeacher = $_GET['teacher_id'] ?? '';
+$selectedDay = $_GET['day'] ?? '';
 ?>
 
 <style>
@@ -70,14 +71,11 @@ $selectedTeacher = $_GET['teacher_id'] ?? '';
           <label class="block text-sm font-medium text-gray-400 mb-2">Kelas</label>
           <select name="class_id" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
             <option value="">Semua Kelas</option>
-            <?php
-            $classQuery = $config->query("SELECT id, name FROM classes ORDER BY name");
-            while ($class = $classQuery->fetch_assoc()):
-            ?>
+            <?php foreach (($filterClasses ?? []) as $class): ?>
             <option value="<?= $class['id'] ?>" <?= $selectedClass == $class['id'] ? 'selected' : '' ?>>
               <?= htmlspecialchars($class['name']) ?>
             </option>
-            <?php endwhile; ?>
+            <?php endforeach; ?>
           </select>
         </div>
 
@@ -85,15 +83,21 @@ $selectedTeacher = $_GET['teacher_id'] ?? '';
           <label class="block text-sm font-medium text-gray-400 mb-2">Guru</label>
           <select name="teacher_id" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
             <option value="">Semua Guru</option>
-            <?php
-            // list users who can be teachers (guru or admin)
-            $teacherQuery = $config->query("SELECT id, name FROM users WHERE level='guru' OR level='admin' ORDER BY name");
-            while ($teacher = $teacherQuery->fetch_assoc()):
-            ?>
+            <?php foreach (($filterTeachers ?? []) as $teacher): ?>
             <option value="<?= $teacher['id'] ?>" <?= $selectedTeacher == $teacher['id'] ? 'selected' : '' ?>>
               <?= htmlspecialchars($teacher['name']) ?>
             </option>
-            <?php endwhile; ?>
+            <?php endforeach; ?>
+          </select>
+        </div>
+
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-sm font-medium text-gray-400 mb-2">Hari</label>
+          <select name="day" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
+            <option value="">Semua Hari</option>
+            <?php foreach ($days as $d): ?>
+            <option value="<?= $d ?>" <?= $selectedDay == $d ? 'selected' : '' ?>><?= $d ?></option>
+            <?php endforeach; ?>
           </select>
         </div>
 
@@ -105,7 +109,7 @@ $selectedTeacher = $_GET['teacher_id'] ?? '';
             Filter
           </button>
 
-          <?php if ($selectedClass || $selectedTeacher): ?>
+          <?php if ($selectedClass || $selectedTeacher || $selectedDay): ?>
           <a href="index.php?page=schedule" class="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -187,8 +191,28 @@ $selectedTeacher = $_GET['teacher_id'] ?? '';
                   <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                   </svg>
-                  <span><?= htmlspecialchars($schedule['class']) ?></span>
+                  <span>
+                    <?php
+                    // Prefer class name from classes table using class_id; fallback to schedule.class (room) display separately
+                    $className = null;
+                    if (!empty($schedule['class_id'])) {
+                        $clsQ = $config->query("SELECT name FROM classes WHERE id=" . intval($schedule['class_id']));
+                        $cls = $clsQ ? $clsQ->fetch_assoc() : null;
+                        $className = $cls['name'] ?? null;
+                    }
+                    echo htmlspecialchars($className ?: 'Kelas N/A');
+                    ?>
+                  </span>
                 </div>
+
+                <?php if (!empty($schedule['class'])): ?>
+                <div class="flex items-center gap-2 text-gray-400">
+                  <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/>
+                  </svg>
+                  <span>Ruangan: <?= htmlspecialchars($schedule['class']) ?></span>
+                </div>
+                <?php endif; ?>
               </div>
             </div>
 

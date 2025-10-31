@@ -147,31 +147,34 @@ class SetupProfileController {
     }
     
     private function uploadFile($file, $folder) {
-        $uploadDir = "public/uploads/{$folder}/";
-        
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+        // Filesystem path to uploads directory
+        $uploadDirFs = dirname(__DIR__, 2) . "/public/uploads/{$folder}/";
+        // Public path returned to be saved in DB and used in <img src>
+        $publicBase = "uploads/{$folder}/";
+
+        if (!is_dir($uploadDirFs)) {
+            mkdir($uploadDirFs, 0755, true);
         }
-        
-        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         $maxSize = 5 * 1024 * 1024; // 5MB
-        
-        if (!in_array($file['type'], $allowedTypes)) {
+
+        if (!in_array($file['type'], $allowedTypes, true)) {
             return false;
         }
-        
+
         if ($file['size'] > $maxSize) {
             return false;
         }
-        
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION) ?: 'jpg';
         $fileName = time() . '_' . uniqid() . '.' . $extension;
-        $filePath = $uploadDir . $fileName;
-        
-        if (move_uploaded_file($file['tmp_name'], $filePath)) {
-            return "uploads/{$folder}/{$fileName}";
+        $destFs = $uploadDirFs . $fileName;
+
+        if (move_uploaded_file($file['tmp_name'], $destFs)) {
+            return $publicBase . $fileName;
         }
-        
+
         return false;
     }
 }

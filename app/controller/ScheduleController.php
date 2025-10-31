@@ -23,14 +23,11 @@ class ScheduleController {
         $userLevel = $_SESSION['level'] ?? 'user';
         $userId = $_SESSION['user_id'] ?? 0;
 
-        // Guru can only see their own schedules
-        if ($userLevel === 'guru') {
-            $filters['teacher_id'] = $userId;
-        }
-        // Admin can see all or filter by class/teacher
-        elseif ($userLevel === 'admin') {
+        // Admin can see all or filter by class/teacher/day
+        if ($userLevel === 'admin') {
             if (!empty($_GET['class_id'])) $filters['class_id'] = intval($_GET['class_id']);
             if (!empty($_GET['teacher_id'])) $filters['teacher_id'] = intval($_GET['teacher_id']);
+            if (!empty($_GET['day'])) $filters['day'] = $_GET['day'];
         }
         // Regular users can only see schedules for their class
         else {
@@ -54,14 +51,17 @@ class ScheduleController {
         }
 
         $schedules = $this->model->getAll($filters);
+        // Provide lists for filters to the view (avoid querying in view scope)
+        $filterClasses = $this->db->query("SELECT id, name FROM classes ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
+        $filterTeachers = $this->db->query("SELECT id, name FROM users WHERE level='guru' OR level='admin' ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
         $content = dirname(__DIR__) . '/views/pages/schedule/schedule.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function create() {
-        // Only admin and guru can create schedules
+        // Only admin can create schedules
         $userLevel = $_SESSION['level'] ?? 'user';
-        if (!in_array($userLevel, ['admin', 'guru'])) {
+        if ($userLevel !== 'admin') {
             $_SESSION['error'] = 'Anda tidak memiliki akses untuk membuat jadwal.';
             header('Location: index.php?page=schedule');
             exit;
@@ -74,25 +74,17 @@ class ScheduleController {
         $classes = $this->db->query("SELECT id, name FROM classes")->fetch_all(MYSQLI_ASSOC) ?? [];
         $subjects = $this->db->query("SELECT id, name FROM subjects")->fetch_all(MYSQLI_ASSOC) ?? [];
         
-        // For admin, show all teachers (guru or admin). For guru, they can only assign themselves
-        if ($userLevel === 'admin') {
-            $teachers = $this->db->query("SELECT id, name FROM users WHERE level='guru' OR level='admin'")->fetch_all(MYSQLI_ASSOC) ?? [];
-        } else {
-            $userId = $_SESSION['user_id'];
-            $stmt = $this->db->prepare("SELECT id, name FROM users WHERE id = ? AND (level='guru' OR level='admin')");
-            $stmt->bind_param('i', $userId);
-            $stmt->execute();
-            $teachers = $stmt->get_result()->fetch_all(MYSQLI_ASSOC) ?? [];
-        }
+        // Admin: daftar guru/admin (menampilkan pengguna dengan level 'guru' atau 'admin')
+        $teachers = $this->db->query("SELECT id, name FROM users WHERE level='guru' OR level='admin'")->fetch_all(MYSQLI_ASSOC) ?? [];
 
         $content = dirname(__DIR__) . '/views/pages/schedule/form.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function store() {
-        // Only admin and guru can create schedules
+        // Only admin can create schedules
         $userLevel = $_SESSION['level'] ?? 'user';
-        if (!in_array($userLevel, ['admin', 'guru'])) {
+        if ($userLevel !== 'admin') {
             $_SESSION['error'] = 'Anda tidak memiliki akses untuk membuat jadwal.';
             header('Location: index.php?page=schedule');
             exit;
@@ -108,9 +100,13 @@ class ScheduleController {
             'end_time' => $_POST['end_time'] ?? '',
         ];
 
-        // Validate selected teacher exists and has role guru or admin
+        // Validate selected teacher exists and has level 'guru' atau 'admin'
         $teacherId = $data['teacher_id'];
-        $teacherCheck = $this->db->query("SELECT id FROM users WHERE id = $teacherId AND (level='guru' OR level='admin')")->fetch_assoc();
+        $stmtT = $this->db->prepare("SELECT id FROM users WHERE id = ? AND (level='guru' OR level='admin')");
+        $stmtT->bind_param('i', $teacherId);
+        $stmtT->execute();
+        $teacherCheck = $stmtT->get_result()->fetch_assoc();
+        $stmtT->close();
         if (!$teacherCheck) {
             $_SESSION['error'] = 'Guru yang dipilih tidak valid.';
             header('Location: index.php?page=schedule');
@@ -150,28 +146,15 @@ class ScheduleController {
     }
 
     public function edit($id) {
-        // Only admin and guru can edit schedules
+        // Only admin can edit schedules
         $userLevel = $_SESSION['level'] ?? 'user';
-        if (!in_array($userLevel, ['admin', 'guru'])) {
+        if ($userLevel !== 'admin') {
             $_SESSION['error'] = 'Anda tidak memiliki akses untuk mengedit jadwal.';
             header('Location: index.php?page=schedule');
             exit;
         }
 
-        // Verify access rights for guru
         $userId = $_SESSION['user_id'];
-        if ($userLevel === 'guru') {
-            $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM schedule WHERE id = ? AND teacher_id = ?");
-            $stmt->bind_param('ii', $id, $userId);
-            $stmt->execute();
-            $result = $stmt->get_result()->fetch_assoc();
-            
-            if ($result['count'] === 0) {
-                $_SESSION['error'] = 'Anda hanya dapat mengedit jadwal Anda sendiri.';
-                header('Location: index.php?page=schedule');
-                exit;
-            }
-        }
 
         $mode = 'edit';
         $item = $this->model->getById($id);
@@ -199,28 +182,15 @@ class ScheduleController {
     }
 
     public function update($id) {
-        // Only admin and guru can update schedules
+        // Only admin can update schedules
         $userLevel = $_SESSION['level'] ?? 'user';
-        if (!in_array($userLevel, ['admin', 'guru'])) {
+        if ($userLevel !== 'admin') {
             $_SESSION['error'] = 'Anda tidak memiliki akses untuk mengubah jadwal.';
             header('Location: index.php?page=schedule');
             exit;
         }
 
-        // For guru, verify they own the schedule being updated
-        if ($userLevel === 'guru') {
-            $userId = $_SESSION['user_id'];
-            $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM schedule WHERE id = ? AND teacher_id = ?");
-            $stmt->bind_param('ii', $id, $userId);
-            $stmt->execute();
-            $result = $stmt->get_result()->fetch_assoc();
-            
-            if ($result['count'] === 0) {
-                $_SESSION['error'] = 'Anda hanya dapat mengubah jadwal Anda sendiri.';
-                header('Location: index.php?page=schedule');
-                exit;
-            }
-        }
+        $userId = $_SESSION['user_id'];
 
         $data = [
             'class' => $_POST['class'] ?? '',
@@ -232,9 +202,13 @@ class ScheduleController {
             'end_time' => $_POST['end_time'] ?? '',
         ];
 
-        // Validate selected teacher exists and has role guru or admin
+        // Validate selected teacher exists and has level 'guru' atau 'admin'
         $teacherId = $data['teacher_id'];
-        $teacherCheck = $this->db->query("SELECT id FROM users WHERE id = $teacherId AND (level='guru' OR level='admin')")->fetch_assoc();
+        $stmtT = $this->db->prepare("SELECT id FROM users WHERE id = ? AND (level='guru' OR level='admin')");
+        $stmtT->bind_param('i', $teacherId);
+        $stmtT->execute();
+        $teacherCheck = $stmtT->get_result()->fetch_assoc();
+        $stmtT->close();
         if (!$teacherCheck) {
             $_SESSION['error'] = 'Guru yang dipilih tidak valid.';
             header('Location: index.php?page=schedule');
@@ -273,28 +247,15 @@ class ScheduleController {
     }
 
     public function delete($id) {
-        // Only admin and guru can delete schedules
+        // Only admin can delete schedules
         $userLevel = $_SESSION['level'] ?? 'user';
-        if (!in_array($userLevel, ['admin', 'guru'])) {
+        if ($userLevel !== 'admin') {
             $_SESSION['error'] = 'Anda tidak memiliki akses untuk menghapus jadwal.';
             header('Location: index.php?page=schedule');
             exit;
         }
 
-        // For guru, verify they own the schedule being deleted
-        if ($userLevel === 'guru') {
-            $userId = $_SESSION['user_id'];
-            $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM schedule WHERE id = ? AND teacher_id = ?");
-            $stmt->bind_param('ii', $id, $userId);
-            $stmt->execute();
-            $result = $stmt->get_result()->fetch_assoc();
-            
-            if ($result['count'] === 0) {
-                $_SESSION['error'] = 'Anda hanya dapat menghapus jadwal Anda sendiri.';
-                header('Location: index.php?page=schedule');
-                exit;
-            }
-        }
+        $userId = $_SESSION['user_id'];
 
         $this->model->delete($id);
         header('Location: index.php?page=schedule');
