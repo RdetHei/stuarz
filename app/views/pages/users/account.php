@@ -47,7 +47,7 @@ if (!isset($baseUrl)) {
     <table class="min-w-full">
     <thead class="bg-[#1f2937] text-gray-200 text-xs uppercase tracking-wide">
       <tr>
-      <th class="px-6 py-3 text-left">#</th>
+      <th class="px-6 py-3 text-left">Id</th>
       <th class="px-6 py-3 text-left">Avatar</th>
       <th class="px-6 py-3 text-left">Username</th>
       <th class="px-6 py-3 text-left">Email</th>
@@ -60,7 +60,7 @@ if (!isset($baseUrl)) {
       <?php if (count($rows) > 0): ?>
       <?php foreach ($rows as $i => $row): ?>
         <tr class="hover:bg-[#1f2937] transition">
-        <td class="px-6 py-3 text-sm text-gray-300"><?= $i + 1 ?></td>
+        <td class="px-6 py-3 text-sm text-gray-300"><?= htmlspecialchars($row['id'] ?? '') ?></td>
         <td class="px-6 py-3">
           <?php
           $avatar = $row['avatar'] ?? '';

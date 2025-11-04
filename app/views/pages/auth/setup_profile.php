@@ -8,6 +8,7 @@
     <link rel="icon" type="image/x-icon" href="public/assets/diamond.ico">
 </head>
 <body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
+    
     <div class="max-w-2xl w-full">
         <!-- Header -->
         <div class="text-center mb-8">

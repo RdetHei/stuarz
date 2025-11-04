@@ -2,7 +2,7 @@
 // ...existing code...
 ?>
 <hr class="border-gray-700 my-0" />
-<footer class="bg-gray-900 text-gray-300 py-12">
+<footer class="bg-gray-800 text-gray-300 py-12 border-t border-gray-700">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
             <!-- Logo dan deskripsi (tetap seperti semula) -->
@@ -116,7 +116,7 @@
             <form action="/subscribe" method="post" class="flex items-center justify-center">
                 <label for="footer-email" class="sr-only">Email address</label>
                 <input id="footer-email" name="email" type="email" required
-                    class="w-full max-w-xs px-3 py-2 rounded-l-md bg-gray-800 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    class="bg-gray-900 w-full max-w-xs px-3 py-2 rounded-l-md bg-gray-800 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="you@example.com" />
                 <button type="submit"
                     class="ml-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-r-md text-sm">

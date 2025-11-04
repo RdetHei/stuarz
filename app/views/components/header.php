@@ -29,7 +29,7 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
 }
 </style>
 
-<header class="bg-gray-900 sticky top-0 z-50 border-b border-gray-800">
+<header class="bg-gray-800 sticky top-0 z-50 border-b border-gray-700">
   <nav aria-label="Global" class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
     <!-- Logo -->
     <div class="flex lg:flex-1">
@@ -83,7 +83,7 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
     <div class="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-4">
       <a href="index.php?page=login" 
          class="text-sm font-semibold text-gray-300 hover:text-white transition-colors duration-200">
-        Sign in
+        Login
       </a>
       <a href="index.php?page=register" 
          class="border-2 border-gray-300 hover:border-white hover:text-white rounded-lg px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors duration-200">
