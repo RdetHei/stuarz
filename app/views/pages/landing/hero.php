@@ -1,6 +1,9 @@
 <!-- Hero Section with Discord & GitHub Theme -->
 <div class="relative bg-gray-900 overflow-hidden min-h-screen flex items-center">
-  <div class="relative mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
+  <div>
+    <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/default-banner.png', ENT_QUOTES, 'UTF-8') ?>" alt="Background Hero" class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none select-none" />
+  </div>
+  <div class="relative mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-5">
     <div class="mx-auto max-w-4xl text-center">
       <div class="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-gray-800 border border-gray-700 rounded-full">
         <div class="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -24,16 +27,27 @@
         </a>
       </div>
     </div>
+    </div>
+</div>
+
+    <div class="h-px bg-gray-700"></div>
     
     <!-- Hero Illustration -->
+     
+     <div class="relative bg-gray-900 py-24 sm:py-24">
+     <div class="text-left mx-auto max-w-7xl px-6 lg:px-30">
+      <h2 class="text-base font-semibold leading-7 text-indigo-600">Dashboard</h2>
+      <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+        Overview
+      </p>
+    </div>
     <div class="mt-16 flex justify-center">
       <div class="relative w-full max-w-5xl">
         <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES, 'UTF-8') ?>" alt="Tampilan aplikasi Stuarz" class="w-full rounded-2xl bg-gray-800 border border-gray-700 shadow-lg" />
       </div>
     </div>
   </div>
-</div>
-
+ 
 <!-- Divider -->
 <div class="h-px bg-gray-700"></div>
 

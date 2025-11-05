@@ -33,10 +33,9 @@ class RegisterController
                     } else {
                         $hash = password_hash($password, PASSWORD_BCRYPT);
                         $level = 'user';
-                        $role = 'student';
-                        $sql = 'INSERT INTO users (username, email, password, level, role, join_date) VALUES (?, ?, ?, ?, ?, CURDATE())';
+                        $sql = 'INSERT INTO users (username, email, password, level, join_date) VALUES (?, ?, ?, ?, CURDATE())';
                         $stmt2 = $config->prepare($sql);
-                        $stmt2->bind_param('sssss', $username, $email, $hash, $level, $role);
+                        $stmt2->bind_param('ssss', $username, $email, $hash, $level);
                         if ($stmt2->execute()) {
                         // Get the new user ID
                         $newUserId = $config->insert_id;

@@ -24,7 +24,7 @@
         </div>
       </div>
     </div>
-    <div class="-mt-10 -ml-6 p-6 lg:sticky lg:top-12 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
+    <div class="-mt-10 -ml-6 p-6 lg:sticky lg:top-20 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
       <div class="group relative w-full max-w-none sm:w-[36rem]">
         <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES, 'UTF-8') ?>" alt="Stuarz App Screenshot" class="w-full rounded-2xl bg-gray-800/80 shadow-2xl ring-1 ring-white/10 transition-transform duration-500 group-hover:scale-[1.02]" />
         <div class="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10"></div>
