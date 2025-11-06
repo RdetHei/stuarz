@@ -144,11 +144,10 @@ $router->get('/schedule/edit/{id}', 'ScheduleController@edit');
 $router->post('/schedule/update/{id}', 'ScheduleController@update');
 $router->post('/schedule/delete/{id}', 'ScheduleController@delete');
 
-// Attendance
+// Attendance routes
 $router->get('/attendance', 'AttendanceController@index');
-$router->get('/attendance/mark', 'AttendanceController@mark');
-$router->post('/attendance/store', 'AttendanceController@store');
-$router->get('/attendance/report', 'AttendanceController@report');
+$router->post('/attendance_checkin', 'AttendanceController@checkIn');
+$router->post('/attendance_checkout', 'AttendanceController@checkOut');
 
 
 // Backward-compat: map ?page=... into a path for dispatching

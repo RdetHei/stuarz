@@ -1,54 +1,64 @@
 <?php
+
 class AttendanceModel {
     private $db;
-    public function __construct($db) { $this->db = $db; }
 
-    public function getAll($filters = []) {
-        $where = [];
-        if (!empty($filters['class_id'])) $where[] = "a.class_id=" . intval($filters['class_id']);
-        if (!empty($filters['date'])) $where[] = "a.date='" . $this->db->real_escape_string($filters['date']) . "'";
-        $sql = "SELECT a.*, u.name as student_name FROM attendance a LEFT JOIN users u ON u.id=a.user_id" . (count($where) ? " WHERE " . implode(' AND ', $where) : "") . " ORDER BY a.date DESC, u.name";
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    public function getClasses() {
+        $sql = "SELECT id, name FROM classes ORDER BY name";
         $res = $this->db->query($sql);
-        $data = [];
-        if ($res) while ($r = $res->fetch_assoc()) $data[] = $r;
-        return $data;
+        return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
     }
 
-    public function getByUserDateClass($user_id, $date, $class_id) {
-        $user_id = intval($user_id);
-        $class_id = intval($class_id);
-        $date = $this->db->real_escape_string($date);
-        $res = $this->db->query("SELECT * FROM attendance WHERE user_id=$user_id AND date='$date' AND class_id=$class_id");
-        return $res ? $res->fetch_assoc() : null;
-    }
-
-    public function store($data) {
-        // unique constraint business logic enforced here
-        $exists = $this->getByUserDateClass($data['user_id'], $data['date'], $data['class_id']);
-        if ($exists) {
-            // update existing
-            $status = $this->db->real_escape_string($data['status']);
-            return $this->db->query("UPDATE attendance SET status='$status' WHERE id=" . intval($exists['id']));
+    public function getTodayAttendance($userId, $date, $classId = null) {
+        $sql = "SELECT * FROM attendance WHERE user_id = ? AND date = ?";
+        if ($classId !== null) $sql .= " AND class_id = ?";
+        $stmt = $this->db->prepare($sql);
+        if ($classId !== null) {
+            $stmt->bind_param('isi', $userId, $date, $classId);
         } else {
-            $user_id = intval($data['user_id']);
-            $date = $this->db->real_escape_string($data['date']);
-            $status = $this->db->real_escape_string($data['status']);
-            $class_id = intval($data['class_id']);
-            return $this->db->query("INSERT INTO attendance (user_id, date, status, class_id) VALUES ($user_id, '$date', '$status', $class_id)");
+            $stmt->bind_param('is', $userId, $date);
         }
+        $stmt->execute();
+        $res = $stmt->get_result();
+        return $res->fetch_assoc() ?: null;
     }
 
-    public function reportByUser($user_id, $from = null, $to = null) {
-        $user_id = intval($user_id);
-        $where = "user_id=$user_id";
-        if ($from) $where .= " AND date >= '" . $this->db->real_escape_string($from) . "'";
-        if ($to) $where .= " AND date <= '" . $this->db->real_escape_string($to) . "'";
-        $sql = "SELECT status, COUNT(*) as cnt FROM attendance WHERE $where GROUP BY status";
-        $res = $this->db->query($sql);
-        $data = ['Hadir'=>0,'Absen'=>0,'Terlambat'=>0];
-        if ($res) while ($r = $res->fetch_assoc()) {
-            $data[$r['status']] = intval($r['cnt']);
+    public function insertAttendance($userId, $classId, $date, $time, $status) {
+        $stmt = $this->db->prepare("
+            INSERT INTO attendance (user_id, class_id, date, check_in, status)
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE check_in = VALUES(check_in), status = VALUES(status)
+        ");
+        $stmt->bind_param('iisss', $userId, $classId, $date, $time, $status);
+        return $stmt->execute();
+    }
+
+    public function updateCheckOut($userId, $date, $classId, $time) {
+        $stmt = $this->db->prepare("
+            UPDATE attendance 
+            SET check_out = ?
+            WHERE user_id = ? AND date = ? AND class_id = ?
+        ");
+        $stmt->bind_param('sisi', $time, $userId, $date, $classId);
+        return $stmt->execute();
+    }
+
+    public function getFilteredAttendance($startDate, $endDate, $classId = null) {
+        $sql = "SELECT a.*, u.username FROM attendance a JOIN users u ON a.user_id = u.id
+                WHERE a.date BETWEEN ? AND ?";
+        if ($classId !== null) $sql .= " AND a.class_id = ?";
+        $sql .= " ORDER BY a.date DESC, a.created_at DESC";
+        $stmt = $this->db->prepare($sql);
+        if ($classId !== null) {
+            $stmt->bind_param('ssi', $startDate, $endDate, $classId);
+        } else {
+            $stmt->bind_param('ss', $startDate, $endDate);
         }
-        return $data;
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 }

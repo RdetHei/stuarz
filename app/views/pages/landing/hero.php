@@ -35,7 +35,7 @@
     <!-- Hero Illustration -->
      
      <div class="relative bg-gray-900 py-24 sm:py-24">
-     <div class="text-left mx-auto max-w-7xl px-6 lg:px-30">
+     <div class="text-center mx-auto max-w-7xl px-6 lg:px-30">
       <h2 class="text-base font-semibold leading-7 text-indigo-600">Dashboard</h2>
       <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
         Overview

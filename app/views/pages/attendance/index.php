@@ -28,11 +28,6 @@ $displayStats = [
 ?>
 
 <style>
-  .glass-card {
-    background: rgba(43, 45, 49, 0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
   .toast {
     position: fixed;
     bottom: 2rem;
@@ -52,333 +47,267 @@ $displayStats = [
     opacity: 1;
     transform: translateY(0);
   }
-  .badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  .badge-success {
-    background: rgba(34, 197, 94, 0.2);
-    color: #86efac;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-  }
-  .badge-danger {
-    background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-  }
 </style>
 
 <div class="max-w-7xl mx-auto p-6">
-  <!-- Header -->
-  <div class="mb-8">
-    <div class="flex items-center justify-between flex-wrap gap-4">
-      <div class="flex items-center gap-4">
-        <div class="w-14 h-14 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg">
-          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-white">Attendance Clock</h1>
+                <p class="text-gray-400 text-sm mt-1">Check in and check out system</p>
+            </div>
         </div>
-        <div>
-          <h1 class="text-3xl font-bold text-white">Absensi</h1>
-          <p class="text-gray-400 text-sm mt-1">Kelola kehadiran siswa dengan mudah</p>
-        </div>
-      </div>
+    </div>
 
-      <div class="flex items-center gap-3">
-        <a href="index.php?page=attendance/mark" 
-           class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-          Input Absensi
-        </a>
-        <a href="index.php?page=attendance/report" 
-           class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 border border-gray-600">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-          </svg>
-          Laporan
-        </a>
-      </div>
+    <!-- Clock Card -->
+    <div class="bg-gray-800 border border-gray-700 rounded-xl p-8 mb-6">
+        <div class="text-center">
+            <div class="mb-6">
+                <p class="text-gray-400 text-sm mb-2">Current Time</p>
+                <div id="clock" class="text-6xl font-bold text-white mb-2"></div>
+                <p class="text-gray-500 text-sm" id="dateDisplay"></p>
+            </div>
+            
+            <div class="mb-6">
+                <label for="classSelect" class="block text-sm font-medium text-gray-300 mb-2">
+                    Select Class <span class="text-red-500">*</span>
+                </label>
+                <select id="classSelect" class="w-full max-w-md mx-auto px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
+                    <option value="">Choose a class</option>
+                    <?php foreach($classes as $class): ?>
+                        <option value="<?= $class['id'] ?>"><?= htmlspecialchars($class['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div class="flex items-center justify-center gap-4">
+                <button id="checkInBtn" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                    </svg>
+                    Check In
+                </button>
+                <button id="checkOutBtn" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    Check Out
+                </button>
+            </div>
+            
+            <div id="message" class="mt-6"></div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <?php foreach ($displayStats as $s): ?>
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-sm font-medium text-gray-400 mb-2"><?= htmlspecialchars($s['title']) ?></div>
+                    <div class="text-3xl font-bold text-white"><?= (int)$s['value'] ?></div>
+                    <div class="text-xs text-gray-500 mt-1">total hari</div>
+                </div>
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center <?php
+                    echo $s['color']==='success' ? 'bg-emerald-500/20' : ($s['color']==='danger' ? 'bg-red-500/20' : 'bg-orange-500/20');
+                ?>">
+                    <?php if ($s['icon']==='check'): ?>
+                        <svg class="w-7 h-7 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    <?php elseif ($s['icon']==='x'): ?>
+                        <svg class="w-7 h-7 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+                        </svg>
+                    <?php else: ?>
+                        <svg class="w-7 h-7 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 6v6l4 2" stroke-linecap="round"/>
+                            <circle cx="12" cy="12" r="9"/>
+                        </svg>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
     </div>
 
     <!-- Filter Section -->
-    <div class="mt-6 bg-gray-800 border border-gray-700 rounded-lg p-4">
-      <form method="GET" action="index.php" class="flex flex-wrap gap-3">
-        <input type="hidden" name="page" value="attendance">
-
-        <div class="flex-1 min-w-[200px]">
-          <label class="block text-sm font-medium text-gray-400 mb-2">Kelas</label>
-          <select name="class_id" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
-            <option value="">Semua Kelas</option>
-            <?php
-            global $config;
-            $classQuery = $config->query("SELECT id, name FROM classes ORDER BY name");
-            $selectedClass = $_GET['class_id'] ?? '';
-            while ($class = $classQuery->fetch_assoc()):
-            ?>
-            <option value="<?= $class['id'] ?>" <?= $selectedClass == $class['id'] ? 'selected' : '' ?>>
-              <?= htmlspecialchars($class['name']) ?>
-            </option>
-            <?php endwhile; ?>
-          </select>
-        </div>
-
-        <div class="flex-1 min-w-[200px]">
-          <label class="block text-sm font-medium text-gray-400 mb-2">Tanggal</label>
-          <input type="date" name="date" 
-                 value="<?= htmlspecialchars($_GET['date'] ?? date('Y-m-d')) ?>"
-                 class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
-        </div>
-
-        <div class="flex items-end gap-2">
-          <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+    <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-6">
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
             </svg>
-            Filter
-          </button>
-
-          <?php if ($selectedClass || !empty($_GET['date'])): ?>
-          <a href="index.php?page=attendance" class="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-            Reset
-          </a>
-          <?php endif; ?>
-        </div>
-      </form>
+            Filter Records
+        </h3>
+        <form method="get" class="flex flex-wrap gap-4">
+            <input type="hidden" name="page" value="attendance">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-400 mb-2">Start Date</label>
+                <input type="date" name="start" value="<?= $_GET['start'] ?? date('Y-m-d') ?>" 
+                       class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-400 mb-2">End Date</label>
+                <input type="date" name="end" value="<?= $_GET['end'] ?? date('Y-m-d') ?>" 
+                       class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    Apply Filter
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
 
-  <!-- Stats grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <?php foreach ($displayStats as $s): ?>
-    <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-sm font-medium text-gray-400 mb-2"><?= htmlspecialchars($s['title']) ?></div>
-          <div class="text-3xl font-bold text-white"><?= (int)$s['value'] ?></div>
-          <div class="text-xs text-gray-500 mt-1">total hari</div>
-        </div>
-        <div class="w-14 h-14 rounded-xl flex items-center justify-center <?php
-          echo $s['color']==='success' ? 'bg-emerald-500/20' : ($s['color']==='danger' ? 'bg-red-500/20' : 'bg-orange-500/20');
-        ?>">
-          <?php if ($s['icon']==='check'): ?>
-            <svg class="w-7 h-7 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          <?php elseif ($s['icon']==='x'): ?>
-            <svg class="w-7 h-7 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
-            </svg>
-          <?php else: ?>
-            <svg class="w-7 h-7 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 6v6l4 2" stroke-linecap="round"/>
-              <circle cx="12" cy="12" r="9"/>
-            </svg>
-          <?php endif; ?>
-        </div>
-      </div>
-    </div>
-    <?php endforeach; ?>
-  </div>
-
-  <!-- Check-in/out card -->
-  <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-6">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-      <div class="flex-1">
-        <div class="text-sm font-medium text-gray-400 mb-2">Waktu Sekarang</div>
-        <div id="attClock" class="text-5xl font-bold text-white mb-2">00:00:00</div>
-        <div id="attStatus">
-          <span class="badge badge-danger">Not Checked In</span>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-4 px-6 py-4 bg-gray-900 rounded-lg border border-gray-700">
-        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <div>
-          <div class="text-xs text-gray-400">Check-in Time</div>
-          <div id="attCheckinTime" class="text-white font-semibold">--:--:--</div>
-        </div>
-      </div>
-      
-      <button id="attActionBtn" class="px-8 py-3.5 rounded-lg font-semibold transition-all text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg min-w-[140px]">
-        Check In
-      </button>
-    </div>
-  </div>
-
-  <!-- Attendance Records -->
-  <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
-    <div class="p-6 border-b border-gray-700">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-xl font-bold text-white">Data Absensi</h2>
-          <p class="text-sm text-gray-400 mt-1">
-            <?php if (!empty($records)): ?>
-              Menampilkan <?= count($records) ?> catatan absensi
-            <?php else: ?>
-              Belum ada data absensi tersedia
-            <?php endif; ?>
-          </p>
-        </div>
-        <?php if (!empty($records)): ?>
-        <div class="flex items-center gap-2 text-sm text-gray-400">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          <span>Total: <?= count($records) ?></span>
-        </div>
-        <?php endif; ?>
-      </div>
-    </div>
-    
+    <!-- Records Table -->
     <?php if (!empty($records)): ?>
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead>
-          <tr class="bg-gray-900 border-b border-gray-700">
-            <th class="py-4 px-6 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Tanggal</th>
-            <th class="py-4 px-6 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Nama Siswa</th>
-            <th class="py-4 px-6 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Kelas</th>
-            <th class="py-4 px-6 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-700">
-          <?php foreach ($records as $record): ?>
-          <tr class="hover:bg-gray-700/50 transition-colors">
-            <td class="py-4 px-6 text-gray-300">
-              <div class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <?= date('d/m/Y', strtotime($record['date'])) ?>
-              </div>
-            </td>
-            <td class="py-4 px-6">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-semibold">
-                  <?php
-                  global $config;
-                  $studentQuery = $config->query("SELECT name FROM users WHERE id=" . intval($record['user_id']));
-                  $student = $studentQuery->fetch_assoc();
-                  $studentName = $student['name'] ?? 'N/A';
-                  echo strtoupper(substr($studentName, 0, 1));
-                  ?>
-                </div>
-                <span class="text-white font-medium"><?= htmlspecialchars($studentName) ?></span>
-              </div>
-            </td>
-            <td class="py-4 px-6 text-gray-400">
-              <?php
-              $classQuery = $config->query("SELECT name FROM classes WHERE id=" . intval($record['class_id']));
-              $class = $classQuery->fetch_assoc();
-              echo htmlspecialchars($class['name'] ?? 'N/A');
-              ?>
-            </td>
-            <td class="py-4 px-6">
-              <?php
-              $status = $record['status'] ?? 'Absen';
-              $statusClasses = [
-                'Hadir' => 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-                'Absen' => 'bg-red-500/20 text-red-300 border-red-500/30',
-                'Terlambat' => 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-                'Izin' => 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-                'Sakit' => 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-              ];
-              $class = $statusClasses[$status] ?? $statusClasses['Absen'];
-              ?>
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border <?= $class ?>">
-                <?= htmlspecialchars($status) ?>
-              </span>
-            </td>
-          </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
+    <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+        <div class="p-6 border-b border-gray-700">
+            <h3 class="text-xl font-bold text-white">Attendance Records</h3>
+            <p class="text-sm text-gray-400 mt-1">Total: <?= count($records) ?> records</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-900 border-b border-gray-700">
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Check In</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Check Out</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <?php foreach ($records as $record): ?>
+                    <tr class="hover:bg-gray-700/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-semibold">
+                                    <?= strtoupper(substr($record['username'], 0, 1)) ?>
+                                </div>
+                                <span class="text-white font-medium"><?= htmlspecialchars($record['username']) ?></span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-gray-300">
+                            <?= date('d/m/Y', strtotime($record['date'])) ?>
+                        </td>
+                        <td class="px-6 py-4 text-gray-300">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <?= $record['check_in'] ?>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-gray-300">
+                            <?= $record['check_out'] ?? '-' ?>
+                        </td>
+                        <td class="px-6 py-4">
+                            <?php
+                            $statusClass = $record['status'] === 'present' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 
+                                          ($record['status'] === 'late' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 
+                                           'bg-red-500/20 text-red-300 border-red-500/30');
+                            ?>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border <?= $statusClass ?>">
+                                <?= ucfirst($record['status']) ?>
+                            </span>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
     <?php else: ?>
-    <div class="text-center py-16">
-      <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-indigo-600/20 flex items-center justify-center">
-        <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-      </div>
-      <h3 class="text-xl font-bold text-white mb-2">Belum Ada Data Absensi</h3>
-      <p class="text-gray-400 mb-6 max-w-md mx-auto">Mulai input absensi untuk melihat data kehadiran siswa di sini.</p>
-      <a href="index.php?page=attendance/mark" 
-         class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Input Absensi Pertama
-      </a>
+    <div class="bg-gray-800 border border-gray-700 rounded-xl p-12 text-center">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-indigo-600/20 flex items-center justify-center">
+            <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">No Records Found</h3>
+        <p class="text-gray-400">No attendance records available for the selected date range.</p>
     </div>
     <?php endif; ?>
-  </div>
 </div>
 
 <div id="attToast" class="toast">Saved</div>
 
 <script>
-(function(){
-  const clock = document.getElementById('attClock');
-  const statusEl = document.getElementById('attStatus');
-  const checkinTimeEl = document.getElementById('attCheckinTime');
-  const btn = document.getElementById('attActionBtn');
-  const toast = document.getElementById('attToast');
-  let checkedIn = false;
-  let checkinAt = null;
+// Real-time clock
+function updateClock() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('clock').textContent = timeStr;
+    document.getElementById('dateDisplay').textContent = dateStr;
+}
+setInterval(updateClock, 1000);
+updateClock();
 
-  function tick(){
-    const d = new Date();
-    const pad = n => String(n).padStart(2,'0');
-    clock.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  }
-  setInterval(tick, 1000); tick();
-
-  function showToast(msg){
-    toast.textContent = msg;
+// Toast function
+function showToast(message, isSuccess = true) {
+    const toast = document.getElementById('attToast');
+    toast.textContent = message;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2000);
-  }
+}
 
-  function render(){
-    if (checkedIn){
-      statusEl.innerHTML = '<span class="badge badge-success">Checked In</span>';
-      btn.textContent = 'Check Out';
-      btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-      btn.classList.add('bg-red-600', 'hover:bg-red-700');
-      const d = new Date(checkinAt);
-      const pad = n => String(n).padStart(2,'0');
-      checkinTimeEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    } else {
-      statusEl.innerHTML = '<span class="badge badge-danger">Not Checked In</span>';
-      btn.textContent = 'Check In';
-      btn.classList.remove('bg-red-600', 'hover:bg-red-700');
-      btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-      checkinTimeEl.textContent = '--:--:--';
+// Handle check in/out
+async function handleAttendance(type) {
+    try {
+        const classId = document.getElementById('classSelect').value;
+        if (!classId) {
+            showMessage('Please select a class first', false);
+            return;
+        }
+
+        const response = await fetch(`index.php?page=attendance_${type}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `class_id=${classId}`
+        });
+        
+        const data = await response.json();
+        
+        showMessage(data.message, data.success);
+        showToast(data.message, data.success);
+        
+        if (data.success) {
+            setTimeout(() => window.location.reload(), 1500);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage('An error occurred. Please try again.', false);
     }
-  }
+}
 
-  btn.addEventListener('click', function(){
-    if (!checkedIn){
-      checkedIn = true;
-      checkinAt = Date.now();
-      showToast('✓ Checked in successfully');
-    } else {
-      checkedIn = false;
-      showToast('✓ Checked out successfully');
-    }
-    render();
-  });
+function showMessage(message, isSuccess) {
+    const messageEl = document.getElementById('message');
+    messageEl.innerHTML = `
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg ${isSuccess ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30'}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                ${isSuccess ? 
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>' : 
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>'}
+            </svg>
+            <span>${message}</span>
+        </div>
+    `;
+}
 
-  render();
-})();
+document.getElementById('checkInBtn').onclick = () => handleAttendance('checkin');
+document.getElementById('checkOutBtn').onclick = () => handleAttendance('checkout');
 </script>
