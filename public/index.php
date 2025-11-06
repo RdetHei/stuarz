@@ -146,8 +146,11 @@ $router->post('/schedule/delete/{id}', 'ScheduleController@delete');
 
 // Attendance routes
 $router->get('/attendance', 'AttendanceController@index');
+$router->get('/attendance_manage', 'AttendanceController@manage');
 $router->post('/attendance_checkin', 'AttendanceController@checkIn');
 $router->post('/attendance_checkout', 'AttendanceController@checkOut');
+$router->post('/attendance_edit', 'AttendanceController@edit');
+$router->post('/attendance_delete', 'AttendanceController@delete');
 
 
 // Backward-compat: map ?page=... into a path for dispatching

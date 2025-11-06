@@ -13,6 +13,46 @@ class AttendanceModel {
         return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
     }
 
+    public function getAttendanceById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM attendance WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
+
+    public function updateAttendance($id, $data) {
+        $allowedFields = ['class_id', 'date', 'check_in', 'check_out', 'status'];
+        $updates = [];
+        $types = '';
+        $values = [];
+        
+        foreach ($allowedFields as $field) {
+            if (isset($data[$field])) {
+                $updates[] = "{$field} = ?";
+                $types .= 's';
+                $values[] = $data[$field];
+            }
+        }
+        
+        if (empty($updates)) {
+            return false;
+        }
+
+        $values[] = $id;
+        $types .= 'i';
+        
+        $sql = "UPDATE attendance SET " . implode(', ', $updates) . " WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param($types, ...array_values($values));
+        return $stmt->execute();
+    }
+
+    public function deleteAttendance($id) {
+        $stmt = $this->db->prepare("DELETE FROM attendance WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        return $stmt->execute();
+    }
+
     public function getTodayAttendance($userId, $date, $classId = null) {
         $sql = "SELECT * FROM attendance WHERE user_id = ? AND date = ?";
         if ($classId !== null) $sql .= " AND class_id = ?";

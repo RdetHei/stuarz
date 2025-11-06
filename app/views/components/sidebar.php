@@ -1,10 +1,4 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
-if (!isset($_SESSION['user'])) {
-  header("Location: index.php?page=login");
-  exit;
-}
-
 // gunakan nama berbeda agar tidak menimpa $user dari controller
 $sessionUser = $_SESSION['user'];
 

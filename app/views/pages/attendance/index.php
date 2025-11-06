@@ -52,16 +52,23 @@ $displayStats = [
 <div class="max-w-7xl mx-auto p-6">
     <!-- Header -->
     <div class="mb-8">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg">
-                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Attendance Clock</h1>
+                    <p class="text-gray-400 text-sm mt-1">Check in and check out system</p>
+                </div>
             </div>
-            <div>
-                <h1 class="text-3xl font-bold text-white">Attendance Clock</h1>
-                <p class="text-gray-400 text-sm mt-1">Check in and check out system</p>
-            </div>
+            <?php if (isset($_SESSION['level']) && $_SESSION['level'] === 'admin'): ?>
+            <a href="index.php?page=attendance_manage" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                Manage Attendance
+            </a>
+            <?php endif; ?>
         </div>
     </div>
 

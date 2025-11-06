@@ -31,6 +31,11 @@ class AuthController
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
                     $_SESSION['level'] = $user['level'];
+                    // Simpan timezone aplikasi di session dan set timezone untuk proses saat ini
+                    $_SESSION['timezone'] = $GLOBALS['app_timezone'] ?? 'Asia/Jakarta';
+                    if (!ini_get('date.timezone')) {
+                        date_default_timezone_set($_SESSION['timezone']);
+                    }
 
                     // Set cookie login untuk 1 jam
                     setcookie('user_id', $user['id'], time() + 3600, '/');

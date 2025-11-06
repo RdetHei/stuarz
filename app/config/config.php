@@ -1,4 +1,10 @@
 <?php 
+$tz = 'Asia/Jakarta';
+if (!ini_get('date.timezone')) {
+	date_default_timezone_set($tz);
+}
+$GLOBALS['app_timezone'] = $tz;
+
 $config = mysqli_connect("localhost","root","","stuarz");
  
 // Check connection

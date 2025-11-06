@@ -1,4 +1,20 @@
 
+<?php
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!isset($_SESSION['user'])) {
+    header("Location: index.php?page=login");
+    exit;
+}
+
+// Check for admin access on admin-only pages
+$current_page = $_GET['page'] ?? '';
+if (strpos($current_page, 'attendance_manage') === 0) {
+    if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'admin') {
+        header("Location: index.php?page=attendance");
+        exit;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
