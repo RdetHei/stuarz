@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 05 Nov 2025 pada 23.21
+-- Waktu pembuatan: 10 Nov 2025 pada 00.16
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -78,11 +78,22 @@ CREATE TABLE `attendance` (
   `class_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `date` date NOT NULL,
-  `status` enum('hadir','alfa','izin','sakit','terlambat') DEFAULT 'hadir',
+  `check_in` time DEFAULT NULL,
+  `check_out` time DEFAULT NULL,
+  `status` enum('present','late','absent','sick','excused') DEFAULT 'present',
   `notes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `attendance`
+--
+
+INSERT INTO `attendance` (`id`, `class_id`, `user_id`, `date`, `check_in`, `check_out`, `status`, `notes`, `created_at`, `updated_at`) VALUES
+(6, 7, 1, '2025-11-06', '17:48:49', NULL, 'late', NULL, '2025-11-06 10:48:49', NULL),
+(7, 7, 1, '2025-11-07', '19:26:10', '19:26:17', 'late', NULL, '2025-11-07 12:26:10', '2025-11-07 12:26:17'),
+(8, 7, 1, '2025-11-08', '17:15:32', '17:15:38', 'late', NULL, '2025-11-08 10:15:32', '2025-11-08 10:15:38');
 
 -- --------------------------------------------------------
 
@@ -129,6 +140,13 @@ CREATE TABLE `classes` (
   `created_by` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `classes`
+--
+
+INSERT INTO `classes` (`id`, `name`, `code`, `description`, `created_by`, `created_at`) VALUES
+(7, 'Arch', '12345', 'asdf', 1, '2025-11-06 09:29:56');
 
 -- --------------------------------------------------------
 
@@ -302,7 +320,7 @@ CREATE TABLE `news` (
 --
 
 INSERT INTO `news` (`id`, `title`, `content`, `category`, `thumbnail`, `author`, `created_at`) VALUES
-(1, 'Tangan', 'Aku juga tidak tahu apa yang sebenarnya terjadi.', 'Ilmu Pengetahuan', 'uploads/news/1761414522_Screenshot_2025-07-14_181451.png', 'arch', '2025-09-17 08:24:00');
+(1, 'Tangan', 'Aku juga tidak tahu apa yang sebenarnya terjadi.', 'Ilmu Pengetahuan', 'uploads/news/1762654677_Shorekeeper_Icon_.jfif', 'arch', '2025-09-17 08:24:00');
 
 -- --------------------------------------------------------
 
@@ -337,34 +355,13 @@ CREATE TABLE `schedule` (
   `end_time` time NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Struktur dari tabel `student`
+-- Dumping data untuk tabel `schedule`
 --
 
-CREATE TABLE `student` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `phone` varchar(20) DEFAULT NULL,
-  `address` varchar(255) DEFAULT NULL,
-  `join_date` date DEFAULT NULL,
-  `class` varchar(50) DEFAULT NULL,
-  `profile_picture` varchar(255) DEFAULT NULL,
-  `tasks_completed` int(11) DEFAULT 0,
-  `attendance` int(11) DEFAULT 0,
-  `certificates` int(11) DEFAULT 0,
-  `average_grade` varchar(5) DEFAULT 'N/A'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data untuk tabel `student`
---
-
-INSERT INTO `student` (`id`, `name`, `email`, `phone`, `address`, `join_date`, `class`, `profile_picture`, `tasks_completed`, `attendance`, `certificates`, `average_grade`) VALUES
-(1, 'Budi Santoso', 'budi@example.com', '+62 813 9876 5432', 'Jl. Merdeka No. 45, Bandung', '2024-02-01', 'XI IPS 1', '/uploads/profiles/budi.jpg', 18, 10, 2, 'B'),
-(2, 'Citra Lestari', 'citra@example.com', '+62 811 2222 3333', 'Jl. Mawar No. 7, Surabaya', '2024-03-10', 'XII IPA 3', '/uploads/profiles/citra.jpg', 30, 15, 5, 'A');
+INSERT INTO `schedule` (`id`, `class`, `subject`, `teacher_id`, `class_id`, `day`, `start_time`, `end_time`) VALUES
+(17, 'Lab Komputer', 'PAI', 2, 7, 'Senin', '08:09:00', '08:11:00'),
+(18, 'Lab Komputer', 'MTK', 1, 7, 'Senin', '09:02:00', '09:03:00');
 
 -- --------------------------------------------------------
 
@@ -378,6 +375,14 @@ CREATE TABLE `subjects` (
   `description` text DEFAULT NULL,
   `teacher_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `subjects`
+--
+
+INSERT INTO `subjects` (`id`, `name`, `description`, `teacher_id`) VALUES
+(6, 'MTK', 'Kari', 1),
+(7, 'PAI', 'Agama adalah sesuatu', 2);
 
 -- --------------------------------------------------------
 
@@ -397,6 +402,13 @@ CREATE TABLE `tasks_completed` (
   `subject_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data untuk tabel `tasks_completed`
+--
+
+INSERT INTO `tasks_completed` (`id`, `user_id`, `title`, `description`, `status`, `deadline`, `created_at`, `class_id`, `subject_id`) VALUES
+(6, 1, 'MTK 5', 'Kona', 'pending', '2025-11-06', '2025-11-06 12:27:28', 7, 6);
+
 -- --------------------------------------------------------
 
 --
@@ -414,6 +426,27 @@ CREATE TABLE `task_submissions` (
   `grade` decimal(5,2) DEFAULT NULL,
   `feedback` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `teachers`
+--
+
+CREATE TABLE `teachers` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `teachers`
+--
+
+INSERT INTO `teachers` (`id`, `name`, `email`, `created_at`) VALUES
+(1, 'asd', 'asd@gmail.com', '2025-11-07 13:36:37'),
+(2, 'asd', 'asd@gmail.com', '2025-11-07 13:36:42');
 
 -- --------------------------------------------------------
 
@@ -447,7 +480,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `level`, `name`, `phone`, `address`, `join_date`, `class`, `role`, `avatar`, `bio`, `tasks_completed`, `attendance`, `certificates`, `average_grade`, `banner`) VALUES
-(1, 'arch', 'arcadial076@gmail.com', '$2y$10$T1MOtbhQ.MpF4YtXhlj8ie3li5V.gvbQQ5lXk6pxVE36.9oSvM1pe', 'admin', 'Restu Rudiansyah', '085793344459', 'Kp. Nangela RT/RW 002/003', '2025-11-02', 'XII-PPLG', 'teacher', 'uploads/avatars/1762058270_430aa0673c1b.png', 'Dadidudedo', 0, 0, 0, 'N/A', 'uploads/banners/1762058270_banner_e69d382875e5.png');
+(1, 'arch', 'arcadial076@gmail.com', '$2y$10$GBcRbaY7HPE7Wo6Dvm9Z/.kqZmEVorvR4PP/jU5aZgxynCii3gpBa', 'admin', 'Restu Rudiansyah', '085793344459', 'Kp. Nangela RT/RW 002/003', '2025-11-02', 'XII-PPLG', 'teacher', 'uploads/avatars/1762531732_e466397f7b95.jpg', 'Dadidudedo', 0, 0, 0, 'N/A', 'uploads/banners/1762531732_banner_f791546d8aad.png'),
+(2, 'FelineKrausher', 'as@gmail.com', '$2y$10$I3yLHtybOv.yx53qovkqreR427E4GELUOcB7QKb.ojooISN3LgAH2', 'guru', 'John Deep', '234523', 'Kp. Nangela RT/RW 002/003', '2025-11-09', NULL, 'teacher', 'assets/default-avatar.png', 'fsdfg', 0, 0, 0, 'N/A', 'assets/default-banner.png');
 
 --
 -- Indexes for dumped tables
@@ -555,12 +589,6 @@ ALTER TABLE `schedule`
   ADD KEY `class_id` (`class_id`);
 
 --
--- Indeks untuk tabel `student`
---
-ALTER TABLE `student`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indeks untuk tabel `subjects`
 --
 ALTER TABLE `subjects`
@@ -584,6 +612,12 @@ ALTER TABLE `task_submissions`
   ADD KEY `task_id` (`task_id`),
   ADD KEY `user_id` (`user_id`),
   ADD KEY `class_id` (`class_id`);
+
+--
+-- Indeks untuk tabel `teachers`
+--
+ALTER TABLE `teachers`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indeks untuk tabel `users`
@@ -619,7 +653,7 @@ ALTER TABLE `archives`
 -- AUTO_INCREMENT untuk tabel `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT untuk tabel `average_grade`
@@ -637,7 +671,7 @@ ALTER TABLE `certificates`
 -- AUTO_INCREMENT untuk tabel `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT untuk tabel `class_members`
@@ -673,25 +707,19 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT untuk tabel `schedule`
 --
 ALTER TABLE `schedule`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT untuk tabel `student`
---
-ALTER TABLE `student`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT untuk tabel `subjects`
 --
 ALTER TABLE `subjects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT untuk tabel `tasks_completed`
 --
 ALTER TABLE `tasks_completed`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `task_submissions`
@@ -700,10 +728,16 @@ ALTER TABLE `task_submissions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT untuk tabel `teachers`
+--
+ALTER TABLE `teachers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
