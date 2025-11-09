@@ -71,9 +71,13 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
                     <select name="class_id" id="class_id" required 
                             class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
                         <option value="">Pilih Kelas</option>
-                        <?php foreach ($classes as $class): ?>
+                        <?php 
+                        // Get class_id from query string if available (for pre-selection)
+                        $preselectedClassId = $_GET['class_id'] ?? ($item['class_id'] ?? '');
+                        foreach ($classes as $class): 
+                        ?>
                         <option value="<?= $class['id'] ?>" 
-                                <?= ($item['class_id'] ?? '') == $class['id'] ? 'selected' : '' ?>>
+                                <?= $preselectedClassId == $class['id'] ? 'selected' : '' ?>>
                             <?= htmlspecialchars($class['name']) ?>
                         </option>
                         <?php endforeach; ?>

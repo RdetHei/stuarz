@@ -24,6 +24,13 @@
     </main>
 
     <?php include __DIR__ . '/../components/footer.php'; ?>
+    
+    <!-- Include AI Helper -->
+    <?php 
+    define('BASEPATH', true); // Security check for AI Helper
+    include __DIR__ . '/../components/ai-helper/chat-modal.php'; 
+    ?>
+    
 </body>
 </html>
 

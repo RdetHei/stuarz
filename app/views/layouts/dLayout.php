@@ -33,9 +33,9 @@ if (strpos($current_page, 'attendance_manage') === 0) {
     
 </head>
 <body class="bg-gray-900">
-
+<?php include __DIR__ . '/../components/sidebar.php'; ?>
     <?php include __DIR__ . '/../components/dHeader.php'; ?>
-    <?php include __DIR__ . '/../components/sidebar.php'; ?>
+    
 
     <main id="content" class="transition-all duration-300 p-6">
         <?php

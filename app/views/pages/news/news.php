@@ -7,90 +7,205 @@ if (!isset($baseUrl)) {
 }
 ?>
 
-<div class="bg-gray-900 text-white min-h-screen">
-  <!-- Header -->
-  <div class="bg-gray-900 min-h-screen">
-  <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-white">News</h1>
+<div class="bg-gray-900 min-h-screen">
+  <div class="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-100">News</h1>
+        <p class="text-sm text-gray-400 mt-1">Latest updates and announcements</p>
+      </div>
+      <?php if (isset($_SESSION['level']) && $_SESSION['level'] === 'admin'): ?>
+      <a href="index.php?page=news/create" 
+         class="bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md px-4 py-2 text-sm font-medium transition-colors inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add News
+      </a>
+      <?php endif; ?>
     </div>
 
-  <!-- Search -->
-  <section class="px-6 pb-6 pl-0">
-    <form method="GET" action="index.php" class="max-w-3xl">
-      <input type="hidden" name="page" value="news">
-      <div class="relative flex items-stretch">
-        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-          <span class="material-symbols-outlined">Search</span>
+    <!-- Search & Filter -->
+    <div class="mb-6 bg-[#1f2937] border border-gray-700 rounded-lg p-4">
+      <form method="GET" action="index.php" class="flex flex-col sm:flex-row gap-3">
+        <input type="hidden" name="page" value="news">
+        
+        <div class="flex-1 relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <input type="text" 
+                 name="q" 
+                 placeholder="Search news..." 
+                 value="<?= htmlspecialchars($q) ?>" 
+                 class="w-full pl-10 pr-4 py-2 bg-[#111827] border border-gray-700 text-sm text-gray-200 rounded-md focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors placeholder-gray-500">
         </div>
-        <input type="text" name="q" placeholder="Search news...." value="<?= htmlspecialchars($q) ?>" class="flex-1 pl-11 pr-4 py-2 rounded-l-xl bg-gray-800/70 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <select name="cat" class="mx-2 px-3 py-2 rounded-1-xl bg-gray-800/70 border border-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <option value="">Semua Kategori</option>
+        
+        <select name="cat" 
+                class="px-3 py-2 bg-[#111827] border border-gray-700 text-sm text-gray-200 rounded-md focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors">
+          <option value="">All Categories</option>
           <?php foreach ($cats as $c): ?>
-            <option value="<?= htmlspecialchars($c) ?>" <?= $cat === $c ? 'selected' : '' ?>><?= htmlspecialchars($c) ?></option>
+            <option value="<?= htmlspecialchars($c) ?>" <?= $cat === $c ? 'selected' : '' ?>>
+              <?= htmlspecialchars($c) ?>
+            </option>
           <?php endforeach; ?>
         </select>
-        <button type="submit" class="px-5 py-2 rounded-r-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold border border-gray-700">Cari</button>
-      </div>
-    </form>
-  </section>
+        
+        <button type="submit" 
+                class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap">
+          Search
+        </button>
+      </form>
+    </div>
 
-  <!-- News Grid -->
-  <section class="px-6 pb-12 pl-0 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- News Grid -->
     <?php if (!empty($allNews)): ?>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <!-- Featured News (First Item) -->
       <?php $first = $allNews[0]; ?>
-      <a href="index.php?page=news_show&id=<?= (int)$first['id'] ?>" class="md:col-span-2 relative rounded-xl overflow-hidden shadow-lg bg-[#313338] border border-gray-800 block group">
+      <a href="index.php?page=news_show&id=<?= (int)$first['id'] ?>" 
+         class="lg:col-span-2 group relative rounded-lg overflow-hidden bg-[#1f2937] border border-gray-700 hover:border-gray-600 transition-all">
         <?php if (!empty($first['thumbnail'])): ?>
-          <img
-            src="<?= htmlspecialchars(($baseUrl ? $baseUrl . '/' : '') . ltrim($first['thumbnail'], '/')) ?>"
-            alt="Thumbnail"
-            class="w-full object-cover opacity-90"
-            style="height:360px; max-height:50vh;"
-            loading="lazy"
-            decoding="async"
-            onerror="this.onerror=null;this.src='<?= htmlspecialchars(($baseUrl ? $baseUrl . '/' : '') . 'assets/default-thumb.png') ?>'">
+          <div class="relative overflow-hidden" style="height: 360px;">
+            <img
+              src="<?= htmlspecialchars(($baseUrl ? $baseUrl . '/' : '') . ltrim($first['thumbnail'], '/')) ?>"
+              alt="<?= htmlspecialchars($first['title']) ?>"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+              onerror="this.onerror=null;this.src='<?= htmlspecialchars(($baseUrl ? $baseUrl . '/' : '') . 'assets/default-thumb.png') ?>'">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          </div>
         <?php endif; ?>
-        <div class="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
-          <span class="px-3 py-1 border border-gray-700 bg-gray-800/60 rounded text-sm"><?= htmlspecialchars($first['category']) ?></span>
-          <h2 class="text-2xl font-bold mt-2"><?= htmlspecialchars($first['title']) ?></h2>
-          <p class="text-gray-300 mt-1 line-clamp-2"><?= htmlspecialchars(mb_substr(strip_tags($first['content']), 0, 160)) ?>...</p>
-          <div class="text-sm text-gray-400 mt-2">👤 <?= htmlspecialchars($first['author']) ?> • <?= htmlspecialchars(date('d M Y', strtotime($first['created_at']))) ?></div>
+        <div class="absolute inset-x-0 bottom-0 p-6">
+          <span class="inline-block px-2.5 py-1 bg-[#5865F2]/10 text-[#5865F2] border border-[#5865F2]/20 rounded-md text-xs font-medium mb-3">
+            <?= htmlspecialchars($first['category']) ?>
+          </span>
+          <h2 class="text-xl font-bold text-white mb-2 line-clamp-2">
+            <?= htmlspecialchars($first['title']) ?>
+          </h2>
+          <p class="text-gray-300 text-sm mb-3 line-clamp-2">
+            <?= htmlspecialchars(mb_substr(strip_tags($first['content']), 0, 160)) ?>...
+          </p>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            <span><?= htmlspecialchars($first['author']) ?></span>
+            <span>•</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span><?= htmlspecialchars(date('d M Y', strtotime($first['created_at']))) ?></span>
+          </div>
         </div>
       </a>
 
+      <!-- Regular News Items -->
       <?php foreach (array_slice($allNews, 1) as $n): ?>
-        <a href="index.php?page=news_show&id=<?= (int)$n['id'] ?>" class="rounded-xl overflow-hidden shadow-lg bg-[#313338] border border-gray-800 block hover:bg-[#35373b]">
+        <a href="index.php?page=news_show&id=<?= (int)$n['id'] ?>" 
+           class="group rounded-lg overflow-hidden bg-[#1f2937] border border-gray-700 hover:border-gray-600 transition-all flex flex-col">
           <?php if (!empty($n['thumbnail'])): ?>
-            <img
-              src="<?= htmlspecialchars(($baseUrl ? $baseUrl . '/' : '') . ltrim($n['thumbnail'], '/')) ?>"
-              alt="Thumbnail"
-              class="w-full object-cover"
-              style="height:160px;"
-              loading="lazy"
-              decoding="async"
-              onerror="this.onerror=null;this.src='<?= htmlspecialchars(($baseUrl ? $baseUrl . '/' : '') . 'assets/default-thumb.png') ?>'">
+            <div class="relative overflow-hidden" style="height: 180px;">
+              <img
+                src="<?= htmlspecialchars(($baseUrl ? $baseUrl . '/' : '') . ltrim($n['thumbnail'], '/')) ?>"
+                alt="<?= htmlspecialchars($n['title']) ?>"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+                onerror="this.onerror=null;this.src='<?= htmlspecialchars(($baseUrl ? $baseUrl . '/' : '') . 'assets/default-thumb.png') ?>'">
+            </div>
           <?php endif; ?>
-          <div class="p-4 ">
-            <span class="px-3 py-1 border border-gray-700 bg-gray-800/60 rounded text-sm"><?= htmlspecialchars($n['category']) ?></span>
-            <h3 class="font-bold mt-2 text-white"><?= htmlspecialchars($n['title']) ?></h3>
-            <p class="text-gray-300 text-sm mt-1 line-clamp-3"><?= htmlspecialchars(mb_substr(strip_tags($n['content']), 0, 120)) ?>...</p>
-            <div class="text-sm text-gray-400 mt-2">👤 <?= htmlspecialchars($n['author']) ?> • <?= htmlspecialchars(date('d M Y', strtotime($n['created_at']))) ?></div>
+          <div class="p-4 flex-1 flex flex-col">
+            <span class="inline-block px-2.5 py-1 bg-[#5865F2]/10 text-[#5865F2] border border-[#5865F2]/20 rounded-md text-xs font-medium mb-2 self-start">
+              <?= htmlspecialchars($n['category']) ?>
+            </span>
+            <h3 class="font-semibold text-gray-100 mb-2 line-clamp-2 group-hover:text-[#5865F2] transition-colors">
+              <?= htmlspecialchars($n['title']) ?>
+            </h3>
+            <p class="text-gray-400 text-sm mb-3 line-clamp-2 flex-1">
+              <?= htmlspecialchars(mb_substr(strip_tags($n['content']), 0, 100)) ?>...
+            </p>
+            <div class="flex items-center gap-2 text-xs text-gray-500 pt-3 border-t border-gray-700">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              <span class="truncate"><?= htmlspecialchars($n['author']) ?></span>
+              <span>•</span>
+              <span><?= htmlspecialchars(date('d M Y', strtotime($n['created_at']))) ?></span>
+            </div>
           </div>
         </a>
       <?php endforeach; ?>
-    <?php else: ?>
-      <div class="md:col-span-3 text-center text-gray-400 py-16">Belum ada berita.</div>
-    <?php endif; ?>
-  </section>
-
-  <?php if ($totalPages > 1): ?>
-  <div class="px-6 pb-10">
-    <div class="inline-flex items-center gap-2 bg-[#1e1f22] border border-gray-800 rounded-xl p-2">
-      <?php $prev = max(1, $page - 1); $next = min($totalPages, $page + 1); ?>
-      <a href="index.php?page=news&q=<?= urlencode($q) ?>&cat=<?= urlencode($cat) ?>&p=<?= $prev ?>" class="px-3 py-1 rounded bg-[#2b2d31] text-gray-200 hover:bg-[#32343a]">Prev</a>
-      <span class="px-2 text-gray-400">Hal <?= $page ?> / <?= $totalPages ?></span>
-      <a href="index.php?page=news&q=<?= urlencode($q) ?>&cat=<?= urlencode($cat) ?>&p=<?= $next ?>" class="px-3 py-1 rounded bg-[#2b2d31] text-gray-200 hover:bg-[#32343a]">Next</a>
     </div>
+    <?php else: ?>
+    <!-- Empty State -->
+    <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-12 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-800 flex items-center justify-center">
+        <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-100 mb-2">No News Found</h3>
+      <p class="text-gray-400 mb-6">There are no news articles available at the moment.</p>
+      <?php if (isset($_SESSION['level']) && $_SESSION['level'] === 'admin'): ?>
+      <a href="index.php?page=news/create" 
+         class="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md text-sm font-medium transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Create First News
+      </a>
+      <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Pagination -->
+    <?php if ($totalPages > 1): ?>
+    <div class="flex justify-center">
+      <div class="inline-flex items-center gap-2 bg-[#1f2937] border border-gray-700 rounded-lg p-2">
+        <?php $prev = max(1, $page - 1); $next = min($totalPages, $page + 1); ?>
+        
+        <?php if ($page > 1): ?>
+        <a href="index.php?page=news&q=<?= urlencode($q) ?>&cat=<?= urlencode($cat) ?>&p=<?= $prev ?>" 
+           class="px-3 py-1.5 bg-[#111827] hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-md transition-colors flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Previous
+        </a>
+        <?php else: ?>
+        <span class="px-3 py-1.5 bg-gray-800 text-gray-600 text-sm font-medium rounded-md cursor-not-allowed flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Previous
+        </span>
+        <?php endif; ?>
+        
+        <span class="px-4 py-1.5 text-sm text-gray-400">
+          Page <span class="text-gray-200 font-medium"><?= $page ?></span> of <span class="text-gray-200 font-medium"><?= $totalPages ?></span>
+        </span>
+        
+        <?php if ($page < $totalPages): ?>
+        <a href="index.php?page=news&q=<?= urlencode($q) ?>&cat=<?= urlencode($cat) ?>&p=<?= $next ?>" 
+           class="px-3 py-1.5 bg-[#111827] hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-md transition-colors flex items-center gap-1">
+          Next
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+        <?php else: ?>
+        <span class="px-3 py-1.5 bg-gray-800 text-gray-600 text-sm font-medium rounded-md cursor-not-allowed flex items-center gap-1">
+          Next
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </span>
+        <?php endif; ?>
+      </div>
+    </div>
+    <?php endif; ?>
   </div>
-  <?php endif; ?>
 </div>

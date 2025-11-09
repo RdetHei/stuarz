@@ -57,8 +57,8 @@ class DashboardAdminController
             $stats['total_users'] = $row['total'];
         }
 
-        // Total Students
-        $result = $this->db->query("SELECT COUNT(*) as total FROM student");
+        // Total Students (count users with level = 'student')
+        $result = $this->db->query("SELECT COUNT(*) as total FROM users WHERE `level` = 'student'");
         if ($result && $row = $result->fetch_assoc()) {
             $stats['total_students'] = $row['total'];
         }
@@ -161,10 +161,12 @@ class DashboardAdminController
             'values' => []
         ];
 
-        $sql = "SELECT class, COUNT(*) as total 
-                FROM student 
-                GROUP BY class 
-                ORDER BY class";
+        // Count members per class using classes and class_members tables
+        $sql = "SELECT c.name as class, COUNT(cm.user_id) as total
+                FROM classes c
+                LEFT JOIN class_members cm ON c.id = cm.class_id
+                GROUP BY c.id
+                ORDER BY c.name";
 
         $result = $this->db->query($sql);
         if ($result) {
@@ -210,11 +212,12 @@ class DashboardAdminController
             'values' => []
         ];
 
+        // New students per month - use users table's join_date and filter by student level
         $sql = "SELECT 
                     DATE_FORMAT(join_date, '%b') as month,
                     COUNT(*) as total
-                FROM student
-                WHERE join_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                FROM users
+                WHERE `level` = 'student' AND join_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
                 GROUP BY YEAR(join_date), MONTH(join_date)
                 ORDER BY join_date";
 
@@ -283,13 +286,46 @@ class DashboardAdminController
         global $config;
         $title = "Docs — Admin";
         $description = "Kelola dokumentasi";
-        $res = mysqli_query($config, "SELECT * FROM documentation ORDER BY section, title");
+
+        // Pagination and search parameters
+        $limit = (int)($_GET['limit'] ?? 10);
+        if ($limit <= 0) $limit = 10;
+
+        // Accept either 'p' or 'page_num' for compatibility with view links
+        $page = isset($_GET['p']) ? (int)$_GET['p'] : (isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1);
+        if ($page <= 0) $page = 1;
+
+        // Normalize for view which reads page_num
+        $_GET['page_num'] = $page;
+
+        $q = trim($_GET['q'] ?? '');
+        $offset = ($page - 1) * $limit;
+
+        $where = '';
+        if ($q !== '') {
+            $esc = mysqli_real_escape_string($config, $q);
+            $where = "WHERE section LIKE '%{$esc}%' OR title LIKE '%{$esc}%' OR description LIKE '%{$esc}%'";
+        }
+
+        // Total count for pagination
+        $total = 0;
+        $resTotal = mysqli_query($config, "SELECT COUNT(*) as total FROM documentation {$where}");
+        if ($resTotal && $row = mysqli_fetch_assoc($resTotal)) {
+            $total = (int)$row['total'];
+        }
+
+        // Fetch paginated rows
         $docs = [];
+        $sql = "SELECT * FROM documentation {$where} ORDER BY section, title LIMIT {$offset}, {$limit}";
+        $res = mysqli_query($config, $sql);
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $docs[] = $r;
+            mysqli_free_result($res);
         }
-    $content = dirname(__DIR__) . '/views/pages/admin/admin_docs_list.php';
-    include dirname(__DIR__) . '/views/layouts/dLayout.php';
+
+        // Expose variables used by the view: $docs, $total, $limit, $q
+        $content = dirname(__DIR__) . '/views/pages/admin/admin_docs_list.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function docsCreate()
@@ -390,13 +426,46 @@ class DashboardAdminController
         global $config;
         $title = "News — Admin";
         $description = "Kelola berita";
-        $res = mysqli_query($config, "SELECT * FROM news ORDER BY created_at DESC, id DESC");
+
+        // Pagination and search parameters
+        $limit = (int)($_GET['limit'] ?? 10);
+        if ($limit <= 0) $limit = 10;
+
+        // Accept either 'p' or 'page_num' for compatibility with view links
+        $page = isset($_GET['p']) ? (int)$_GET['p'] : (isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1);
+        if ($page <= 0) $page = 1;
+
+        // Normalize for view which reads page_num
+        $_GET['page_num'] = $page;
+
+        $q = trim($_GET['q'] ?? '');
+        $offset = ($page - 1) * $limit;
+
+        $where = '';
+        if ($q !== '') {
+            $esc = mysqli_real_escape_string($config, $q);
+            $where = "WHERE title LIKE '%{$esc}%' OR content LIKE '%{$esc}%' OR category LIKE '%{$esc}%' OR author LIKE '%{$esc}%'";
+        }
+
+        // Total count for pagination
+        $total = 0;
+        $resTotal = mysqli_query($config, "SELECT COUNT(*) as total FROM news {$where}");
+        if ($resTotal && $row = mysqli_fetch_assoc($resTotal)) {
+            $total = (int)$row['total'];
+        }
+
+        // Fetch paginated rows
         $news = [];
+        $sql = "SELECT * FROM news {$where} ORDER BY created_at DESC, id DESC LIMIT {$offset}, {$limit}";
+        $res = mysqli_query($config, $sql);
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $news[] = $r;
+            mysqli_free_result($res);
         }
-    $content = dirname(__DIR__) . '/views/pages/admin/admin_news_list.php';
-    include dirname(__DIR__) . '/views/layouts/dLayout.php';
+
+        // Expose variables used by the view: $news, $total, $limit, $q
+        $content = dirname(__DIR__) . '/views/pages/admin/admin_news_list.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
     public function newsCreate()

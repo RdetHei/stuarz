@@ -7,9 +7,9 @@ $sub  = isset($_GET['dashboard']) && $_GET['dashboard'] !== '' ? (string) $_GET[
 
 function navActive(string $navPage, string $currentPage, ?string $currentSub = null): string
 {
-  if ($navPage === $currentPage) return 'bg-gray-800';
-  if ($currentPage === 'dashboard' && $currentSub !== null && $navPage === $currentSub) return 'bg-gray-800';
-  return 'hover:bg-gray-700';
+  if ($navPage === $currentPage) return 'bg-gray-800 dark:bg-gray-800 bg-gray-100 text-white dark:text-white text-gray-900';
+  if ($currentPage === 'dashboard' && $currentSub !== null && $navPage === $currentSub) return 'bg-gray-800 dark:bg-gray-800 bg-gray-100 text-white dark:text-white text-gray-900';
+  return 'hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 text-white dark:text-white text-gray-900';
 }
 
 function initialsFromName(string $name, int $len = 2): string
@@ -221,8 +221,8 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
 <div id="sidebar" class="fixed inset-y-0 left-0 bg-[#0f172a] text-white flex flex-col z-50">
 
   <!-- Header -->
-  <div class="relative flex items-center justify-center h-16 border-b border-gray-700">
-    <button id="sidebarLogoToggle" class="absolute left-6 top-4 text-white focus:outline-none" aria-label="Toggle sidebar logo/menu">
+  <div class="relative flex items-center justify-center h-16 border-b border-gray-700 dark:border-gray-700 border-gray-200">
+    <button id="sidebarLogoToggle" class="absolute left-6 top-4 text-white dark:text-white text-gray-900 focus:outline-none" aria-label="Toggle sidebar logo/menu">
       <!-- Treat this as a brand mark; keep it visible only when expanded -->
       <svg id="sidebarLogo" fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 293.538 293.538" class="w-8 h-8" aria-hidden="true">
         <g>
@@ -236,7 +236,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
       </svg>
     </button>
 
-    <button id="sidebarToggle" class="absolute right-4 top-4 text-white focus:outline-none hover:bg-gray-700 rounded p-1" aria-label="Toggle sidebar">
+    <button id="sidebarToggle" class="absolute right-4 top-4 text-white dark:text-white text-gray-900 focus:outline-none hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 rounded p-1 transition-colors" aria-label="Toggle sidebar">
       <div class="hamburger" aria-hidden="true">
         <span class="hamburger-line hamburger-line-1"></span>
         <span class="hamburger-line hamburger-line-2"></span>
@@ -317,8 +317,8 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
   </nav>
 
   <!-- User Profile (Bottom) -->
-  <div class="border-t border-gray-700 relative py-4 px-1">
-    <button id="profileBtn" class="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-gray-800 transition-colors focus:outline-none" aria-haspopup="true" aria-expanded="false" title="<?= htmlspecialchars($sessionUser['username'] ?? ($sessionUser['name'] ?? 'User')) ?>">
+  <div class="border-t border-gray-700 dark:border-gray-700 border-gray-200 relative py-4 px-1">
+    <button id="profileBtn" class="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-gray-800 dark:hover:bg-gray-800 hover:bg-gray-200 transition-colors focus:outline-none" aria-haspopup="true" aria-expanded="false" title="<?= htmlspecialchars($sessionUser['username'] ?? ($sessionUser['name'] ?? 'User')) ?>">
       <?php
       $userLocal = $sessionUser; // local alias for clarity in template
       $avatar = $userLocal['avatar'] ?? '';
@@ -358,12 +358,12 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
         <p class="text-xs text-gray-400"><?= htmlspecialchars($userLocal['level'] ?? '') ?></p>
       </div>
 
-      <div id="profileModal" class="hidden z-[9999] w-60 bg-[#1f2937] rounded-t-xl shadow-xl">
-        <div class="px-2 py-2 text-sm text-gray-200 border-b border-gray-600">
+      <div id="profileModal" class="hidden z-[9999] w-60 bg-[#1f2937] dark:bg-[#1f2937] bg-white rounded-t-xl shadow-xl border border-gray-700 dark:border-gray-700 border-gray-200">
+        <div class="px-2 py-2 text-sm text-gray-200 dark:text-gray-200 text-gray-900 border-b border-gray-600 dark:border-gray-600 border-gray-200">
           <?= htmlspecialchars($userLocal['email'], ENT_QUOTES, 'UTF-8'); ?>
         </div>
-        <nav class="flex flex-col text-sm text-gray-200">
-          <a href="index.php?page=profile" class="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors">
+        <nav class="flex flex-col text-sm text-gray-200 dark:text-gray-200 text-gray-900">
+          <a href="index.php?page=profile" class="flex items-center px-4 py-2 hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-100 transition-colors">
             <span class="material-symbols-outlined mr-3">account_circle</span>
             Profil Saya
           </a>

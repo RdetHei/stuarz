@@ -31,29 +31,98 @@ class ScheduleController {
         }
         // Regular users can only see schedules for their class
         else {
-            // Get user's class
-            $stmt = $this->db->prepare("SELECT class FROM users WHERE id = ?");
+            // Get user's class from class_members
+            $stmt = $this->db->prepare("SELECT class_id FROM class_members WHERE user_id = ? LIMIT 1");
             $stmt->bind_param('i', $userId);
             $stmt->execute();
             $result = $stmt->get_result();
-            $user = $result->fetch_assoc();
-            if ($user && $user['class']) {
-                // Get class ID from class name
-                $stmt = $this->db->prepare("SELECT id FROM classes WHERE name = ?");
-                $stmt->bind_param('s', $user['class']);
+            $member = $result->fetch_assoc();
+            $stmt->close();
+            
+            if ($member && $member['class_id']) {
+                $filters['class_id'] = $member['class_id'];
+            } else {
+                // Fallback: try to get from users.class field
+                $stmt = $this->db->prepare("SELECT class FROM users WHERE id = ?");
+                $stmt->bind_param('i', $userId);
                 $stmt->execute();
                 $result = $stmt->get_result();
-                $class = $result->fetch_assoc();
-                if ($class) {
-                    $filters['class_id'] = $class['id'];
+                $user = $result->fetch_assoc();
+                $stmt->close();
+                if ($user && $user['class']) {
+                    // Get class ID from class name
+                    $stmt = $this->db->prepare("SELECT id FROM classes WHERE name = ?");
+                    $stmt->bind_param('s', $user['class']);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $class = $result->fetch_assoc();
+                    $stmt->close();
+                    if ($class) {
+                        $filters['class_id'] = $class['id'];
+                    }
                 }
             }
         }
 
-        $schedules = $this->model->getAll($filters);
-        // Provide lists for filters to the view (avoid querying in view scope)
+        // Get all classes (or filtered class if class_id filter is set)
+        if (!empty($filters['class_id'])) {
+            $allClasses = $this->db->query("SELECT id, name, code, description FROM classes WHERE id = " . intval($filters['class_id']) . " ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
+        } else {
+            $allClasses = $this->db->query("SELECT id, name, code, description FROM classes ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
+        }
+        
+        // For each class, get ALL its schedules regardless of teacher/day filters
+        // Each card should show ALL schedules for that class
+        $classesWithSchedules = [];
+        foreach ($allClasses as $class) {
+            $classId = $class['id'];
+            
+            // Get ALL schedules for this class (no teacher/day filtering)
+            // This ensures each card shows all schedules related to the class
+            $classSchedules = $this->model->getAllWithRelations(['class_id' => $classId]);
+            
+            // Ensure we have an array
+            if (!is_array($classSchedules)) {
+                $classSchedules = [];
+            }
+            
+            $classesWithSchedules[$classId] = array_merge($class, [
+                'schedules' => $classSchedules
+            ]);
+        }
+        
+        // If teacher or day filter is set, only show classes that have matching schedules
+        // But still display ALL schedules for those classes
+        if (!empty($filters['teacher_id']) || !empty($filters['day'])) {
+            $filteredClasses = [];
+            foreach ($classesWithSchedules as $classId => $classData) {
+                $hasMatchingSchedule = false;
+                foreach ($classData['schedules'] as $schedule) {
+                    $match = true;
+                    if (!empty($filters['teacher_id']) && $schedule['teacher_id'] != $filters['teacher_id']) {
+                        $match = false;
+                    }
+                    if (!empty($filters['day']) && $schedule['day'] != $filters['day']) {
+                        $match = false;
+                    }
+                    if ($match) {
+                        $hasMatchingSchedule = true;
+                        break;
+                    }
+                }
+                // Only include class if it has at least one matching schedule
+                // But still show ALL schedules for that class
+                if ($hasMatchingSchedule) {
+                    $filteredClasses[$classId] = $classData;
+                }
+            }
+            $classesWithSchedules = $filteredClasses;
+        }
+
+        // Provide lists for filters to the view (always show all classes/teachers for filter dropdown)
         $filterClasses = $this->db->query("SELECT id, name FROM classes ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
         $filterTeachers = $this->db->query("SELECT id, name FROM users WHERE level='guru' OR level='admin' ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
+        
         $content = dirname(__DIR__) . '/views/pages/schedule/schedule.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -71,11 +140,11 @@ class ScheduleController {
         $item = null;
         $days = $this->allowedDays;
         // load helper lists
-        $classes = $this->db->query("SELECT id, name FROM classes")->fetch_all(MYSQLI_ASSOC) ?? [];
-        $subjects = $this->db->query("SELECT id, name FROM subjects")->fetch_all(MYSQLI_ASSOC) ?? [];
+        $classes = $this->db->query("SELECT id, name, code FROM classes ORDER BY name")->fetch_all(MYSQLI_ASSOC) ?? [];
+        $subjects = $this->db->query("SELECT id, name FROM subjects ORDER BY name")->fetch_all(MYSQLI_ASSOC) ?? [];
         
         // Admin: daftar guru/admin (menampilkan pengguna dengan level 'guru' atau 'admin')
-        $teachers = $this->db->query("SELECT id, name FROM users WHERE level='guru' OR level='admin'")->fetch_all(MYSQLI_ASSOC) ?? [];
+        $teachers = $this->db->query("SELECT id, name FROM users WHERE level='guru' OR level='admin' ORDER BY name")->fetch_all(MYSQLI_ASSOC) ?? [];
 
         $content = dirname(__DIR__) . '/views/pages/schedule/form.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
@@ -91,14 +160,21 @@ class ScheduleController {
         }
 
         $data = [
-            'class' => $_POST['class'] ?? '',
-            'subject' => $_POST['subject'] ?? '',
+            'class' => trim($_POST['class'] ?? ''),
+            'subject' => trim($_POST['subject'] ?? ''),
             'teacher_id' => intval($_POST['teacher_id'] ?? 0),
             'class_id' => intval($_POST['class_id'] ?? 0),
-            'day' => $_POST['day'] ?? '',
-            'start_time' => $_POST['start_time'] ?? '',
-            'end_time' => $_POST['end_time'] ?? '',
+            'day' => trim($_POST['day'] ?? ''),
+            'start_time' => trim($_POST['start_time'] ?? ''),
+            'end_time' => trim($_POST['end_time'] ?? ''),
         ];
+        
+        // Validate day is selected and valid
+        if (empty($data['day']) || !in_array($data['day'], $this->allowedDays)) {
+            $_SESSION['error'] = 'Hari tidak valid atau tidak dipilih.';
+            header('Location: index.php?page=schedule/create');
+            exit;
+        }
 
         // Validate selected teacher exists and has level 'guru' atau 'admin'
         $teacherId = $data['teacher_id'];
@@ -193,14 +269,21 @@ class ScheduleController {
         $userId = $_SESSION['user_id'];
 
         $data = [
-            'class' => $_POST['class'] ?? '',
-            'subject' => $_POST['subject'] ?? '',
+            'class' => trim($_POST['class'] ?? ''),
+            'subject' => trim($_POST['subject'] ?? ''),
             'teacher_id' => intval($_POST['teacher_id'] ?? 0),
             'class_id' => intval($_POST['class_id'] ?? 0),
-            'day' => $_POST['day'] ?? '',
-            'start_time' => $_POST['start_time'] ?? '',
-            'end_time' => $_POST['end_time'] ?? '',
+            'day' => trim($_POST['day'] ?? ''),
+            'start_time' => trim($_POST['start_time'] ?? ''),
+            'end_time' => trim($_POST['end_time'] ?? ''),
         ];
+        
+        // Validate day is selected and valid
+        if (empty($data['day']) || !in_array($data['day'], $this->allowedDays)) {
+            $_SESSION['error'] = 'Hari tidak valid atau tidak dipilih.';
+            header('Location: index.php?page=schedule/edit/' . $id);
+            exit;
+        }
 
         // Validate selected teacher exists and has level 'guru' atau 'admin'
         $teacherId = $data['teacher_id'];
