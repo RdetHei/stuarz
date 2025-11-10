@@ -47,10 +47,45 @@ class SettingsController
             $email = trim($_POST['email'] ?? '');
             $username = trim($_POST['username'] ?? '');
 
+            // Basic validation
+            if ($name === '' || $email === '' || $username === '') {
+                $_SESSION['error'] = 'Nama, email, dan username wajib diisi.';
+                header("Location: index.php?page=settings");
+                exit;
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['error'] = 'Format email tidak valid.';
+                header("Location: index.php?page=settings");
+                exit;
+            }
+
+            // Ensure email/username are unique (exclude current user)
+            $checkStmt = mysqli_prepare($config, "SELECT id FROM users WHERE (email = ? OR username = ?) AND id != ? LIMIT 1");
+            mysqli_stmt_bind_param($checkStmt, "ssi", $email, $username, $userId);
+            mysqli_stmt_execute($checkStmt);
+            $res = mysqli_stmt_get_result($checkStmt);
+            $conflict = mysqli_fetch_assoc($res);
+            mysqli_stmt_close($checkStmt);
+
+            if ($conflict) {
+                $_SESSION['error'] = 'Email atau username sudah digunakan oleh akun lain.';
+                header("Location: index.php?page=settings");
+                exit;
+            }
+
             $stmt = mysqli_prepare($config, "UPDATE users SET name = ?, email = ?, username = ? WHERE id = ?");
             mysqli_stmt_bind_param($stmt, "sssi", $name, $email, $username, $userId);
             mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
+
+            // Refresh session user data
+            $stmt = mysqli_prepare($config, "SELECT id, username, name, email, `level`, COALESCE(role,'') AS role, avatar, banner, join_date, phone, address, `class`, bio FROM users WHERE id = ? LIMIT 1");
+            mysqli_stmt_bind_param($stmt, "i", $userId);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $updatedUser = mysqli_fetch_assoc($result);
+            mysqli_stmt_close($stmt);
+            if ($updatedUser) $_SESSION['user'] = $updatedUser;
 
             $_SESSION['flash'] = 'Profil berhasil diperbarui';
         } elseif (isset($_POST['update_password'])) {
@@ -66,7 +101,7 @@ class SettingsController
             $user = mysqli_fetch_assoc($result);
             mysqli_stmt_close($stmt);
 
-            if (!password_verify($currentPassword, $user['password'])) {
+            if (!isset($user['password']) || !password_verify($currentPassword, $user['password'])) {
                 $_SESSION['error'] = 'Password saat ini tidak benar';
                 header("Location: index.php?page=settings");
                 exit;
@@ -77,6 +112,8 @@ class SettingsController
                 header("Location: index.php?page=settings");
                 exit;
             }
+
+            // No minimum length requirement enforced here (handled by policy if needed)
 
             $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
             $stmt = mysqli_prepare($config, "UPDATE users SET password = ? WHERE id = ?");

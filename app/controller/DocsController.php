@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__DIR__) . '/config/config.php';
+require_once dirname(__DIR__) . '/helpers/notifier.php';
 
 class DocsController
 {
@@ -112,17 +113,71 @@ class DocsController
 
     public function create()
     {
-        $title = "Create Documentation";
-        $description = "Tambah dokumentasi baru";
-        $doc = null;
-        $content = dirname(__DIR__) . '/views/pages/docs_form.php';
-        include dirname(__DIR__) . '/views/layouts/dlayout.php';
-    }
+        require_once __DIR__ . '/../model/documentation.php';
+        $id = (int)($_POST['id'] ?? $_GET['id'] ?? 0);
+        $model = new Documentation($this->db);
 
-    public function store()
-    {
-        $section = trim($_POST['section'] ?? 'General');
-        $title = trim($_POST['title'] ?? '');
+        if ($id <= 0) {
+            $_SESSION['flash'] = 'ID tidak valid.';
+            header('Location: index.php?page=docs');
+            exit;
+        }
+
+        // show confirmation card if GET or not confirmed
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if ($method === 'GET' || !isset($_POST['confirm'])) {
+            // load doc to show
+            $stmt = mysqli_prepare($this->db, "SELECT * FROM documentation WHERE id = ? LIMIT 1");
+            $doc = null;
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, 'i', $id);
+                mysqli_stmt_execute($stmt);
+                $res = $stmt->get_result();
+                $doc = $res ? $res->fetch_assoc() : null;
+                mysqli_stmt_close($stmt);
+            }
+
+            if (!$doc) {
+                $_SESSION['flash'] = 'Dokumentasi tidak ditemukan.';
+                header('Location: index.php?page=docs');
+                exit;
+            }
+
+            $docToDelete = $doc;
+            $content = dirname(__DIR__) . '/views/pages/docs/confirm_delete.php';
+            include dirname(__DIR__) . '/views/layouts/dLayout.php';
+            exit;
+        }
+
+        // perform deletion when confirmed via POST
+        if (isset($_POST['confirm']) && (string)$_POST['confirm'] === '1') {
+            // fetch title for message
+            $stmt = mysqli_prepare($this->db, "SELECT title FROM documentation WHERE id = ? LIMIT 1");
+            $title = '';
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, 'i', $id);
+                mysqli_stmt_execute($stmt);
+                mysqli_stmt_bind_result($stmt, $title);
+                mysqli_stmt_fetch($stmt);
+                mysqli_stmt_close($stmt);
+            }
+
+            $ok = $model->delete($id);
+            $_SESSION['flash'] = $ok ? 'Dokumentasi dihapus' : 'Gagal menghapus dokumentasi';
+            if ($ok) {
+                $uid = $_SESSION['user']['id'] ?? 0;
+                require_once dirname(__DIR__) . '/helpers/notifier.php';
+                notify_event($this->db, 'delete', 'documentation', $id, $uid, "Dokumentasi dihapus: {$title}", null);
+            }
+
+            header('Location: index.php?page=docs');
+            exit;
+        }
+
+        // fallback
+        $_SESSION['flash'] = 'Aksi dibatalkan.';
+        header('Location: index.php?page=docs');
+        exit;
         $slug = trim($_POST['slug'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $contentText = trim($_POST['content'] ?? '');
@@ -142,8 +197,12 @@ class DocsController
         if ($stmt) {
             mysqli_stmt_bind_param($stmt, "sssss", $section, $title, $slug, $description, $contentText);
             mysqli_stmt_execute($stmt);
+            $insertId = mysqli_insert_id($this->db);
             mysqli_stmt_close($stmt);
             $_SESSION['flash'] = 'Dokumentasi berhasil dibuat';
+            // notify
+            $uid = $_SESSION['user']['id'] ?? 0;
+            notify_event($this->db, 'create', 'documentation', $insertId, $uid, "Dokumentasi dibuat: {$title}", 'index.php?page=docs&doc=' . urlencode($slug));
         } else {
             $_SESSION['flash'] = 'Gagal membuat dokumentasi';
         }
@@ -206,6 +265,8 @@ class DocsController
             mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
             $_SESSION['flash'] = 'Dokumentasi berhasil diupdate';
+            $uid = $_SESSION['user']['id'] ?? 0;
+            notify_event($this->db, 'update', 'documentation', $id, $uid, "Dokumentasi diperbarui: {$title}", 'index.php?page=docs&doc=' . urlencode($slug));
         } else {
             $_SESSION['flash'] = 'Gagal mengupdate dokumentasi';
         }
@@ -220,8 +281,24 @@ class DocsController
         $id = (int)($_GET['id'] ?? 0);
         $model = new Documentation($this->db);
         if ($id > 0) {
+            // fetch title for message
+            $stmt = mysqli_prepare($this->db, "SELECT title FROM documentation WHERE id = ? LIMIT 1");
+            $title = '';
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, 'i', $id);
+                mysqli_stmt_execute($stmt);
+                mysqli_stmt_bind_result($stmt, $title);
+                mysqli_stmt_fetch($stmt);
+                mysqli_stmt_close($stmt);
+            }
+
             $ok = $model->delete($id);
             $_SESSION['flash'] = $ok ? 'Dokumentasi dihapus' : 'Gagal menghapus dokumentasi';
+            if ($ok) {
+                $uid = $_SESSION['user']['id'] ?? 0;
+                // do not include a localhost link for delete notifications; show a special card instead
+                notify_event($this->db, 'delete', 'documentation', $id, $uid, "Dokumentasi dihapus: {$title}", null);
+            }
         } else {
             $_SESSION['flash'] = 'ID tidak valid.';
         }

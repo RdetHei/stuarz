@@ -67,6 +67,7 @@ $router->get('/company', 'CompanyController@company');
 $router->get('/profile', 'ProfileController@profile');
 $router->get('/settings', 'SettingsController@index');
 $router->post('/settings', 'SettingsController@update');
+$router->get('/notifications', 'NotificationController@index');
 $router->get('/dashboard', 'DashboardController@dashboard');
 $router->get('/account', 'AccountController@account');
 $router->get('/create_user', 'AccountController@create');

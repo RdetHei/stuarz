@@ -304,6 +304,11 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
       <span class="menu-text">Pengumuman</span>
     </a>
 
+    <a href="index.php?page=notifications" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('notifications', $page, $sub) ?>">
+      <span class="material-symbols-outlined mr-3">notifications</span>
+      <span class="menu-text">Notifikasi</span>
+    </a>
+
     <?php if (($sessionUser['level'] ?? '') === 'admin'): ?>
       <a href="index.php?page=dashboard-admin-docs" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('dashboard-admin-docs', $page, $sub) ?>">
         <span class="material-symbols-outlined mr-3">library_books</span>

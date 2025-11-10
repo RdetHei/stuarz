@@ -312,15 +312,53 @@ class AccountController
             exit;
         }
 
-        $id = intval($_POST['id'] ?? 0);
+        // accept id from GET for confirmation step, POST for actual delete
+        $id = intval($_POST['id'] ?? $_GET['id'] ?? 0);
         if ($id <= 0) {
             $_SESSION['flash'] = 'ID tidak valid.';
             header('Location: index.php?page=account');
             exit;
         }
 
-        $ok = $this->model->deleteUser($id);
-        $_SESSION['flash'] = $ok ? 'Akun dihapus.' : 'Gagal menghapus akun.';
+        // If request is GET or confirmation not present, show confirmation card
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if ($method === 'GET' || !isset($_POST['confirm'])) {
+            // load user to show info
+            $userToDelete = $this->model->getUserById($id);
+            if (!$userToDelete) {
+                $_SESSION['flash'] = 'Pengguna tidak ditemukan.';
+                header('Location: index.php?page=account');
+                exit;
+            }
+            // Render confirmation card view
+            $content = dirname(__DIR__) . '/views/pages/users/confirm_delete.php';
+            include dirname(__DIR__) . '/views/layouts/dLayout.php';
+            exit;
+        }
+
+        // Otherwise: POST with confirmation -> perform delete
+        // ensure confirm value is affirmative
+        if (isset($_POST['confirm']) && (string)$_POST['confirm'] === '1') {
+            // fetch user for message
+            $userToDelete = $this->model->getUserById($id);
+            $ok = $this->model->deleteUser($id);
+
+            // notify and set flash
+            global $config;
+            require_once dirname(__DIR__) . '/helpers/notifier.php';
+            $uid = $_SESSION['user']['id'] ?? 0;
+            if ($ok) {
+                $username = $userToDelete['username'] ?? '';
+                notify_event($config, 'delete', 'user', $id, $uid, "Akun dihapus: {$username}", null);
+            }
+
+            $_SESSION['flash'] = $ok ? 'Akun dihapus.' : 'Gagal menghapus akun.';
+            header('Location: index.php?page=account');
+            exit;
+        }
+
+        // fallback
+        $_SESSION['flash'] = 'Aksi dibatalkan.';
         header('Location: index.php?page=account');
         exit;
     }

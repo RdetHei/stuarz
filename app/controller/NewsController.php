@@ -25,29 +25,60 @@ class NewsController{
     public function show(){
         global $config;
         require_once __DIR__ . '/../model/newsModel.php';
+        require_once dirname(__DIR__) . '/helpers/notifier.php';
         $model = new NewsModel($config);
-        $id = (int)($_GET['id'] ?? 0);
-        $newsItem = $id ? $model->find($id) : null;
-        if (!$newsItem) {
-            http_response_code(404);
-            $content = dirname(__DIR__) . '/views/pages/errors/notFound.php';
-            include dirname(__DIR__) . '/views/layouts/layout.php';
-            return;
-        }
-        $title = htmlspecialchars($newsItem['title']) . ' - News - Stuarz';
-        $description = mb_substr(strip_tags($newsItem['content']), 0, 140);
-        $content = dirname(__DIR__) . '/views/pages/news/news_single.php';
-        include dirname(__DIR__) . '/views/layouts/layout.php';
-    }
+        $id = (int)($_POST['id'] ?? $_GET['id'] ?? 0);
 
-    public function delete() {
-        global $config;
-        require_once __DIR__ . '/../model/newsModel.php';
+        if ($id <= 0) {
+            $_SESSION['flash'] = 'ID tidak valid.';
+            header('Location: index.php?page=news');
+            exit;
+        }
+
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if ($method === 'GET' || !isset($_POST['confirm'])) {
+            $newsItem = $model->find($id);
+            if (!$newsItem) {
+                $_SESSION['flash'] = 'Berita tidak ditemukan.';
+                header('Location: index.php?page=news');
+                exit;
+            }
+            $newsToDelete = $newsItem;
+            $content = dirname(__DIR__) . '/views/pages/news/confirm_delete.php';
+            include dirname(__DIR__) . '/views/layouts/dLayout.php';
+            exit;
+        }
+
+        if (isset($_POST['confirm']) && (string)$_POST['confirm'] === '1') {
+            $newsItem = $model->find($id);
+            $title = $newsItem['title'] ?? '';
+            $ok = $model->delete($id);
+            $_SESSION['flash'] = $ok ? 'Berita dihapus.' : 'Gagal menghapus berita.';
+            if ($ok) {
+                $uid = $_SESSION['user']['id'] ?? 0;
+                notify_event($config, 'delete', 'news', $id, $uid, "Berita dihapus: {$title}", null);
+            }
+            header('Location: index.php?page=news');
+            exit;
+        }
+
+        $_SESSION['flash'] = 'Aksi dibatalkan.';
+        header('Location: index.php?page=news');
+        exit;
+        require_once dirname(__DIR__) . '/helpers/notifier.php';
         $model = new NewsModel($config);
         $id = (int)($_GET['id'] ?? 0);
         if ($id > 0) {
+            // fetch title for message if possible
+            $newsItem = $model->find($id);
+            $title = $newsItem['title'] ?? '';
             $ok = $model->delete($id);
             $_SESSION['flash'] = $ok ? 'Berita dihapus.' : 'Gagal menghapus berita.';
+            if ($ok) {
+                $uid = $_SESSION['user']['id'] ?? 0;
+                // avoid linking to localhost for delete notifications; use special card rendering
+                notify_event($config, 'delete', 'news', $id, $uid, "Berita dihapus: {$title}", null);
+            }
         } else {
             $_SESSION['flash'] = 'ID tidak valid.';
         }

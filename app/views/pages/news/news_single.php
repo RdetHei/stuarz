@@ -13,8 +13,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
           </a>
-          <div class="h-6 w-px bg-gray-700 flex-shrink-0"></div>
-          <h1 id="headerTitle" class="text-lg font-semibold text-gray-100 truncate opacity-0 transition-opacity duration-300">
+          <div class="h-6 w-px bg-gray-700"></div>
+          <h1 id="headerTitle" class="text-lg font-semibold text-gray-100">
             <?= htmlspecialchars($newsItem['title']) ?>
           </h1>
         </div>
@@ -164,17 +164,7 @@ const articleTop = document.getElementById('articleTop');
 let lastScrollY = window.scrollY;
 let ticking = false;
 
-function updateHeader() {
-  const articleTopBottom = articleTop.getBoundingClientRect().bottom;
-  
-  if (articleTopBottom < 80) {
-    headerTitle.style.opacity = '1';
-  } else {
-    headerTitle.style.opacity = '0';
-  }
-  
-  ticking = false;
-}
+
 
 function onScroll() {
   lastScrollY = window.scrollY;

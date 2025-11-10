@@ -33,6 +33,7 @@ if (strpos($current_page, 'attendance_manage') === 0) {
     
 </head>
 <body class="bg-gray-900">
+    
 <?php include __DIR__ . '/../components/sidebar.php'; ?>
     <?php include __DIR__ . '/../components/dHeader.php'; ?>
     
@@ -49,6 +50,11 @@ if (strpos($current_page, 'attendance_manage') === 0) {
         }
         ?>
     </main>
+
+    <?php 
+    define('BASEPATH', true); // Security check for AI Helper
+    include __DIR__ . '/../components/ai-helper/chat-modal.php'; 
+    ?>
 
 </body>
 </html>

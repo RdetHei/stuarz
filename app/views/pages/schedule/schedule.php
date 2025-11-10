@@ -1,4 +1,4 @@
-*********************************************************************************************************************************************<?php
+<?php
 // Get data from controller
 $classesWithSchedules = $classesWithSchedules ?? [];
 $filterClasses = $filterClasses ?? [];
