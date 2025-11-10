@@ -67,7 +67,7 @@ if (!isset($baseUrl)) {
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
               onerror="this.onerror=null;this.src='<?= htmlspecialchars(($baseUrl ? $baseUrl . '/' : '') . 'assets/default-thumb.png') ?>'">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent"></div>
           </div>
         <?php endif; ?>
         <div class="absolute inset-x-0 bottom-0 p-6">

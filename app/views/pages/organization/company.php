@@ -94,12 +94,12 @@
           </div>
 
             <div class="bg-[#1f2937] border border-gray-700 rounded-xl p-8 hover:border-gray-600 transition-colors">
-            <h2 class="text-3xl font-bold text-gray-100 mb-4">Belajar & bekerja tanpa ribet</h2>
+            <h2 class="text-3xl font-bold text-gray-100 mb-4">Efisiensi kerja tanpa batas</h2>
             <p class="text-gray-400 leading-relaxed mb-6">
-              Dengan Stuarz, tidak perlu server rumit atau setup berlebihan. Cukup login, atur, dan mulai bekerja. Semua fitur sudah siap mendukung kebutuhanmu setiap hari.
+              Dengan Stuarz, semua proses kerja menjadi lebih cepat dan efisien. Fitur otomatisasi dan integrasi yang canggih membantu mengurangi waktu yang dihabiskan untuk tugas-tugas rutin.
             </p>
             <p class="text-gray-400 leading-relaxed">
-              Stuarz bukan hanya alat, tapi solusi lengkap untuk mendukung perkembangan belajar, produktivitas tim, dan pengelolaan proyek.
+              Ini merupakan langkah besar menuju produktivitas yang lebih baik.
             </p>
           </div>
       

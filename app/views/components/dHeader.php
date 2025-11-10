@@ -36,7 +36,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
     $title = $pageTitles[$currentPage] ?? '-';
 }
 ?>
-<header id="dHeader" class="bg-slate-900 text-white h-14 flex items-center justify-between px-4 transition-all duration-300">
+<header id="dHeader" class="bg-slate-900 text-white h-16 flex items-center border-b border-slate-700 justify-between px-4 transition-all duration-300">
     <div class="flex items-center gap-4">
         <!-- Mobile menu button -->
         <button id="mobileMenuToggle" class="lg:hidden p-2 hover:bg-slate-700 rounded" aria-label="Toggle mobile menu">

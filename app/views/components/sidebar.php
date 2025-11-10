@@ -218,7 +218,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
 </style>
 
 <!-- Sidebar -->
-<div id="sidebar" class="fixed inset-y-0 left-0 bg-[#0f172a] text-white flex flex-col z-50">
+<div id="sidebar" class="fixed inset-y-0 left-0 bg-[#0f172a] text-white flex flex-col z-50 border-r border-gray-700 dark:border-gray-700 border-gray-200">
 
   <!-- Header -->
   <div class="relative flex items-center justify-center h-16 border-b border-gray-700 dark:border-gray-700 border-gray-200">
