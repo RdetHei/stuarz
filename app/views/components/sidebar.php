@@ -5,6 +5,12 @@ $sessionUser = $_SESSION['user'];
 $page = isset($_GET['page']) && $_GET['page'] !== '' ? $_GET['page'] : 'home';
 $sub  = isset($_GET['dashboard']) && $_GET['dashboard'] !== '' ? (string) $_GET['dashboard'] : null;
 
+// groups for dropdown auto-open logic
+$manajemenPages = ['account'];
+$akademikPages  = ['class', 'subjects', 'schedule', 'attendance', 'grades', 'tasks', 'certificates'];
+$informasiPages = ['announcement', 'notifications'];
+$adminPages     = ['dashboard-admin-docs', 'dashboard-admin-news'];
+
 function navActive(string $navPage, string $currentPage, ?string $currentSub = null): string
 {
   if ($navPage === $currentPage) return 'bg-gray-800 dark:bg-gray-800 bg-gray-100 text-white dark:text-white text-gray-900';
@@ -191,6 +197,50 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
   /* collapsed: hide logo */
   #sidebar.collapsed #sidebarLogo { opacity: 0; transform: scale(.9); pointer-events: none; }
 
+  /* dropdown (details/summary) */
+  #sidebar details.sidebar-group summary { list-style: none; cursor: pointer; }
+  #sidebar details.sidebar-group summary::-webkit-details-marker { display: none; }
+  #sidebar details.sidebar-group .chev { transition: transform 200ms ease; }
+  #sidebar details[open].sidebar-group .chev { transform: rotate(180deg); }
+
+  /* sticky header inside sidebar + scrollable nav */
+  #sidebar .sidebar-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background-color: inherit; /* match sidebar background */
+  }
+  #sidebar nav.sidebar-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0; /* enable flex child to shrink and allow scrolling */
+    max-height: calc(100vh - 4rem - 4.5rem); /* fallback if flex fails: header(4rem) + approx footer */
+  }
+
+  /* vertical guideline for open groups */
+  #sidebar details.sidebar-group .group-children { position: relative; }
+  #sidebar details.sidebar-group .group-children::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 1.25rem; /* closer to the summary (approx pl-5) */
+    width: 2px;
+    background-color: transparent;
+    pointer-events: none;
+    z-index: 0; /* behind children */
+  }
+  #sidebar details[open].sidebar-group .group-children::before {
+    background-color: rgba(148,163,184,.35); /* slate-400-ish */
+  }
+  #sidebar details.sidebar-group .group-children > a { position: relative; z-index: 1; }
+  #sidebar.collapsed details.sidebar-group .group-children::before { background-color: transparent; } /* hide when collapsed */
+
+  /* hide scrollbar for sidebar nav while keeping scroll functionality */
+  #sidebar nav.sidebar-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+  #sidebar nav.sidebar-scroll::-webkit-scrollbar { display: none; }
+
   /* animated hamburger -> X for sidebar toggle (smoother) */
   #sidebar .hamburger {
     position: relative;
@@ -221,7 +271,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
 <div id="sidebar" class="fixed inset-y-0 left-0 bg-[#0f172a] text-white flex flex-col z-50 border-r border-gray-700 dark:border-gray-700 border-gray-200">
 
   <!-- Header -->
-  <div class="relative flex items-center justify-center h-16 border-b border-gray-700 dark:border-gray-700 border-gray-200">
+  <div class="sidebar-header relative flex items-center justify-center h-16 border-b border-gray-700 dark:border-gray-700 border-gray-200">
     <button id="sidebarLogoToggle" class="absolute left-6 top-4 text-white dark:text-white text-gray-900 focus:outline-none" aria-label="Toggle sidebar logo/menu">
       <!-- Treat this as a brand mark; keep it visible only when expanded -->
       <svg id="sidebarLogo" fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 293.538 293.538" class="w-8 h-8" aria-hidden="true">
@@ -247,77 +297,112 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
   </div>
 
   <!-- Navigation -->
-  <nav class="flex-1 px-2 py-4 space-y-2">
+  <nav class="sidebar-scroll flex-1 px-2 py-4 space-y-2">
+    <!-- Utama -->
+    <div class="px-3 mt-1 mb-1">
+      <div class="menu-text text-[10px] tracking-wider uppercase text-gray-400">Utama</div>
+    </div>
     <a href="index.php?page=dashboard-admin" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg <?= navActive('dashboard-admin', $page, $sub) ?>">
       <span class="material-symbols-outlined mr-3">home</span>
       <span class="menu-text">Dashboard</span>
     </a>
 
-    <a href="index.php?page=account" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('account', $page, $sub) ?>">
-      <span class="material-symbols-outlined mr-3">group</span>
-      <span class="menu-text">Pengguna</span>
-    </a>
+    <!-- Manajemen (dropdown) -->
+    <details class="sidebar-group" <?= in_array($page, $manajemenPages, true) ? 'open' : '' ?>>
+      <summary class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
+        <span class="material-symbols-outlined mr-3">group</span>
+        <a href="index.php?page=account" class="menu-text hover:underline">Pengguna</a>
+        <span class="ml-auto material-symbols-outlined chev">expand_more</span>
+      </summary>
+      <div class="mt-1 space-y-1 pl-10 group-children">
+        <a href="index.php?page=account&section=students" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
+          <span class="material-symbols-outlined mr-3">school</span>
+          <span class="menu-text">Siswa</span>
+        </a>
+        <a href="index.php?page=account&section=teachers" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
+          <span class="material-symbols-outlined mr-3">co_present</span>
+          <span class="menu-text">Guru</span>
+        </a>
+      </div>
+    </details>
 
-    <!-- Kelas direct link -->
-    <a href="index.php?page=class" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('class', $page, $sub) ?>">
-      <span class="material-symbols-outlined mr-3">school</span>
-      <span class="menu-text">Kelas</span>
-    </a>
+    <!-- Akademik (dropdown) -->
+    <details class="sidebar-group" <?= in_array($page, $akademikPages, true) ? 'open' : '' ?>>
+      <summary class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
+        <span class="material-symbols-outlined mr-3">school</span>
+        <span class="menu-text">Akademik</span>
+        <span class="ml-auto material-symbols-outlined chev">expand_more</span>
+      </summary>
+      <div class="mt-1 space-y-1 pl-10 group-children">
+        <a href="index.php?page=class" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('class', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">school</span>
+          <span class="menu-text">Kelas</span>
+        </a>
+        <a href="index.php?page=subjects" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('subjects', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">menu_book</span>
+          <span class="menu-text">Mata Pelajaran</span>
+        </a>
+        <a href="index.php?page=schedule" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('schedule', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">calendar_month</span>
+          <span class="menu-text">Jadwal</span>
+        </a>
+        <a href="index.php?page=attendance" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('attendance', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">how_to_reg</span>
+          <span class="menu-text">Absensi</span>
+        </a>
+        <a href="index.php?page=grades" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('grades', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">bar_chart</span>
+          <span class="menu-text">Nilai</span>
+        </a>
+        <a href="index.php?page=tasks" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('tasks', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">assignment</span>
+          <span class="menu-text">Tugas</span>
+        </a>
+        <a href="index.php?page=certificates&scope=all" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('certificates', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">workspace_premium</span>
+          <span class="menu-text">Sertifikat</span>
+        </a>
+      </div>
+    </details>
 
+    <!-- Informasi (dropdown) -->
+    <details class="sidebar-group" <?= in_array($page, $informasiPages, true) ? 'open' : '' ?>>
+      <summary class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
+        <span class="material-symbols-outlined mr-3">info</span>
+        <span class="menu-text">Informasi</span>
+        <span class="ml-auto material-symbols-outlined chev">expand_more</span>
+      </summary>
+      <div class="mt-1 space-y-1 pl-10 group-children">
+        <a href="index.php?page=announcement" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('announcement', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">campaign</span>
+          <span class="menu-text">Pengumuman</span>
+        </a>
+        <a href="index.php?page=notifications" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('notifications', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">notifications</span>
+          <span class="menu-text">Notifikasi</span>
+        </a>
+      </div>
+    </details>
 
-  <a href="index.php?page=grades" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('grades', $page, $sub) ?>">
-      <span class="material-symbols-outlined mr-3">bar_chart</span>
-      <span class="menu-text">Nilai</span>
-    </a>
-    <a href="index.php?page=subjects" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('subjects', $page, $sub) ?>">
-      <span class="material-symbols-outlined mr-3">menu_book</span>
-      <span class="menu-text">Mata Pelajaran</span>
-    </a>
-    <a href="index.php?page=tasks" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('tasks', $page, $sub) ?>">
-      <span class="material-symbols-outlined mr-3">assignment</span>
-      <span class="menu-text">Tugas</span>
-    </a>
-
-
-    <a href="index.php?page=schedule" 
-   class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('schedule', $page, $sub) ?>">
-  <span class="material-symbols-outlined mr-3">calendar_month</span>
-  <span class="menu-text">Jadwal</span>
-</a>
-
-<a href="index.php?page=attendance" 
-   class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('attendance', $page, $sub) ?>">
-  <span class="material-symbols-outlined mr-3">how_to_reg</span>
-  <span class="menu-text">Absensi</span>
-</a>
-
-
-    <a href="index.php?page=certificates&scope=all" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('certificates', $page, $sub) ?>">
-      <span class="material-symbols-outlined mr-3">workspace_premium</span>
-      <span class="menu-text">Sertifikat</span>
-    </a>
-
-    
-
-    <a href="index.php?page=announcement" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('announcement', $page, $sub) ?>">
-      <span class="material-symbols-outlined mr-3">campaign</span>
-      <span class="menu-text">Pengumuman</span>
-    </a>
-
-    <a href="index.php?page=notifications" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('notifications', $page, $sub) ?>">
-      <span class="material-symbols-outlined mr-3">notifications</span>
-      <span class="menu-text">Notifikasi</span>
-    </a>
-
+    <!-- Admin -->
     <?php if (($sessionUser['level'] ?? '') === 'admin'): ?>
-      <a href="index.php?page=dashboard-admin-docs" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('dashboard-admin-docs', $page, $sub) ?>">
-        <span class="material-symbols-outlined mr-3">library_books</span>
-        <span class="menu-text">Docs</span>
-      </a>
-      <a href="index.php?page=dashboard-admin-news" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('dashboard-admin-news', $page, $sub) ?>">
-        <span class="material-symbols-outlined mr-3">newspaper</span>
-        <span class="menu-text">News</span>
-      </a>
+      <details class="sidebar-group" <?= in_array($page, $adminPages, true) ? 'open' : '' ?>>
+        <summary class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
+          <span class="material-symbols-outlined mr-3">admin_panel_settings</span>
+          <span class="menu-text">Admin</span>
+          <span class="ml-auto material-symbols-outlined chev">expand_more</span>
+        </summary>
+        <div class="mt-1 space-y-1 pl-10 group-children">
+          <a href="index.php?page=dashboard-admin-docs" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('dashboard-admin-docs', $page, $sub) ?>">
+            <span class="material-symbols-outlined mr-3">library_books</span>
+            <span class="menu-text">Docs</span>
+          </a>
+          <a href="index.php?page=dashboard-admin-news" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('dashboard-admin-news', $page, $sub) ?>">
+            <span class="material-symbols-outlined mr-3">newspaper</span>
+            <span class="menu-text">News</span>
+          </a>
+        </div>
+      </details>
     <?php endif; ?>
   </nav>
 
