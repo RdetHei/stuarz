@@ -120,22 +120,6 @@
                     <p class="text-xs text-gray-500 mt-2">Upload gambar untuk pengumuman (Format: JPG, PNG • Max: 5MB)</p>
                 </div>
 
-                <!-- Kelas ID -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                        ID Kelas <span class="text-red-400">*</span>
-                    </label>
-                    <input 
-                        type="number" 
-                        name="class_id" 
-                        required
-                        min="1"
-                        value="<?= htmlspecialchars($announcement['class_id'] ?? '') ?>"
-                        class="w-full px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors duration-200"
-                        placeholder="Masukkan ID kelas">
-                    <p class="text-xs text-gray-500 mt-2">Masukkan ID kelas tujuan pengumuman</p>
-                </div>
-
                 <div class="border-t border-gray-700 pt-6"></div>
 
                 <!-- Action Buttons -->

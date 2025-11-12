@@ -1,6 +1,7 @@
 <h2>Edit Pengumuman</h2>
-<form method="POST" action="index.php?page=update_announcement" enctype="multipart/form-data">
+<form method="POST" action="index.php?page=announcement_update" enctype="multipart/form-data">
   <input type="hidden" name="id" value="<?= $announcement['id'] ?>">
+  <input type="hidden" name="photo_existing" value="<?= htmlspecialchars($announcement['photo'] ?? '') ?>">
 
   <label>Judul</label>
   <input type="text" name="title" value="<?= htmlspecialchars($announcement['title']) ?>" required class="form-control">

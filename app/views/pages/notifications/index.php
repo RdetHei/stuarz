@@ -41,6 +41,10 @@ $user = $_SESSION['user'] ?? null;
             <?php else: ?>
                 <?php foreach ($notifications as $n): ?>
                     <?php 
+                    $entity = $n['entity'] ?? ($n['type'] ?? 'general');
+                    $entityId = $n['entity_id'] ?? ($n['reference_id'] ?? null);
+                    ?>
+                    <?php 
                     $type = $n['type'] ?? 'info';
                     $isDelete = $type === 'delete';
                     $isUnread = !($n['is_read'] ?? false);
@@ -69,8 +73,8 @@ $user = $_SESSION['user'] ?? null;
                                                     Penghapusan
                                                 </span>
                                                 <span class="text-xs text-gray-500 ml-2">
-                                                    <?= htmlspecialchars($n['entity']) ?> 
-                                                    <?= $n['entity_id'] ? '#'.htmlspecialchars($n['entity_id']) : '' ?>
+                                                    <?= htmlspecialchars($entity) ?> 
+                                                    <?= $entityId ? '#'.htmlspecialchars($entityId) : '' ?>
                                                 </span>
                                             </div>
                                             <time class="text-xs text-gray-500 whitespace-nowrap">
@@ -156,8 +160,8 @@ $user = $_SESSION['user'] ?? null;
                                                     <?= htmlspecialchars(ucfirst($type)) ?>
                                                 </span>
                                                 <span class="text-xs text-gray-500">
-                                                    <?= htmlspecialchars($n['entity']) ?> 
-                                                    <?= $n['entity_id'] ? '#'.htmlspecialchars($n['entity_id']) : '' ?>
+                                                    <?= htmlspecialchars($entity) ?> 
+                                                    <?= $entityId ? '#'.htmlspecialchars($entityId) : '' ?>
                                                 </span>
                                                 <?php if ($isUnread): ?>
                                                 <span class="flex-shrink-0 w-2 h-2 bg-[#5865F2] rounded-full"></span>

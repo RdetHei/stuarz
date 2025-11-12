@@ -5,12 +5,13 @@
     </h2>
 
     <form method="POST" 
-          action="index.php?page=<?= isset($announcement) ? 'update_announcement' : 'upload_announcement' ?>" 
+          action="index.php?page=<?= isset($announcement) ? 'announcement_update' : 'announcement_store' ?>" 
           enctype="multipart/form-data"
           class="space-y-5">
 
       <?php if (isset($announcement)): ?>
         <input type="hidden" name="id" value="<?= $announcement['id'] ?>">
+        <input type="hidden" name="photo_existing" value="<?= htmlspecialchars($announcement['photo'] ?? '') ?>">
       <?php endif; ?>
 
       <!-- Judul -->
@@ -60,7 +61,7 @@
 
       <!-- Tombol -->
       <div class="flex justify-end gap-3 pt-4">
-        <a href="index.php?page=announcements"
+        <a href="index.php?page=announcement"
            class="px-4 py-2 rounded-md bg-gray-600 text-white hover:bg-gray-700 transition">
            Batal
         </a>

@@ -13,9 +13,14 @@ class AnnouncementModel
     {
         $result = [];
         $sql = "
-            SELECT a.*, u.username AS creator
+            SELECT
+                a.*,
+                u.username AS creator,
+                u.username AS username,
+                c.name AS class_name
             FROM announcements AS a
             LEFT JOIN users AS u ON a.created_by = u.id
+            LEFT JOIN classes AS c ON a.class_id = c.id
             ORDER BY a.created_at DESC
         ";
         $res = $this->db->query($sql);
@@ -30,9 +35,10 @@ class AnnouncementModel
 
     public function getByUserId($userId)
     {
-        $sql = "SELECT a.*, u.username, u.avatar
+        $sql = "SELECT a.*, u.username, u.avatar, c.name AS class_name
                 FROM announcements a
                 LEFT JOIN users u ON a.created_by = u.id
+                LEFT JOIN classes AS c ON a.class_id = c.id
                 WHERE a.created_by = ?
                 ORDER BY a.created_at DESC";
         $stmt = $this->db->prepare($sql);
@@ -48,9 +54,10 @@ class AnnouncementModel
     {
         // kept for compatibility but if class_id doesn't exist this should return empty
         // check first that column exists would be better; here we attempt safe query
-        $sql = "SELECT a.*, u.username, u.avatar
+        $sql = "SELECT a.*, u.username, u.avatar, c.name AS class_name
                 FROM announcements a
                 LEFT JOIN users u ON a.created_by = u.id
+                LEFT JOIN classes AS c ON a.class_id = c.id
                 WHERE a.class_id = ?
                 ORDER BY a.created_at DESC";
         $stmt = $this->db->prepare($sql);
@@ -67,9 +74,12 @@ class AnnouncementModel
     {
         $sql = "SELECT 
             a.*,
-            u.username as creator
+            u.username as creator,
+            u.username as username,
+            c.name AS class_name
         FROM announcements a
         LEFT JOIN users u ON a.created_by = u.id
+        LEFT JOIN classes c ON a.class_id = c.id
         WHERE a.id = ?";
 
         $stmt = $this->db->prepare($sql);
@@ -85,17 +95,18 @@ class AnnouncementModel
 
     public function create($data)
     {
-        $sql = "INSERT INTO announcements (created_by, title, content, photo, created_at)
-            VALUES (?, ?, ?, ?, NOW())";
+        $sql = "INSERT INTO announcements (created_by, class_id, title, content, photo, created_at)
+            VALUES (?, NULLIF(?, 0), ?, ?, ?, NOW())";
 
         $stmt = $this->db->prepare($sql);
 
         $created_by = intval($data['created_by'] ?? 0);
+        $class_id = intval($data['class_id'] ?? 0);
         $title = $data['title'] ?? '';
         $content = $data['content'] ?? '';
         $photo = $data['photo'] ?? '';
 
-        $stmt->bind_param('isss', $created_by, $title, $content, $photo);
+        $stmt->bind_param('iisss', $created_by, $class_id, $title, $content, $photo);
 
         $ok = $stmt->execute();
         $stmt->close();
@@ -108,13 +119,14 @@ class AnnouncementModel
                     title = ?,
                     content = ?,
                     photo = ?,
-                    updated_at = NOW()
+                    class_id = NULLIF(?, 0)
                 WHERE id = ?";
         $stmt = $this->db->prepare($sql);
         $title = $data['title'] ?? '';
         $content = $data['content'] ?? '';
         $photo = $data['photo'] ?? '';
-        $stmt->bind_param('sssi', $title, $content, $photo, $id);
+        $class_id = intval($data['class_id'] ?? 0);
+        $stmt->bind_param('sssii', $title, $content, $photo, $class_id, $id);
         $ok = $stmt->execute();
         $stmt->close();
         return $ok;
@@ -140,5 +152,24 @@ class AnnouncementModel
         $row = $res ? $res->fetch_assoc() : ['count' => 0];
         $stmt->close();
         return (int)$row['count'];
+    }
+
+    public function getCommentsByAnnouncementId(int $announcementId): array
+    {
+        $sql = "SELECT ac.*, u.username
+                FROM announcement_comments ac
+                LEFT JOIN users u ON ac.user_id = u.id
+                WHERE ac.announcement_id = ?
+                ORDER BY ac.created_at ASC";
+        $stmt = $this->db->prepare($sql);
+        if (! $stmt) {
+            return [];
+        }
+        $stmt->bind_param('i', $announcementId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $rows = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        return $rows;
     }
 }

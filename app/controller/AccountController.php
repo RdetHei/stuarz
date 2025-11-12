@@ -53,7 +53,7 @@ class AccountController
     public function teachers()
     {
         // Use DB-level filter for efficiency
-        $users = $this->model->getByLevel('teacher');
+        $users = $this->model->getByLevel('guru');
         $content = dirname(__DIR__) . '/views/pages/users/teachers.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }

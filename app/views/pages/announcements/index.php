@@ -51,7 +51,7 @@
         </h1>
         <p class="text-sm text-gray-400 mt-2">Informasi dan berita terkini</p>
       </div>
-      <a href="index.php?page=create_announcement" 
+      <a href="index.php?page=announcement_create" 
          class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md text-sm font-medium transition-colors inline-flex items-center gap-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -71,7 +71,7 @@
         </div>
         <h3 class="text-lg font-semibold text-gray-100 mb-2">Belum Ada Pengumuman</h3>
         <p class="text-gray-400 mb-6">Belum ada pengumuman yang tersedia saat ini</p>
-        <a href="index.php?page=create_announcement" 
+        <a href="index.php?page=announcement_create" 
            class="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md text-sm font-medium transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -152,16 +152,17 @@
               </div>
 
               <div class="flex items-center gap-2">
-                <a href="index.php?page=edit_announcement&id=<?= $a['id'] ?>" 
+                <a href="index.php?page=announcement_edit&id=<?= $a['id'] ?>" 
                    class="p-2 text-gray-400 hover:text-[#5865F2] hover:bg-[#5865F2]/10 rounded-md transition-colors"
                    title="Edit">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                   </svg>
                 </a>
-                <form method="POST" action="index.php?page=delete_announcement&id=<?= $a['id'] ?>" 
+                <form method="POST" action="index.php?page=announcement_delete" 
                       class="inline" 
                       onsubmit="return confirm('Yakin ingin menghapus pengumuman ini?')">
+                  <input type="hidden" name="id" value="<?= $a['id'] ?>">
                   <button type="submit" 
                           class="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
                           title="Hapus">
