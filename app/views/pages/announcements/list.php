@@ -14,7 +14,6 @@
                 <thead class="bg-[#1f2937] text-gray-200 text-xs uppercase tracking-wide">
                     <tr>
                         <th class="px-6 py-3 text-left">Judul</th>
-                        <th class="px-6 py-3 text-left">Kelas</th>
                         <th class="px-6 py-3 text-left">Oleh</th>
                         <th class="px-6 py-3 text-left">Tanggal</th>
                         <th class="px-6 py-3 text-right">Aksi</th>
@@ -25,7 +24,6 @@
                         <?php foreach ($announcements as $a): ?>
                             <tr class="hover:bg-[#1f2937] transition">
                                 <td class="px-6 py-3 text-gray-100 font-medium"><?= htmlspecialchars($a['title']) ?></td>
-                                <td class="px-6 py-3 text-gray-300"><?= htmlspecialchars($a['class_name']) ?></td>
                                 <td class="px-6 py-3 text-gray-300"><?= htmlspecialchars($a['creator']) ?></td>
                                 <td class="px-6 py-3 text-gray-400 text-sm"> <?= htmlspecialchars($a['created_at']) ?> </td>
                                 <td class="px-6 py-3">
@@ -37,7 +35,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5" class="px-6 py-6 text-center text-gray-400">Belum ada pengumuman.</td>
+                            <td colspan="4" class="px-6 py-6 text-center text-gray-400">Belum ada pengumuman.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -52,7 +50,6 @@
             <h5 class="card-title"><?= htmlspecialchars($announcement['title']) ?></h5>
             <p class="card-text"><?= nl2br(htmlspecialchars($announcement['content'])) ?></p>
             <p class="text-muted">
-                Kelas: <?= htmlspecialchars($announcement['class_name'] ?? 'Semua Kelas') ?><br>
                 Dibuat oleh: <?= htmlspecialchars($announcement['creator'] ?? 'Unknown') ?><br>
                 Tanggal: <?= date('d/m/Y H:i', strtotime($announcement['created_at'])) ?>
             </p>

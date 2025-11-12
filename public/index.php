@@ -70,6 +70,8 @@ $router->post('/settings', 'SettingsController@update');
 $router->get('/notifications', 'NotificationController@index');
 $router->get('/dashboard', 'DashboardController@dashboard');
 $router->get('/account', 'AccountController@account');
+$router->get('/students', 'AccountController@students');
+$router->get('/teachers', 'AccountController@teachers');
 $router->get('/create_user', 'AccountController@create');
 $router->post('/store_user', 'AccountController@store');
 $router->get('/edit_user', 'AccountController@edit');

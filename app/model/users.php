@@ -59,9 +59,49 @@ class users
         return null;
     }
 
+    public function getByLevel(string $level)
+    {
+        $rows = [];
+        $sql = "SELECT id, username, name, email, `level`, COALESCE(role, '') AS role, avatar, banner, join_date, phone, address, `class`, bio FROM users WHERE `level` = ? ORDER BY join_date DESC";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, 's', $level);
+            mysqli_stmt_execute($stmt);
+
+            if (function_exists('mysqli_stmt_get_result')) {
+                $res = mysqli_stmt_get_result($stmt);
+                if ($res) {
+                    while ($r = mysqli_fetch_assoc($res)) $rows[] = $r;
+                    mysqli_free_result($res);
+                }
+                mysqli_stmt_close($stmt);
+                return $rows;
+            }
+
+            $meta = mysqli_stmt_result_metadata($stmt);
+            if ($meta) {
+                $fields = [];
+                $row = [];
+                $bindVars = [];
+                while ($f = mysqli_fetch_field($meta)) {
+                    $fields[] = $f->name;
+                    $bindVars[] = & $row[$f->name];
+                }
+                mysqli_free_result($meta);
+                call_user_func_array('mysqli_stmt_bind_result', array_merge([$stmt], $bindVars));
+                while (mysqli_stmt_fetch($stmt)) {
+                    $result = [];
+                    foreach ($row as $k => $v) $result[$k] = $v;
+                    $rows[] = $result;
+                }
+            }
+            mysqli_stmt_close($stmt);
+        }
+        return $rows;
+    }
+
     public function createUser(array $data)
     {
-        // include optional role column
         $sql = "INSERT INTO users (username, name, email, password, `level`, role, avatar, banner, join_date, phone, address, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
         if (!$stmt) return false;
@@ -89,71 +129,69 @@ class users
         $fields = [];
         $types = "";
         $params = [];
-        
-        // Build dynamic update query
+
         if (isset($data['name'])) {
             $fields[] = "name = ?";
             $types .= "s";
             $params[] = $data['name'];
         }
-        
+
         if (isset($data['phone'])) {
             $fields[] = "phone = ?";
             $types .= "s";
             $params[] = $data['phone'];
         }
-        
+
         if (isset($data['address'])) {
             $fields[] = "address = ?";
             $types .= "s";
             $params[] = $data['address'];
         }
-        
+
         if (isset($data['class'])) {
             $fields[] = "`class` = ?";
             $types .= "s";
             $params[] = $data['class'];
         }
-        
+
         if (isset($data['bio'])) {
             $fields[] = "bio = ?";
             $types .= "s";
             $params[] = $data['bio'];
         }
-        
+
         if (isset($data['avatar'])) {
             $fields[] = "avatar = ?";
             $types .= "s";
             $params[] = $data['avatar'];
         }
-        
+
         if (isset($data['banner'])) {
             $fields[] = "banner = ?";
             $types .= "s";
             $params[] = $data['banner'];
         }
-        
+
         if (empty($fields)) {
             return false;
         }
-        
+
         $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE id = ?";
         $types .= "i";
         $params[] = $id;
-        
+
         $stmt = mysqli_prepare($this->conn, $sql);
         if (!$stmt) return false;
-        
+
         mysqli_stmt_bind_param($stmt, $types, ...$params);
         $ok = mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
-        
+
         return (bool)$ok;
     }
 
     public function updateUser($id, array $data)
     {
-        // build dynamic update (password optional)
         $fields = ['username = ?', 'name = ?', 'email = ?', 'level = ?', 'role = ?', 'avatar = ?', 'banner = ?', 'phone = ?', 'address = ?', 'bio = ?'];
         $types = "ssssssssss";
         $params = [
@@ -179,7 +217,6 @@ class users
         $stmt = mysqli_prepare($this->conn, $sql);
         if (!$stmt) return false;
 
-        // bind params + id
         $typesFinal = $types . "i";
         $params[] = $id;
         $refs = [];

@@ -315,11 +315,11 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
         <span class="ml-auto material-symbols-outlined chev">expand_more</span>
       </summary>
       <div class="mt-1 space-y-1 pl-10 group-children">
-        <a href="index.php?page=account&section=students" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
+        <a href="index.php?page=students" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
           <span class="material-symbols-outlined mr-3">school</span>
           <span class="menu-text">Siswa</span>
         </a>
-        <a href="index.php?page=account&section=teachers" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
+        <a href="index.php?page=teachers" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
           <span class="material-symbols-outlined mr-3">co_present</span>
           <span class="menu-text">Guru</span>
         </a>

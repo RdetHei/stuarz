@@ -40,6 +40,24 @@ class AccountController
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
+    // show users with level = 'user' (students page)
+    public function students()
+    {
+        // Use DB-level filter for efficiency
+        $users = $this->model->getByLevel('user');
+        $content = dirname(__DIR__) . '/views/pages/users/students.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    // show users with level = 'teacher' (teachers page)
+    public function teachers()
+    {
+        // Use DB-level filter for efficiency
+        $users = $this->model->getByLevel('teacher');
+        $content = dirname(__DIR__) . '/views/pages/users/teachers.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
     public function create()
     {
         if (!$this->isAdmin()) {
