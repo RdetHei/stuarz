@@ -31,7 +31,7 @@ if (!$userToDelete) {
             <?php endif; ?>
         </div>
 
-        <form method="post" action="index.php?page=account_delete" class="mt-5 flex items-center gap-3">
+        <form method="post" action="index.php?page=delete_user" class="mt-5 flex items-center gap-3">
             <input type="hidden" name="id" value="<?= htmlspecialchars($userToDelete['id']) ?>">
             <input type="hidden" name="confirm" value="1">
             <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-500">Ya, hapus akun</button>
