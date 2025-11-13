@@ -37,6 +37,20 @@ class DashboardAdminController
             'documentation' => $this->getDocumentationData()
         ];
 
+        // Ambil pengumuman terbaru untuk card di dashboard admin
+        $latestAnnouncement = null;
+        try {
+            require_once __DIR__ . '/../model/AnnouncementModel.php';
+            $annModel = new AnnouncementModel($this->db);
+            $allAnnouncements = $annModel->getAll();
+            if (!empty($allAnnouncements)) {
+                $latestAnnouncement = $allAnnouncements[0];
+            }
+        } catch (\Throwable $e) {
+            // jangan hentikan halaman jika ada error; biarkan $latestAnnouncement null
+            $latestAnnouncement = null;
+        }
+
         // Tentukan file view utama
         $content = dirname(__DIR__) . '/views/pages/admin/dashboard.php';
 

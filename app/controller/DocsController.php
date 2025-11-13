@@ -111,6 +111,58 @@ class DocsController
         include dirname(__DIR__) . '/views/layouts/layout.php';
     }
 
+    public function print()
+    {
+        $search = trim((string)($_GET['q'] ?? ''));
+
+        $docs = [];
+
+        if ($search !== '') {
+            $sql = "SELECT * FROM documentation 
+                    WHERE title LIKE CONCAT('%', ?, '%') 
+                       OR description LIKE CONCAT('%', ?, '%') 
+                       OR content LIKE CONCAT('%', ?, '%') 
+                    ORDER BY section, title";
+            $stmt = mysqli_prepare($this->db, $sql);
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "sss", $search, $search, $search);
+                mysqli_stmt_execute($stmt);
+                $rows = $this->stmt_fetch_all($stmt);
+                foreach ($rows as $row) $docs[$row['section']][] = $row;
+                mysqli_stmt_close($stmt);
+            }
+        } else {
+            $sql = "SELECT * FROM documentation ORDER BY section, title";
+            if ($res = mysqli_query($this->db, $sql)) {
+                while ($row = mysqli_fetch_assoc($res)) $docs[$row['section']][] = $row;
+                mysqli_free_result($res);
+            }
+        }
+
+        $slug = trim((string)($_GET['doc'] ?? ''));
+        $currentDoc = null;
+        if ($slug !== '') {
+            $stmt = mysqli_prepare($this->db, "SELECT * FROM documentation WHERE slug = ? LIMIT 1");
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "s", $slug);
+                mysqli_stmt_execute($stmt);
+                $rows = $this->stmt_fetch_all($stmt);
+                if (!empty($rows)) $currentDoc = $rows[0];
+                mysqli_stmt_close($stmt);
+            } else {
+                $esc = mysqli_real_escape_string($this->db, $slug);
+                $res = mysqli_query($this->db, "SELECT * FROM documentation WHERE slug = '{$esc}' LIMIT 1");
+                if ($res) {
+                    $currentDoc = mysqli_fetch_assoc($res) ?: null;
+                    mysqli_free_result($res);
+                }
+            }
+        }
+
+        $content = dirname(__DIR__) . '/views/pages/docs/docs_print.php';
+        include dirname(__DIR__) . '/views/layouts/print.php';
+    }
+
     public function create()
     {
         require_once __DIR__ . '/../model/documentation.php';

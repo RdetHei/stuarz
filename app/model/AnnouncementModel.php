@@ -16,11 +16,9 @@ class AnnouncementModel
             SELECT
                 a.*,
                 u.username AS creator,
-                u.username AS username,
-                c.name AS class_name
+                u.avatar AS creator_avatar
             FROM announcements AS a
             LEFT JOIN users AS u ON a.created_by = u.id
-            LEFT JOIN classes AS c ON a.class_id = c.id
             ORDER BY a.created_at DESC
         ";
         $res = $this->db->query($sql);
@@ -35,12 +33,11 @@ class AnnouncementModel
 
     public function getByUserId($userId)
     {
-        $sql = "SELECT a.*, u.username, u.avatar, c.name AS class_name
-                FROM announcements a
-                LEFT JOIN users u ON a.created_by = u.id
-                LEFT JOIN classes AS c ON a.class_id = c.id
-                WHERE a.created_by = ?
-                ORDER BY a.created_at DESC";
+    $sql = "SELECT a.*, u.username, u.avatar
+        FROM announcements a
+        LEFT JOIN users u ON a.created_by = u.id
+        WHERE a.created_by = ?
+        ORDER BY a.created_at DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param('i', $userId);
         $stmt->execute();
@@ -52,22 +49,9 @@ class AnnouncementModel
 
     public function getByClassId($classId)
     {
-        // kept for compatibility but if class_id doesn't exist this should return empty
-        // check first that column exists would be better; here we attempt safe query
-        $sql = "SELECT a.*, u.username, u.avatar, c.name AS class_name
-                FROM announcements a
-                LEFT JOIN users u ON a.created_by = u.id
-                LEFT JOIN classes AS c ON a.class_id = c.id
-                WHERE a.class_id = ?
-                ORDER BY a.created_at DESC";
-        $stmt = $this->db->prepare($sql);
-        if (! $stmt) return []; // if column missing, prepared statement will fail
-        $stmt->bind_param('i', $classId);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $rows = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
-        $stmt->close();
-        return $rows;
+        // The announcements table no longer contains a class_id column in this schema.
+        // Keep the method for compatibility but return an empty result to avoid SQL errors.
+        return [];
     }
 
     public function getById($id)
@@ -75,11 +59,9 @@ class AnnouncementModel
         $sql = "SELECT 
             a.*,
             u.username as creator,
-            u.username as username,
-            c.name AS class_name
+            u.avatar as creator_avatar
         FROM announcements a
         LEFT JOIN users u ON a.created_by = u.id
-        LEFT JOIN classes c ON a.class_id = c.id
         WHERE a.id = ?";
 
         $stmt = $this->db->prepare($sql);
@@ -95,18 +77,17 @@ class AnnouncementModel
 
     public function create($data)
     {
-        $sql = "INSERT INTO announcements (created_by, class_id, title, content, photo, created_at)
-            VALUES (?, NULLIF(?, 0), ?, ?, ?, NOW())";
+        $sql = "INSERT INTO announcements (created_by, title, content, photo, created_at)
+            VALUES (?, ?, ?, ?, NOW())";
 
         $stmt = $this->db->prepare($sql);
 
         $created_by = intval($data['created_by'] ?? 0);
-        $class_id = intval($data['class_id'] ?? 0);
         $title = $data['title'] ?? '';
         $content = $data['content'] ?? '';
         $photo = $data['photo'] ?? '';
 
-        $stmt->bind_param('iisss', $created_by, $class_id, $title, $content, $photo);
+        $stmt->bind_param('isss', $created_by, $title, $content, $photo);
 
         $ok = $stmt->execute();
         $stmt->close();
@@ -118,15 +99,13 @@ class AnnouncementModel
         $sql = "UPDATE announcements SET 
                     title = ?,
                     content = ?,
-                    photo = ?,
-                    class_id = NULLIF(?, 0)
+                    photo = ?
                 WHERE id = ?";
         $stmt = $this->db->prepare($sql);
         $title = $data['title'] ?? '';
         $content = $data['content'] ?? '';
         $photo = $data['photo'] ?? '';
-        $class_id = intval($data['class_id'] ?? 0);
-        $stmt->bind_param('sssii', $title, $content, $photo, $class_id, $id);
+        $stmt->bind_param('sssi', $title, $content, $photo, $id);
         $ok = $stmt->execute();
         $stmt->close();
         return $ok;

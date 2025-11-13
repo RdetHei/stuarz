@@ -3,7 +3,7 @@
     <div class="max-w-2xl mx-auto">
         <div class="px-6 py-4 border border-gray-700 rounded-2xl mb-4 bg-gray-800/60">
             <h1 class="text-xl font-bold mb-2"><?= htmlspecialchars($announcement['title'] ?? '') ?></h1>
-            <div class="mb-2 text-gray-400 text-sm">Kelas: <?= htmlspecialchars($announcement['class_name'] ?? '-') ?> | Oleh: <?= htmlspecialchars($announcement['creator'] ?? '-') ?> | <?= htmlspecialchars($announcement['created_at'] ?? '') ?></div>
+            <div class="mb-2 text-gray-400 text-sm">Oleh: <?= htmlspecialchars($announcement['creator'] ?? '-') ?> | <?= htmlspecialchars($announcement['created_at'] ?? '') ?></div>
             <?php if (!empty($announcement['photo'])): ?>
                 <img src="<?= htmlspecialchars($announcement['photo']) ?>" alt="photo" class="mb-4 rounded w-full max-h-64 object-cover">
             <?php endif; ?>

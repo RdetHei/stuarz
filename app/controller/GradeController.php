@@ -126,4 +126,42 @@ class GradeController
     $content = dirname(__DIR__) . '/views/pages/grades/index.php';
     include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
+
+    public function print()
+    {
+        // Reuse same data gathering as index but render print view
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['user'])) {
+            header('Location: index.php?page=login');
+            exit;
+        }
+
+        global $config;
+        $userId = (int)($_SESSION['user']['id'] ?? 0);
+        if ($userId <= 0) {
+            $_SESSION['flash'] = 'User tidak valid';
+            header('Location: index.php?page=grades');
+            exit;
+        }
+
+        // Get full grades list (no pagination) — same as index
+        $grades = [];
+        $sql = 'SELECT g.*, u.username, s.name AS subject_name, t.title AS task_title, c.name AS class_name
+            FROM grades g
+            LEFT JOIN users u ON g.user_id = u.id
+            LEFT JOIN subjects s ON g.subject_id = s.id
+            LEFT JOIN tasks_completed t ON g.task_id = t.id
+            LEFT JOIN classes c ON g.class_id = c.id';
+        $result = $this->db->query($sql);
+        if ($result) while ($row = $result->fetch_assoc()) $grades[] = $row;
+
+        // For filters in print, also include subject/class lists
+        $subjectsList = $this->db->query('SELECT * FROM subjects ORDER BY name ASC');
+        $subjects = $subjectsList ? $subjectsList->fetch_all(MYSQLI_ASSOC) : [];
+        $classesList = $this->db->query('SELECT * FROM classes ORDER BY name ASC');
+        $classes = $classesList ? $classesList->fetch_all(MYSQLI_ASSOC) : [];
+
+        $content = dirname(__DIR__) . '/views/pages/grades/grades_print.php';
+        include dirname(__DIR__) . '/views/layouts/print.php';
+    }
 }

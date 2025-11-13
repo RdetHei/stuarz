@@ -30,6 +30,19 @@ if (strpos($current_page, 'attendance_manage') === 0) {
     <title>Stuarz</title>
     <link rel="icon" type="image/png" sizes="32x32" href="assets/diamond.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/diamond.png">
+        <style>
+        @media print {
+            /* hide admin chrome */
+            #sidebar, .sidebar, .hamburger, nav, .ai-helper, .chat-modal, #sidebarToggle, #sidebarLogoToggle { display: none !important; }
+            /* hide dashboard header */
+            #dHeader, .d-header, header { display: none !important; }
+            /* make main content full width */
+            #content, main { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+            /* normalize colors for printing */
+            body, #content, article, .prose { background: #fff !important; color: #000 !important; }
+            a:after { content: " (" attr(href) ")"; font-size: 90%; }
+        }
+        </style>
     
 </head>
 <body class="bg-gray-900">

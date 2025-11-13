@@ -253,6 +253,28 @@ class AnnouncementController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
+    public function print()
+    {
+        $id = intval($_GET['id'] ?? 0);
+        if ($id <= 0) {
+            $_SESSION['flash'] = 'ID pengumuman tidak valid.';
+            $_SESSION['flash_level'] = 'danger';
+            header('Location: index.php?page=announcement');
+            exit;
+        }
+
+        $announcement = $this->model->getById($id);
+        if (!$announcement) {
+            $_SESSION['flash'] = 'Pengumuman tidak ditemukan.';
+            $_SESSION['flash_level'] = 'danger';
+            header('Location: index.php?page=announcement');
+            exit;
+        }
+
+        $content = dirname(__DIR__) . '/views/pages/announcements/announcement_print.php';
+        include dirname(__DIR__) . '/views/layouts/print.php';
+    }
+
     public function uploadAnnouncement() {
         $announcement = null;
         $content = dirname(__DIR__) . '/views/pages/announcements/upload_announcement.php';
