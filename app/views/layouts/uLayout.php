@@ -1,20 +1,11 @@
-
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user'])) {
     header("Location: index.php?page=login");
     exit;
 }
-
-// Check for admin access on admin-only pages
-$current_page = $_GET['page'] ?? '';
-if (strpos($current_page, 'attendance_manage') === 0) {
-    if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'admin') {
-        header("Location: index.php?page=attendance");
-        exit;
-    }
-}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,29 +35,26 @@ if (strpos($current_page, 'attendance_manage') === 0) {
         </style>
     
 </head>
-<body class="bg-gray-900">
-    
-<?php include __DIR__ . '/../components/sidebar.php'; ?>
+<body class="bg-gray-900 flex flex-col min-h-screen">
+    <?php include __DIR__ . '/../components/sidebar.php'; ?>
     <?php include __DIR__ . '/../components/dHeader.php'; ?>
-    
 
-    <main id="content" class="transition-all duration-300 p-6">
+    <main id="content" class="flex-1 transition-all duration-300 p-6">
         <?php
-        // Defensive include: ensure $content is set and file exists
         $viewToInclude = $content ?? '';
         if ($viewToInclude && file_exists($viewToInclude)) {
             include $viewToInclude;
         } else {
-            // fallback to errors/notFound.php to avoid fatal errors
             include __DIR__ . '/../pages/errors/notFound.php';
         }
         ?>
     </main>
 
+    <?php include __DIR__ . '/../components/footer.php'; ?>
+
     <?php 
-    define('BASEPATH', true); // Security check for AI Helper
+    define('BASEPATH', true);
     include __DIR__ . '/../components/ai-helper/chat-modal.php'; 
     ?>
-
 </body>
 </html>
