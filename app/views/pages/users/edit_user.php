@@ -7,7 +7,7 @@ unset($_SESSION['flash']);
 // $user harus disediakan oleh controller. Jangan menimpa $user dengan session di sini.
 if (!isset($user) || !is_array($user)) {
     $_SESSION['flash'] = "Pengguna tidak ditemukan.";
-    header("Location: index.php?page=account");
+    header("Location: index.php?page=profile");
     exit;
 }
 
@@ -92,6 +92,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
 
                 <form action="index.php?page=update_user" method="post" enctype="multipart/form-data" class="space-y-6">
                     <input type="hidden" name="id" value="<?= htmlspecialchars($user['id']) ?>">
+                    <input type="hidden" name="return_to" value="<?= htmlspecialchars($returnTo ?? 'profile', ENT_QUOTES, 'UTF-8') ?>">
                     <input name="avatar" id="avatarInput" type="file" accept="image/*" class="hidden">
                     <input name="banner" id="bannerInput" type="file" accept="image/*" class="hidden">
 
@@ -165,6 +166,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                     <div class="border-t border-gray-700 pt-6"></div>
 
                     <!-- Password & Level -->
+                    <?php if (($sessionUser['level'] ?? '') === 'admin'): ?>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Password Baru</label>
@@ -196,6 +198,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                             </select>
                         </div>
                     </div>
+                    <?php endif; ?>
 
                     <!-- Action Buttons -->
                     <div class="flex flex-col sm:flex-row gap-3 pt-4">
@@ -207,9 +210,15 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                             </svg>
                             Simpan Perubahan
                         </button>
+                        <?php
+                        $cancelHref = 'index.php?page=profile';
+                        if (!empty($returnTo) && in_array($returnTo, ['account','students','teachers','profile'], true)) {
+                            $cancelHref = 'index.php?page=' . $returnTo;
+                        }
+                        ?>
                         <a 
-                            href="index.php?page=account" 
-                            class="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors duration-200 text-center flex items-center justify-center gap-2">
+                            href="<?= htmlspecialchars($cancelHref, ENT_QUOTES, 'UTF-8') ?>" 
+                            class="px-6 py-2. 5 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors duration-200 text-center flex items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>

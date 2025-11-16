@@ -195,12 +195,14 @@
                         sidebar.classList.add('collapsed');
                         if (logo) logo.style.opacity = '0';
                         localStorage.setItem('sidebarCollapsed', '1');
+                        try { document.documentElement.classList.add('sidebar-collapsed'); } catch (e) { }
                         if (window.__sidebarDebug) console.log('[sidebar] collapsed -> true');
                         showDebugOverlay && showDebugOverlay('collapsed');
                     } else {
                         sidebar.classList.remove('collapsed');
                         if (logo) logo.style.opacity = '1';
                         localStorage.setItem('sidebarCollapsed', '0');
+                        try { document.documentElement.classList.remove('sidebar-collapsed'); } catch (e) { }
                         if (window.__sidebarDebug) console.log('[sidebar] collapsed -> false');
                         showDebugOverlay && showDebugOverlay('expanded');
                     }
@@ -242,8 +244,10 @@
                         // ensure collapsed class is in correct state
                         if (collapsed) {
                             sidebar.classList.add('collapsed');
+                            try { document.documentElement.classList.add('sidebar-collapsed'); } catch (e) { }
                         } else {
                             sidebar.classList.remove('collapsed');
+                            try { document.documentElement.classList.remove('sidebar-collapsed'); } catch (e) { }
                             // clear inline margins when expanded
                             if (header) header.style.marginLeft = '';
                             if (content) content.style.marginLeft = '';
@@ -278,6 +282,10 @@
                     sidebar.classList.toggle('mobile-open');
                     const isOpen = sidebar.classList.contains('mobile-open');
                     mobileMenuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    try {
+                        if (isOpen) document.documentElement.classList.add('sidebar-mobile-open');
+                        else document.documentElement.classList.remove('sidebar-mobile-open');
+                    } catch (e) { }
                 });
             }
 
@@ -289,6 +297,7 @@
                     !mobileMenuToggle.contains(e.target)) {
                     sidebar.classList.remove('mobile-open');
                     mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                    try { document.documentElement.classList.remove('sidebar-mobile-open'); } catch (e) { }
                 }
             });
 
@@ -297,6 +306,7 @@
                 if (window.innerWidth > 1023.98) {
                     sidebar.classList.remove('mobile-open');
                     if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                    try { document.documentElement.classList.remove('sidebar-mobile-open'); } catch (e) { }
                 }
                 setTimeout(positionProfileModal, 50);
             });

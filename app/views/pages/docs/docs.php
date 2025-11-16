@@ -68,10 +68,10 @@
             </nav>
 
             <!-- Article -->
-            <div class="lg:sticky lg:top-16 lg:z-20">
-              <article class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden lg:overflow-auto" style="max-height: calc(100vh - 6rem);">
+            <div class="lg:sticky lg:top-20 lg:z-20 lg:self-start">
+              <article class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden flex flex-col shadow-xl" style="max-height: calc(100vh - 7rem);">
               <!-- Article Header (sticky when scrolling) -->
-              <div id="docHeader" class="px-8 py-6 border-b border-gray-700 sticky top-0 z-30 bg-[#1f2937] transition-all duration-200">
+              <div id="docHeader" class="px-8 py-6 border-b border-gray-700 sticky top-0 z-30 bg-[#1f2937] transition-all duration-200 flex-shrink-0">
                 <div class="flex items-start gap-4">
                   <div class="w-12 h-12 rounded-xl bg-[#5865F2]/10 flex items-center justify-center border border-[#5865F2]/20 flex-shrink-0">
                     <svg class="w-6 h-6 text-[#5865F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +124,7 @@
               </div>
 
               <!-- Article Content -->
-              <div id="docContent" class="px-8 py-10">
+              <div id="docContent" class="px-8 py-10 overflow-y-auto flex-1">
                 <div class="prose prose-invert prose-lg max-w-none">
                   <div class="text-gray-300 leading-relaxed space-y-6" style="white-space: pre-wrap; line-height: 1.8;">
                     <?= nl2br(htmlspecialchars($currentDoc['content'])) ?>
@@ -133,7 +133,7 @@
               </div>
 
               <!-- Article Footer -->
-              <div class="px-8 py-6 border-t border-gray-700 bg-[#111827]">
+              <div class="px-8 py-6 border-t border-gray-700 bg-[#111827] flex-shrink-0">
                 <div class="flex items-center justify-between">
                   <a href="index.php?page=docs" 
                      class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-gray-100 hover:bg-gray-800 rounded-md transition-colors">

@@ -14,18 +14,7 @@
     <title>Stuarz</title>
      <link rel="icon" type="image/png" sizes="32x32" href="assets/diamond.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/diamond.png">
-        <style>
-        @media print {
-            /* Hide site chrome when printing */
-            header, footer, nav, aside, .sidebar, #sidebar, .chat-modal, .ai-helper, .menu-text, .hamburger, .d-header { display: none !important; }
-            /* Expand main content to full page */
-            main { margin: 0 !important; padding: 0 !important; width: 100% !important; }
-            /* Make backgrounds white and text black for print readability */
-            body, main, article, .prose, .card { background: #fff !important; color: #000 !important; }
-            /* Show link URLs after links */
-            a:after { content: " (" attr(href) ")"; font-size: 90%; }
-        }
-        </style>
+        <!-- print styles removed from landing layout; admin print rules live in dLayout.php -->
     
 </head>
 <body>

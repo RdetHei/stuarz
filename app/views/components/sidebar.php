@@ -36,6 +36,17 @@ if ($baseUrl === '/') $baseUrl = '';
 $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong jika tidak ada
 ?>
 
+<!-- apply collapsed state early to avoid flash on refresh -->
+<script>
+  (function(){
+    try {
+      if (localStorage.getItem('sidebarCollapsed') === '1') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    } catch (e) { }
+  })();
+</script>
+
 <!-- keep avatar fixed size and not scale when sidebar collapses -->
 <style>
   /* avatar container fixed size */
@@ -72,6 +83,36 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
     min-width: 16rem;
     max-width: 16rem;
   }
+  /* apply same collapsed visual state early when html has the class (prevents flash) */
+  html.sidebar-collapsed #sidebar {
+    width: 4rem !important; /* w-16 equivalent */
+    min-width: 4rem !important;
+    max-width: 4rem !important;
+  }
+  html.sidebar-collapsed #sidebar .menu-text {
+    opacity: 0;
+    transform: translateX(-8px) scaleX(.96);
+    max-width: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  html.sidebar-collapsed #sidebar .profile-avatar,
+  html.sidebar-collapsed #sidebar .profile-avatar img {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  /* ensure page containers follow collapsed state early */
+  html.sidebar-collapsed #content { margin-left: 4rem; }
+  html.sidebar-collapsed #dHeader { margin-left: 4rem; }
+  /* mirror some collapsed internal rules so visuals match immediately */
+  html.sidebar-collapsed #sidebar nav a .material-symbols-outlined { transform: scale(.96); opacity: .92; }
+  html.sidebar-collapsed #sidebar #sidebarLogo { opacity: 0; transform: scale(.9); pointer-events: none; }
+  html.sidebar-collapsed #sidebar details.sidebar-group .group-children::before { background-color: transparent; }
+  html.sidebar-collapsed #sidebar .hamburger-line-1 { top: 4px; transform: rotate(0deg); }
+  html.sidebar-collapsed #sidebar .hamburger-line-2 { top: 9px; opacity: 1; transform: none; }
+  html.sidebar-collapsed #sidebar .hamburger-line-3 { top: 14px; transform: rotate(0deg); }
   
   /* collapsed state */
   #sidebar.collapsed {
@@ -123,6 +164,9 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
       left: 0;
       box-shadow: 0 0 0 9999px rgba(0,0,0,0.45); /* backdrop via big shadow, no extra element needed */
     }
+    /* pre-apply mobile-open state early if html has class (prevents visual flicker on mobile) */
+    html.sidebar-mobile-open #sidebar { left: 0; box-shadow: 0 0 0 9999px rgba(0,0,0,0.45); }
+    html.sidebar-mobile-open #sidebar nav { opacity: 1; transform: none; }
 
     /* subtle fade/slide-in for the inner nav on mobile open */
     #sidebar nav { opacity: 0; transform: translateX(-6px); transition: opacity 280ms ease, transform 280ms ease; }
@@ -200,8 +244,11 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
   /* dropdown (details/summary) */
   #sidebar details.sidebar-group summary { list-style: none; cursor: pointer; }
   #sidebar details.sidebar-group summary::-webkit-details-marker { display: none; }
-  #sidebar details.sidebar-group .chev { transition: transform 200ms ease; }
+  #sidebar details.sidebar-group .chev { transition: transform 200ms ease, font-size 360ms ease; font-size: 1.25rem; }
   #sidebar details[open].sidebar-group .chev { transform: rotate(180deg); }
+  #sidebar.collapsed details.sidebar-group .chev { font-size: 0.0rem; }
+  /* smaller chevron when pre-applied class exists */
+  html.sidebar-collapsed #sidebar details.sidebar-group .chev { font-size: 0.0rem; }
 
   /* sticky header inside sidebar + scrollable nav */
   #sidebar .sidebar-header {
@@ -268,7 +315,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
 </style>
 
 <!-- Sidebar -->
-<div id="sidebar" class="fixed inset-y-0 left-0 bg-[#0f172a] text-white flex flex-col z-50 border-r border-gray-700 dark:border-gray-700 border-gray-200">
+<div id="sidebar" class="fixed inset-y-0 left-0 bg-[#0f172a] opacity-100 text-white flex flex-col z-50 border-r border-gray-700 dark:border-gray-700 border-gray-200">
 
   <!-- Header -->
   <div class="sidebar-header relative flex items-center justify-center h-16 border-b border-gray-700 dark:border-gray-700 border-gray-200">
@@ -308,6 +355,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
     </a>
 
     <!-- Manajemen (dropdown) -->
+<?php if (($sessionUser['level'] ?? '') === 'admin'): ?>
     <details class="sidebar-group" <?= in_array($page, $manajemenPages, true) ? 'open' : '' ?>>
       <summary class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 <?= navActive('account', $page, $sub)?>">
         <span class="material-symbols-outlined mr-3">group</span>
@@ -325,6 +373,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
         </a>
       </div>
     </details>
+    <?php endif; ?>
 
     <!-- Akademik (dropdown) -->
     <details class="sidebar-group" <?= in_array($page, $akademikPages, true) ? 'open' : '' ?>>

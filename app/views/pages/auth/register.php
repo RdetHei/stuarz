@@ -7,78 +7,86 @@
     <title>Register - Stuarz</title>
     <link rel="icon" type="image/png" sizes="32x32" href="assets/diamond.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/diamond.png">
-    <style>
-        input:focus {
-            outline: none;
-            border-color: #5865f2;
-            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
-        }
-    </style>
 </head>
 <body class="bg-gray-900 min-h-screen">
     <div class="flex min-h-screen">
         <!-- Left Panel - Branding -->
-        <div class="hidden lg:flex lg:w-1/2 bg-gray-800 p-12 flex-col justify-center items-center">
-            <div class="max-w-md w-full">
-                <div class="flex justify-center mb-8">
-                    <svg fill="#ffffff" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 293.538 293.538" stroke="#ffffff" class="h-24 w-24">
-                        <g>
-                            <polygon points="210.084,88.631 146.622,284.844 81.491,88.631"></polygon>
-                            <polygon points="103.7,64.035 146.658,21.08 188.515,64.035"></polygon>
-                            <polygon points="55.581,88.631 107.681,245.608 0,88.631"></polygon>
-                            <polygon points="235.929,88.631 293.538,88.631 184.521,247.548"></polygon>
-                            <polygon points="283.648,64.035 222.851,64.035 168.938,8.695 219.079,8.695"></polygon>
-                            <polygon points="67.563,8.695 124.263,8.695 68.923,64.035 7.969,64.035"></polygon>
-                        </g>
-                    </svg>
+        <div class="hidden lg:flex lg:w-1/2 bg-[#1f2937] p-12 flex-col justify-center relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-30">
+                <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(88, 101, 242, 0.1) 1px, transparent 0); background-size: 40px 40px;"></div>
+            </div>
+
+            <div class="max-w-md mx-auto relative z-10">
+                <!-- Logo -->
+                <div class="flex justify-center mb-10">
+                    <div class="w-20 h-20 rounded-2xl bg-[#5865F2] flex items-center justify-center shadow-2xl">
+                        <svg fill="#ffffff" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 293.538 293.538" class="h-12 w-12">
+                            <g>
+                                <polygon points="210.084,88.631 146.622,284.844 81.491,88.631"></polygon>
+                                <polygon points="103.7,64.035 146.658,21.08 188.515,64.035"></polygon>
+                                <polygon points="55.581,88.631 107.681,245.608 0,88.631"></polygon>
+                                <polygon points="235.929,88.631 293.538,88.631 184.521,247.548"></polygon>
+                                <polygon points="283.648,64.035 222.851,64.035 168.938,8.695 219.079,8.695"></polygon>
+                                <polygon points="67.563,8.695 124.263,8.695 68.923,64.035 7.969,64.035"></polygon>
+                            </g>
+                        </svg>
+                    </div>
                 </div>
                 
-                <h1 class="text-4xl font-bold text-white mb-4 text-center">Join Stuarz Today</h1>
-                <p class="text-gray-400 text-center mb-8">Create your account and start your journey with us.</p>
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-bold text-gray-100 mb-3">Join Stuarz Today</h1>
+                    <p class="text-gray-400 text-lg">Create your account and start your journey</p>
+                </div>
                 
                 <!-- Benefits -->
                 <div class="space-y-4">
-                    <div class="flex items-start gap-3 bg-gray-900 border border-gray-700 rounded-lg p-4">
-                        <svg class="w-6 h-6 text-indigo-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
+                    <div class="flex items-start gap-4 p-4 bg-[#111827] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 flex-shrink-0">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
                         <div>
-                            <h3 class="text-white font-semibold mb-1">Free Forever</h3>
+                            <h3 class="text-gray-100 font-semibold mb-1">Free Forever</h3>
                             <p class="text-sm text-gray-400">No credit card required, start for free</p>
                         </div>
                     </div>
                     
-                    <div class="flex items-start gap-3 bg-gray-900 border border-gray-700 rounded-lg p-4">
-                        <svg class="w-6 h-6 text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
+                    <div class="flex items-start gap-4 p-4 bg-[#111827] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center border border-[#5865F2]/20 flex-shrink-0">
+                            <svg class="w-5 h-5 text-[#5865F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
                         <div>
-                            <h3 class="text-white font-semibold mb-1">Privacy First</h3>
+                            <h3 class="text-gray-100 font-semibold mb-1">Privacy First</h3>
                             <p class="text-sm text-gray-400">Your data is encrypted and protected</p>
                         </div>
                     </div>
                     
-                    <div class="flex items-start gap-3 bg-gray-900 border border-gray-700 rounded-lg p-4">
-                        <svg class="w-6 h-6 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
-                        </svg>
+                    <div class="flex items-start gap-4 p-4 bg-[#111827] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 flex-shrink-0">
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
                         <div>
-                            <h3 class="text-white font-semibold mb-1">Easy Setup</h3>
+                            <h3 class="text-gray-100 font-semibold mb-1">Quick Setup</h3>
                             <p class="text-sm text-gray-400">Get started in less than 2 minutes</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Testimonial -->
-                <div class="mt-8 bg-gray-900 border border-gray-700 rounded-lg p-5">
+                <div class="mt-8 bg-[#111827] border border-gray-700 rounded-lg p-5">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#5865F2] to-[#4752C4] flex items-center justify-center text-sm font-bold text-white">
                             JD
                         </div>
                         <div>
-                            <p class="text-white font-semibold text-sm">John Doe</p>
-                            <p class="text-gray-400 text-xs">Early Member</p>
+                            <p class="text-gray-100 font-semibold text-sm">John Doe</p>
+                            <p class="text-gray-500 text-xs">Early Member</p>
                         </div>
                     </div>
                     <p class="text-gray-400 text-sm italic">"Best decision I made this year. The platform is intuitive and the community is amazing!"</p>
@@ -91,127 +99,135 @@
             <div class="max-w-md mx-auto w-full">
                 <!-- Mobile Logo -->
                 <div class="flex justify-center mb-8 lg:hidden">
-                    <svg fill="#ffffff" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 293.538 293.538" stroke="#ffffff" class="h-16 w-16">
-                        <g>
-                            <polygon points="210.084,88.631 146.622,284.844 81.491,88.631"></polygon>
-                            <polygon points="103.7,64.035 146.658,21.08 188.515,64.035"></polygon>
-                            <polygon points="55.581,88.631 107.681,245.608 0,88.631"></polygon>
-                            <polygon points="235.929,88.631 293.538,88.631 184.521,247.548"></polygon>
-                            <polygon points="283.648,64.035 222.851,64.035 168.938,8.695 219.079,8.695"></polygon>
-                            <polygon points="67.563,8.695 124.263,8.695 68.923,64.035 7.969,64.035"></polygon>
-                        </g>
-                    </svg>
-                </div>
-
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-2">Create a new account</h2>
-                    <p class="text-gray-400">Join thousands of users already on Stuarz.</p>
-                </div>
-
-                <form action="index.php?page=register" method="POST" class="space-y-5">
-                    <!-- Username Field -->
-                    <div class="space-y-2">
-                        <label for="username" class="block text-sm font-medium text-gray-300">
-                            Username <span class="text-red-500">*</span>
-                        </label>
-                        <input 
-                            id="username" 
-                            type="text" 
-                            name="username" 
-                            required 
-                            autocomplete="username"
-                            class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 transition-all duration-200 hover:border-gray-600 placeholder:text-gray-500" 
-                            placeholder="Choose a username"
-                        />
-                    </div>
-
-                    <!-- Email Field -->
-                    <div class="space-y-2">
-                        <label for="email" class="block text-sm font-medium text-gray-300">
-                            Email <span class="text-red-500">*</span>
-                        </label>
-                        <input 
-                            id="email" 
-                            type="email" 
-                            name="email" 
-                            required 
-                            autocomplete="email"
-                            class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 transition-all duration-200 hover:border-gray-600 placeholder:text-gray-500" 
-                            placeholder="your.email@example.com"
-                        />
-                    </div>
-
-                    <!-- Password Field -->
-                    <div class="space-y-2">
-                        <label for="password" class="block text-sm font-medium text-gray-300">
-                            Password <span class="text-red-500">*</span>
-                        </label>
-                        <input 
-                            id="password" 
-                            type="password" 
-                            name="password" 
-                            required 
-                            autocomplete="new-password"
-                            class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 transition-all duration-200 hover:border-gray-600 placeholder:text-gray-500" 
-                            placeholder="Create a strong password"
-                        />
-                    </div>
-
-                    <!-- Confirm Password Field -->
-                    <div class="space-y-2">
-                        <label for="confirm_password" class="block text-sm font-medium text-gray-300">
-                            Confirm Password <span class="text-red-500">*</span>
-                        </label>
-                        <input 
-                            id="confirm_password" 
-                            type="password" 
-                            name="confirm_password" 
-                            required 
-                            autocomplete="new-password"
-                            class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 transition-all duration-200 hover:border-gray-600 placeholder:text-gray-500" 
-                            placeholder="Confirm your password"
-                        />
-                    </div>
-
-                    <!-- Terms & Conditions -->
-                    <div class="flex items-start">
-                        <input 
-                            id="terms" 
-                            type="checkbox" 
-                            required
-                            class="w-4 h-4 rounded bg-gray-800 border-gray-700 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-900 mt-1"
-                        />
-                        <label for="terms" class="ml-2 text-sm text-gray-400">
-                            I agree to the <a href="#" class="text-indigo-400 hover:text-indigo-300">Terms of Service</a> and <a href="#" class="text-indigo-400 hover:text-indigo-300">Privacy Policy</a>
-                        </label>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button 
-                        type="submit"
-                        class="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-                    >
-                        <span>Create Account</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                    <div class="w-16 h-16 rounded-xl bg-[#5865F2] flex items-center justify-center shadow-lg">
+                        <svg fill="#ffffff" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 293.538 293.538" class="h-10 w-10">
+                            <g>
+                                <polygon points="210.084,88.631 146.622,284.844 81.491,88.631"></polygon>
+                                <polygon points="103.7,64.035 146.658,21.08 188.515,64.035"></polygon>
+                                <polygon points="55.581,88.631 107.681,245.608 0,88.631"></polygon>
+                                <polygon points="235.929,88.631 293.538,88.631 184.521,247.548"></polygon>
+                                <polygon points="283.648,64.035 222.851,64.035 168.938,8.695 219.079,8.695"></polygon>
+                                <polygon points="67.563,8.695 124.263,8.695 68.923,64.035 7.969,64.035"></polygon>
+                            </g>
                         </svg>
-                    </button>
-                </form>
+                    </div>
+                </div>
 
-                <!-- Login Link -->
-                <p class="mt-8 text-center text-sm text-gray-400">
-                    Already have an account?
-                    <a href="index.php?page=login" class="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
-                        Sign in
-                    </a>
-                </p>
+                <!-- Register Card -->
+                <div class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden">
+                    <!-- Card Header -->
+                    <div class="px-6 py-5 border-b border-gray-700">
+                        <h2 class="text-2xl font-bold text-gray-100">Create your account</h2>
+                        <p class="text-sm text-gray-400 mt-1">Join thousands of users already on Stuarz</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form action="index.php?page=register" method="POST" class="px-6 py-6 space-y-5">
+                        <!-- Username Field -->
+                        <div>
+                            <label for="username" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                Username <span class="text-red-400">*</span>
+                            </label>
+                            <input 
+                                id="username" 
+                                type="text" 
+                                name="username" 
+                                required 
+                                autocomplete="username"
+                                placeholder="Choose a username"
+                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" 
+                            />
+                        </div>
+
+                        <!-- Email Field -->
+                        <div>
+                            <label for="email" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                Email <span class="text-red-400">*</span>
+                            </label>
+                            <input 
+                                id="email" 
+                                type="email" 
+                                name="email" 
+                                required 
+                                autocomplete="email"
+                                placeholder="your.email@example.com"
+                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" 
+                            />
+                        </div>
+
+                        <!-- Password Field -->
+                        <div>
+                            <label for="password" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                Password <span class="text-red-400">*</span>
+                            </label>
+                            <input 
+                                id="password" 
+                                type="password" 
+                                name="password" 
+                                required 
+                                autocomplete="new-password"
+                                placeholder="Create a strong password"
+                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" 
+                            />
+                        </div>
+
+                        <!-- Confirm Password Field -->
+                        <div>
+                            <label for="confirm_password" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                Confirm Password <span class="text-red-400">*</span>
+                            </label>
+                            <input 
+                                id="confirm_password" 
+                                type="password" 
+                                name="confirm_password" 
+                                required 
+                                autocomplete="new-password"
+                                placeholder="Confirm your password"
+                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" 
+                            />
+                        </div>
+
+                        <!-- Terms & Conditions -->
+                        <div class="flex items-start">
+                            <input 
+                                id="terms" 
+                                type="checkbox" 
+                                required
+                                class="w-4 h-4 rounded border-gray-700 bg-[#111827] text-[#5865F2] focus:ring-[#5865F2] focus:ring-offset-0 mt-0.5"
+                            />
+                            <label for="terms" class="ml-2 text-sm text-gray-400">
+                                I agree to the <a href="#" class="text-[#5865F2] hover:text-[#4752C4] transition-colors">Terms of Service</a> and <a href="#" class="text-[#5865F2] hover:text-[#4752C4] transition-colors">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button 
+                            type="submit"
+                            class="w-full px-4 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium rounded-md transition-colors flex items-center justify-center gap-2"
+                        >
+                            <span>Create Account</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <!-- Card Footer -->
+                    <div class="px-6 py-4 border-t border-gray-700 bg-[#111827]">
+                        <p class="text-center text-sm text-gray-400">
+                            Already have an account?
+                            <a href="index.php?page=login" class="text-[#5865F2] hover:text-[#4752C4] font-medium transition-colors ml-1">
+                                Sign in
+                            </a>
+                        </p>
+                    </div>
+                </div>
 
                 <!-- Footer -->
-                <div class="mt-8 pt-6 border-t border-gray-800 flex items-center justify-between text-xs text-gray-500">
+                <div class="mt-8 flex items-center justify-between text-xs text-gray-500">
                     <span>© 2024 Stuarz</span>
                     <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                         <span>Secure registration</span>
                     </div>
                 </div>

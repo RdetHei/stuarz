@@ -60,7 +60,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
     }
 }
 ?>
-<header id="dHeader" class="sticky top-0 z-[60] bg-slate-900/90 backdrop-blur supports-[backdrop-filter]:bg-slate-900/70 text-white h-16 flex items-center border-b border-slate-700 justify-between px-4 transition-all duration-300">
+<header id="dHeader" class="sticky top-0 z-[60] bg-slate-900 opacity-100 text-white h-16 flex items-center border-b border-slate-700 justify-between px-4 transition-all duration-300">
     <div class="flex items-center gap-3 sm:gap-4">
         <!-- Mobile menu button -->
         <button id="mobileMenuToggle" class="lg:hidden p-2 hover:bg-slate-700 rounded" aria-label="Toggle mobile menu">
@@ -106,6 +106,22 @@ if ($currentPage === 'dashboard' && $currentSub) {
             <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-[10px] rounded-full px-1 leading-4">3</span>
         </button>
 
+        <?php
+        // Show Print dropdown only to admin and teacher users
+        $userLevel = $_SESSION['level'] ?? null;
+        if ($userLevel === 'admin' || $userLevel === 'teacher') :
+        ?>
+        <div class="relative">
+            <button id="printDropdownBtn" class="p-2 hover:bg-slate-700 rounded flex items-center gap-2" aria-haspopup="true" aria-expanded="false" title="Print Options">
+                <span class="material-symbols-outlined">print</span>
+            </button>
+            <div id="printDropdownMenu" class="absolute right-0 mt-2 w-44 bg-white text-black rounded shadow-lg hidden z-10">
+                <a href="index.php?page=print_all" class="block px-4 py-2 hover:bg-slate-100">Print All</a>
+                <a href="index.php?page=print" class="block px-4 py-2 hover:bg-slate-100">Print Table</a>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Support dropdown -->
         <div class="relative">
             <button id="supportDropdownBtn" class="p-2 hover:bg-slate-700 rounded flex items-center gap-2" aria-haspopup="true" aria-expanded="false">
@@ -140,6 +156,32 @@ if ($currentPage === 'dashboard' && $currentSub) {
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') menu.classList.add('hidden');
+        });
+    })();
+</script>
+<script>
+    (function(){
+        var btn = document.getElementById('printDropdownBtn');
+        var menu = document.getElementById('printDropdownMenu');
+        if (!btn || !menu) return;
+
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var expanded = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            menu.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', function(){
+            menu.classList.add('hidden');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+        });
+
+        document.addEventListener('keydown', function(e){
+            if (e.key === 'Escape') {
+                menu.classList.add('hidden');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
         });
     })();
 </script>

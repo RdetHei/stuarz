@@ -32,13 +32,13 @@ if (strpos($current_page, 'attendance_manage') === 0) {
         <style>
         @media print {
             /* hide admin chrome */
-            #sidebar, .sidebar, .hamburger, nav, .ai-helper, .chat-modal, #sidebarToggle, #sidebarLogoToggle { display: none !important; }
+            #sidebar, .sidebar, .hamburger, nav, .ai-helper, .chat-modal, #sidebarToggle, #sidebarLogoToggle, .menu-text { display: none !important; }
             /* hide dashboard header */
             #dHeader, .d-header, header { display: none !important; }
             /* make main content full width */
             #content, main { margin: 0 !important; padding: 0 !important; width: 100% !important; }
             /* normalize colors for printing */
-            body, #content, article, .prose { background: #fff !important; color: #000 !important; }
+            body, #content, article, .prose, .card { background: #fff !important; color: #000 !important; }
             a:after { content: " (" attr(href) ")"; font-size: 90%; }
         }
         </style>

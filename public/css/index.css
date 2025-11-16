@@ -8,6 +8,7 @@
   --ring: 0 0% 100% / 0.06;
 }
 
+
 html,body{ height:100%; }
 body{
   background-color: hsl(var(--background));

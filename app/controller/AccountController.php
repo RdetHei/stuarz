@@ -185,6 +185,31 @@ class AccountController
             exit;
         }
 
+        // Determine a safe return target so the form can redirect back to the origin
+        $returnTo = 'account';
+        // prefer explicit ?from=... param
+        if (!empty($_GET['from'])) {
+            $candidate = trim($_GET['from']);
+            $allowed = ['profile', 'account', 'students', 'teachers'];
+            if (in_array($candidate, $allowed, true)) $returnTo = $candidate;
+        } elseif (!empty($_SERVER['HTTP_REFERER'])) {
+            // parse referer for a page=... query param
+            $ref = $_SERVER['HTTP_REFERER'];
+            $parts = parse_url($ref);
+            if (!empty($parts['query'])) {
+                parse_str($parts['query'], $qs);
+                if (!empty($qs['page']) && in_array($qs['page'], ['profile','account','students','teachers'], true)) {
+                    $returnTo = $qs['page'];
+                }
+            }
+        } else {
+            // if editing own profile, return to profile by default
+            if (isset($_SESSION['user']['id']) && (int)$_SESSION['user']['id'] === (int)$id) {
+                $returnTo = 'profile';
+            }
+        }
+
+        // expose $returnTo to the view
         // pastikan $user yang di-include view berasal dari sini (tidak ditimpa di view)
         $content = dirname(__DIR__) . '/views/pages/users/edit_user.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
@@ -317,6 +342,22 @@ class AccountController
         }
 
         $this->setFlash('Akun diperbarui.', 'success');
+
+        // Respect a safe return target when present (prevent open redirect)
+        $allowed = ['profile', 'account', 'students', 'teachers'];
+        $returnTo = $_POST['return_to'] ?? '';
+        if (in_array($returnTo, $allowed, true)) {
+            header('Location: index.php?page=' . $returnTo);
+            exit;
+        }
+
+        // If editing own account, default to profile
+        if (isset($_SESSION['user']['id']) && (int)$_SESSION['user']['id'] === $id) {
+            header('Location: index.php?page=profile');
+            exit;
+        }
+
+        // Fallback to account list
         header('Location: index.php?page=account');
         exit;
     }

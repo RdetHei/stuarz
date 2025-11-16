@@ -1,0 +1,103 @@
+<?php
+class PrintController {
+    
+    public function index() {
+        global $config;
+        // Get all table names from database
+        // Note: tables will be fetched in the view for simplicity
+        // This allows the view to also get count for each table
+        
+        $title = "Print Data - Stuarz";
+        $description = "Print data dari semua tabel";
+        
+        $content = dirname(__DIR__) . '/views/pages/print/index.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+    
+    public function printTable() {
+        global $config;
+        $table = $_GET['table'] ?? '';
+        
+        if (empty($table)) {
+            header('Location: index.php?page=print');
+            exit;
+        }
+        
+        // Validate table name to prevent SQL injection
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            die('Invalid table name');
+        }
+        
+        // Get table data
+        $data = $this->getTableData($config, $table);
+        $columns = $this->getTableColumns($config, $table);
+        $tableName = ucfirst(str_replace('_', ' ', $table));
+        
+        // Include print view
+        include dirname(__DIR__) . '/views/pages/print/print_table.php';
+    }
+    
+    public function printAll() {
+        global $config;
+        // Get all table names
+        $tables = $this->getAllTables($config);
+        
+        // Get data for all tables
+        $allData = [];
+        foreach ($tables as $table) {
+            $allData[$table] = [
+                'columns' => $this->getTableColumns($config, $table),
+                'data' => $this->getTableData($config, $table)
+            ];
+        }
+        
+        // Include print all view
+        include dirname(__DIR__) . '/views/pages/print/print_all.php';
+    }
+    
+    private function getAllTables($db) {
+        $tables = [];
+        $sql = "SHOW TABLES";
+        $result = mysqli_query($db, $sql);
+        
+        if ($result) {
+            while ($row = mysqli_fetch_array($result)) {
+                $tables[] = $row[0];
+            }
+            mysqli_free_result($result);
+        }
+        
+        return $tables;
+    }
+    
+    private function getTableColumns($db, $table) {
+        $columns = [];
+        $sql = "SHOW COLUMNS FROM `{$table}`";
+        $result = mysqli_query($db, $sql);
+        
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $columns[] = $row['Field'];
+            }
+            mysqli_free_result($result);
+        }
+        
+        return $columns;
+    }
+    
+    private function getTableData($db, $table) {
+        $data = [];
+        $sql = "SELECT * FROM `{$table}`";
+        $result = mysqli_query($db, $sql);
+        
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $data[] = $row;
+            }
+            mysqli_free_result($result);
+        }
+        
+        return $data;
+    }
+}
+

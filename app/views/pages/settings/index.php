@@ -20,7 +20,6 @@ if ($baseUrl === '/') $baseUrl = '';
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
     <link rel="icon" type="image/png" sizes="32x32" href="<?= $baseUrl ?>/assets/diamond.png">
     <link rel="icon" type="image/png" sizes="16x16" href="<?= $baseUrl ?>/assets/diamond.png">
-    <script src="<?= $baseUrl ?>/js/theme.js"></script>
 </head>
 <body class="bg-gray-900 dark:bg-gray-900 bg-gray-50 min-h-screen transition-colors duration-200">
     <!-- Header -->
@@ -243,38 +242,7 @@ if ($baseUrl === '/') $baseUrl = '';
                             </label>
                         </div>
 
-                        <div class="flex items-center justify-between py-3">
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-200 dark:text-gray-200 text-gray-900">Mode Gelap</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-500 text-gray-600 mt-0.5">Toggle antara mode terang dan gelap</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="darkModeToggle" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-700 dark:bg-gray-700 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#5865F2] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5865F2]"></div>
-                            </label>
-                        </div>
-                        <script>
-                            // Sync dark mode toggle with theme manager
-                            (function() {
-                                const toggle = document.getElementById('darkModeToggle');
-                                if (!toggle) return;
-                                
-                                // Set initial state
-                                const currentTheme = window.ThemeManager?.getTheme();
-                                toggle.checked = currentTheme === 'dark';
-                                
-                                // Handle toggle
-                                toggle.addEventListener('change', function() {
-                                    const newTheme = this.checked ? 'dark' : 'light';
-                                    window.ThemeManager?.setTheme(newTheme);
-                                });
-                                
-                                // Update on theme change
-                                window.addEventListener('themechange', function(e) {
-                                    toggle.checked = e.detail.theme === 'dark';
-                                });
-                            })();
-                        </script>
+                        <!-- Dark mode preference removed (feature rolled back) -->
                     </div>
                 </div>
             </div>
