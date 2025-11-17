@@ -37,11 +37,6 @@ class AnnouncementController {
             $contentText = trim($_POST['content'] ?? '');
             $photo = $this->handlePhotoUpload(null, $uploadedNewPhoto);
 
-            // Allow class_id to be optional / nullable
-            $class_id = null;
-            if (isset($_POST['class_id']) && $_POST['class_id'] !== '') {
-                $class_id = intval($_POST['class_id']);
-            }
 
             if ($title === '') {
                 throw new \Exception("Title is required");
@@ -57,7 +52,6 @@ class AnnouncementController {
                 'created_by' => $created_by,
                 'title' => $title,
                 'content' => $contentText,
-                'class_id' => $class_id, // may be null
                 'photo' => $photo
             ];
 
@@ -125,6 +119,18 @@ class AnnouncementController {
                 mysqli_stmt_close($stmt);
             }
         }
+        // If comment added, notify announcement owner (if not commenter)
+        if ($ok) {
+            // attempt to find announcement owner and notify
+            $announcement = $this->model->getById($announcement_id);
+            $ownerId = $announcement['created_by'] ?? null;
+            $title = $announcement['title'] ?? '';
+            if ($ownerId && (int)$ownerId !== (int)$user_id) {
+                require_once dirname(__DIR__) . '/helpers/notifier.php';
+                $msg = 'Komentar baru pada: ' . $title;
+                notify_event($config, 'create', 'announcement_comment', $announcement_id, $ownerId, $msg, 'index.php?page=announcement_show&id=' . $announcement_id);
+            }
+        }
 
         $_SESSION['flash'] = $ok ? 'Komentar ditambah.' : 'Gagal menambah komentar.';
         $_SESSION['flash_level'] = $ok ? 'success' : 'danger';
@@ -169,7 +175,7 @@ class AnnouncementController {
             global $config;
             $title = trim($_POST['title'] ?? '');
             $contentText = trim($_POST['content'] ?? '');
-            $class_id = isset($_POST['class_id']) && $_POST['class_id'] !== '' ? intval($_POST['class_id']) : null;
+           
 
             if ($title === '' || $contentText === '') {
                 throw new \Exception('Judul dan isi wajib diisi.');
@@ -180,7 +186,6 @@ class AnnouncementController {
             $updated = $this->model->update($id, [
                 'title' => $title,
                 'content' => $contentText,
-                'class_id' => $class_id,
                 'photo' => $photo,
             ]);
 

@@ -32,14 +32,7 @@
                          focus:ring-2 focus:ring-indigo-500 focus:outline-none"><?= htmlspecialchars($announcement['content'] ?? '') ?></textarea>
       </div>
 
-      <!-- Kelas -->
-      <div>
-        <label class="block text-sm font-medium text-gray-300 mb-1">Kelas</label>
-        <input type="number" name="class_id" 
-               value="<?= htmlspecialchars($announcement['class_id'] ?? '') ?>" 
-               class="w-full px-4 py-2 rounded-md bg-[#202225] text-white placeholder-gray-400 
-                      focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-      </div>
+
 
       <!-- Foto -->
       <div>

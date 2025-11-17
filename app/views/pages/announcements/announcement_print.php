@@ -13,6 +13,28 @@
     .meta { color: #444; font-size: 13px; margin-bottom: 18px; }
     img { max-width: 100%; height: auto; display: block; margin: 12px 0; }
     .content { font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
+
+    /* Print-only adjustments: hide class_id columns and remove scrollbars */
+    @media print {
+      /* Hide any column or element that identifies class_id using common selectors */
+      .col-class_id, .class_id, .class-id, th.class_id, td.class_id, [data-col="class_id"], [data-col="class-id"] {
+        display: none !important;
+      }
+
+      /* If the table has a header cell containing "Class" or "Class ID", try to hide via attribute selectors (best-effort)
+         Note: CSS cannot select by text content reliably; templates should add a class or data attribute for robust control. */
+
+      /* Remove scrollbars and force content to flow in print */
+      html, body { overflow: visible !important; height: auto !important; }
+      .container, .content, .table-wrapper, .table-responsive { overflow: visible !important; max-height: none !important; }
+
+      /* Ensure table cells wrap instead of creating horizontal scroll */
+      table { table-layout: auto !important; width: 100% !important; }
+      th, td { white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; }
+
+      /* Page size */
+      @page { size: A4; margin: 2cm; }
+    }
   </style>
 </head>
 <body>

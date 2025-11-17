@@ -122,4 +122,82 @@ class NotificationsModel
     {
         return $this->getRecent($limit);
     }
+
+    private function columnExists(string $column): bool
+    {
+        $res = mysqli_query($this->conn, "SHOW COLUMNS FROM notifications LIKE '" . mysqli_real_escape_string($this->conn, $column) . "'");
+        if ($res instanceof \mysqli_result) {
+            $exists = $res->num_rows > 0;
+            mysqli_free_result($res);
+            return $exists;
+        }
+        return false;
+    }
+
+    public function setReadStatus(int $id, bool $read = true): bool
+    {
+        if (!$this->columnExists('is_read')) {
+            return false;
+        }
+        $val = $read ? 1 : 0;
+        $stmt = mysqli_prepare($this->conn, "UPDATE notifications SET is_read = ? WHERE id = ?");
+        if (!$stmt) return false;
+        mysqli_stmt_bind_param($stmt, "ii", $val, $id);
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return (bool)$ok;
+    }
+
+    public function markAllRead(?int $userId = null): bool
+    {
+        if (!$this->columnExists('is_read')) {
+            return false;
+        }
+        if ($userId !== null) {
+            $stmt = mysqli_prepare($this->conn, "UPDATE notifications SET is_read = 1 WHERE user_id = ?");
+            if (!$stmt) return false;
+            mysqli_stmt_bind_param($stmt, "i", $userId);
+        } else {
+            $stmt = mysqli_prepare($this->conn, "UPDATE notifications SET is_read = 1");
+            if (!$stmt) return false;
+        }
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return (bool)$ok;
+    }
+
+    public function deleteById(int $id): bool
+    {
+        $stmt = mysqli_prepare($this->conn, "DELETE FROM notifications WHERE id = ?");
+        if (!$stmt) return false;
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return (bool)$ok;
+    }
+
+    public function countUnread(?int $userId = null): int
+    {
+        if (!$this->columnExists('is_read')) {
+            return 0;
+        }
+        if ($userId !== null) {
+            $stmt = mysqli_prepare($this->conn, "SELECT COUNT(*) AS c FROM notifications WHERE is_read = 0 AND user_id = ?");
+            if (!$stmt) return 0;
+            mysqli_stmt_bind_param($stmt, "i", $userId);
+        } else {
+            $stmt = mysqli_prepare($this->conn, "SELECT COUNT(*) AS c FROM notifications WHERE is_read = 0");
+            if (!$stmt) return 0;
+        }
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
+        $count = 0;
+        if ($res) {
+            $row = mysqli_fetch_assoc($res);
+            $count = (int)($row['c'] ?? 0);
+            mysqli_free_result($res);
+        }
+        mysqli_stmt_close($stmt);
+        return $count;
+    }
 }

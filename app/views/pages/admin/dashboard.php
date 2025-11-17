@@ -24,36 +24,20 @@
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-            <!-- Bagian Kiri: Teks -->
-            <div class="w-full">
-                <h1 class="text-3xl font-bold text-gray-100">Dashboard Overview</h1>
-                <p class="text-gray-400 mt-1">Welcome back, Admin</p>
-
-                <!-- LOGO DENGAN BACKGROUND -->
-                <div class="mt-4 flex justify-start sm:justify-start">
-                    <div class="bg-gray-900 border border-gray-400 rounded-xl p-3 shadow-md inline-flex">
+            <!-- Bagian Kiri: Kompak — Logo + Nama Sekolah -->
+            <div class="w-full flex items-center gap-4">
+                <div class="flex-shrink-0">
+                    <div class="bg-gray-900 border border-gray-700 rounded-xl p-2 inline-flex">
                         <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/diamond.png', ENT_QUOTES, 'UTF-8') ?>"
-                             alt="Logo Sekolah"
-                             class="w-20 sm:w-24 md:w-28 object-contain opacity-95" />
+                             alt="Logo"
+                             class="w-16 sm:w-20 md:w-24 object-contain" />
                     </div>
                 </div>
-            </div>
 
-            <!-- Bagian Kanan -->
-            <div class="flex items-center gap-2">
-                <button onclick="window.location.href='index.php?page=notifications'"
-                    class="p-2 text-gray-400 hover:text-gray-200 hover:bg-[#1f2937] rounded-lg transition-colors border border-gray-700"
-                    title="Notifications">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                    </svg>
-                </button>
-
-                <button onclick="window.location.href='index.php?page=logout'"
-                    class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium text-sm text-white">
-                    Logout
-                </button>
+                <div class="min-w-0">
+                    <h1 class="text-3xl font-bold text-gray-100 leading-tight">Stuarz</h1>
+                    <p class="text-sm text-gray-400 mt-1">Sistem Informasi Sekolah — Kelola siswa, tugas, dan absensi</p>
+                </div>
             </div>
         </div>
 
@@ -95,45 +79,64 @@
 
 
 
-        <!-- Announcement Box -->
-        <?php if (!empty($latestAnnouncement)): ?>
+        <!-- Announcement Box: show up to 3 latest announcements with optional thumbnail -->
+        <?php
+        $announcementsList = [];
+        if (!empty($latestAnnouncements) && is_array($latestAnnouncements)) {
+            $announcementsList = array_slice($latestAnnouncements, 0, 3);
+        } elseif (!empty($latestAnnouncement)) {
+            $announcementsList = [ $latestAnnouncement ];
+        }
+        ?>
+
+        <?php if (!empty($announcementsList)): ?>
         <div class="mb-6 flex justify-end">
-            <div class="w-full max-w-md">
-                <a href="index.php?page=announcement&id=<?= (int)($latestAnnouncement['id'] ?? 0) ?>" 
-                   class="block bg-[#1f2937] border-l-4 border-[#5865F2] rounded-lg p-4 hover:bg-gray-800 transition-colors">
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center border border-[#5865F2]/20 flex-shrink-0">
+            <div class="w-full max-w-2xl">
+                <div class="space-y-3">
+                    <?php foreach ($announcementsList as $a): ?>
+                    <a href="index.php?page=announcement&id=<?= (int)($a['id'] ?? 0) ?>"
+                       class="block bg-[#1f2937] border-l-4 border-[#5865F2] rounded-lg p-3 hover:bg-gray-800 transition-colors flex items-center gap-3">
+
+                        <?php if (!empty($a['image']) || !empty($a['banner'])): ?>
+                        <div class="w-16 h-12 bg-gray-800 rounded-md overflow-hidden flex-shrink-0 border border-gray-700">
+                            <img src="<?= htmlspecialchars(($prefix ?? '') . ($a['image'] ?? $a['banner']), ENT_QUOTES, 'UTF-8') ?>"
+                                 alt="" class="w-full h-full object-cover" />
+                        </div>
+                        <?php else: ?>
+                        <div class="w-12 h-12 rounded-lg bg-[#5865F2]/10 flex items-center justify-center border border-[#5865F2]/20 flex-shrink-0">
                             <svg class="w-5 h-5 text-[#5865F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
                             </svg>
                         </div>
+                        <?php endif; ?>
+
                         <div class="flex-1 min-w-0">
-                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                                Pengumuman Terbaru
-                            </div>
-                            <h4 class="text-base font-semibold text-gray-100 mb-1 line-clamp-2">
-                                <?= htmlspecialchars($latestAnnouncement['title'] ?? '-') ?>
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Pengumuman</div>
+                            <h4 class="text-sm font-semibold text-gray-100 mb-0 line-clamp-2">
+                                <?= htmlspecialchars($a['title'] ?? '-') ?>
                             </h4>
-                            <div class="flex items-center gap-2 text-xs text-gray-500">
+                            <div class="flex items-center gap-2 text-xs text-gray-500 mt-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
-                                <?= htmlspecialchars(date('d F Y', strtotime($latestAnnouncement['created_at'] ?? ''))) ?>
+                                <?= htmlspecialchars(date('d F Y', strtotime($a['created_at'] ?? ''))) ?>
                             </div>
                         </div>
+
                         <svg class="w-5 h-5 text-gray-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
-                    </div>
-                </a>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
         <?php endif; ?>
 
         <!-- Charts Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- Attendance Chart (long) -->
-            <div class="bg-[#1f2937] border border-gray-700 p-5 rounded-lg lg:col-span-2">
+            <!-- Attendance Chart -->
+            <div class="bg-[#1f2937] border border-gray-700 p-5 rounded-lg">
                 <div class="flex items-center gap-2 mb-4">
                     <div class="w-8 h-8 bg-[#5865F2]/10 rounded-lg flex items-center justify-center">
                         <svg class="w-4 h-4 text-[#5865F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,8 +180,8 @@
                 </div>
             </div>
 
-            <!-- Students per Class Chart (long) -->
-            <div class="bg-[#1f2937] border border-gray-700 p-5 rounded-lg lg:col-span-2">
+            <!-- Students per Class Chart -->
+            <div class="bg-[#1f2937] border border-gray-700 p-5 rounded-lg">
                 <div class="flex items-center gap-2 mb-4">
                     <div class="w-8 h-8 bg-[#5865F2]/10 rounded-lg flex items-center justify-center">
                         <svg class="w-4 h-4 text-[#5865F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

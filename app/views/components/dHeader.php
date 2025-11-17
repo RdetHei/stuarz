@@ -61,7 +61,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
     }
 }
 ?>
-<header id="dHeader" class="sticky top-0 z-[60] bg-slate-900 opacity-100 text-white h-16 flex items-center border-b border-slate-700 justify-between px-4 transition-all duration-300">
+<header id="dHeader" class="sticky top-0 z-[60] bg-slate-900 opacity-100 text-white h-16 flex items-center border-b border-slate-700 justify-between px-4">
     <div class="flex items-center gap-3 sm:gap-4">
         <!-- Mobile menu button -->
         <button id="mobileMenuToggle" class="lg:hidden p-2 hover:bg-slate-700 rounded" aria-label="Toggle mobile menu">
@@ -102,9 +102,9 @@ if ($currentPage === 'dashboard' && $currentSub) {
         </form>
 
         <!-- Notifications -->
-        <button class="p-2 hover:bg-slate-700 rounded relative" aria-label="Notifications">
+        <button id="notifBtn" class="p-2 hover:bg-slate-700 rounded relative" aria-label="Notifications" title="Notifications">
             <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-[10px] rounded-full px-1 leading-4">99+</span>
+            <span id="notifBadge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-[10px] rounded-full px-1 leading-4" style="display:none">0</span>
         </button>
 
         <?php

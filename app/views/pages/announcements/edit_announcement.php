@@ -9,9 +9,7 @@
   <label>Isi</label>
   <textarea name="content" required class="form-control"><?= htmlspecialchars($announcement['content']) ?></textarea>
 
-  <label>Kelas</label>
-  <input type="number" name="class_id" value="<?= $announcement['class_id'] ?>" class="form-control">
-
+  
   <label>Foto (opsional)</label><br>
   <?php if (!empty($announcement['photo'])): ?>
     <img src="<?= $announcement['photo'] ?>" style="max-width:150px;"><br>

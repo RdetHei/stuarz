@@ -74,8 +74,8 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
 
   /* animated width/margin transitions for smooth collapse */
   #sidebar {
-    /* slower, smoother collapse */
-    transition: width 520ms cubic-bezier(.2,.8,.2,1), min-width 520ms cubic-bezier(.2,.8,.2,1), max-width 520ms cubic-bezier(.2,.8,.2,1);
+    /* faster, snappier collapse to remove perceived lag */
+    transition: width 220ms cubic-bezier(.2,.8,.2,1), min-width 220ms cubic-bezier(.2,.8,.2,1), max-width 220ms cubic-bezier(.2,.8,.2,1);
     will-change: width;
     box-sizing: border-box; /* ensure background and borders follow width */
     overflow: hidden; /* prevent inner content from overflowing during animation */
@@ -123,7 +123,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
   
   /* prefer transitions on the layout containers that move when sidebar changes */
   main, #content, #dHeader {
-    transition: margin-left 520ms cubic-bezier(.2,.8,.2,1);
+    transition: margin-left 220ms cubic-bezier(.2,.8,.2,1);
     will-change: margin-left;
   }
 
@@ -201,7 +201,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
     white-space: nowrap;
     overflow: hidden;
     vertical-align: middle;
-    transition: max-width 520ms cubic-bezier(.2,.8,.2,1), opacity 360ms ease, transform 360ms ease, visibility 360ms ease;
+    transition: max-width 220ms cubic-bezier(.2,.8,.2,1), opacity 200ms ease, transform 200ms ease, visibility 200ms ease;
     transform-origin: left center;
     opacity: 1;
     visibility: visible;
@@ -283,6 +283,70 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
   }
   #sidebar details.sidebar-group .group-children > a { position: relative; z-index: 1; }
   #sidebar.collapsed details.sidebar-group .group-children::before { background-color: transparent; } /* hide when collapsed */
+  /* floating panel style when sidebar is collapsed */
+  .sidebar-floating-children-panel {
+    position: absolute;
+    z-index: 60;
+    background: rgba(15,23,42,0.98); /* match sidebar dark tone */
+    pointer-events: auto;
+    padding: 8px 12px 8px 18px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+    color: #e5e7eb;
+    font-size: 14px;
+    min-width: 180px;
+    max-width: 360px;
+    overflow: hidden;
+  }
+  /* vertical guideline inside the floating panel */
+  .sidebar-floating-children-panel::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: rgba(148,163,184,.20);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+  /* caret/arrow connecting panel to sidebar */
+  .sidebar-floating-children-panel::after {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 14px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid rgba(15,23,42,0.98);
+    pointer-events: none;
+  }
+  .sidebar-floating-children-panel .group-children > a { display: block; padding-left: 18px; color: #d1d5db; }
+
+  /* Popup card for collapsed sidebar (new system) */
+  .sidebar-popup-card {
+    position: absolute;
+    z-index: 80;
+    background: rgba(15,23,42,0.98);
+    color: #e5e7eb;
+    padding: 8px 10px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(2,6,23,0.6);
+    transform-origin: left top;
+    opacity: 0;
+    transform: scale(.96) translateY(-6px);
+    transition: opacity 180ms ease, transform 180ms cubic-bezier(.2,.8,.2,1);
+    pointer-events: auto;
+    min-width: 180px;
+    max-width: 360px;
+  }
+  .sidebar-popup-card.show { opacity: 1; transform: scale(1) translateY(0); }
+  .sidebar-popup-card .sidebar-popup-list { display: flex; flex-direction: column; gap: 6px; }
+  .sidebar-popup-card .sidebar-popup-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; color: #e5e7eb; text-decoration: none; }
+  .sidebar-popup-card .sidebar-popup-item:hover { background: rgba(255,255,255,0.03); }
+  .sidebar-popup-card .sidebar-popup-item .menu-text { display: inline-block; opacity: 1; }
 
   /* hide scrollbar for sidebar nav while keeping scroll functionality */
   #sidebar nav.sidebar-scroll { scrollbar-width: none; -ms-overflow-style: none; }
@@ -362,12 +426,12 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
         <a href="index.php?page=account" class="menu-text hover:underline">Pengguna</a>
         <span class="ml-auto material-symbols-outlined chev">expand_more</span>
       </summary>
-      <div class="mt-1 space-y-1 pl-10 group-children">
-        <a href="index.php?page=students" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 <?= navActive('students', $page, $sub)?>">
+        <div class="mt-1 space-y-1 pl-10 group-children">
+        <a href="index.php?page=students" title="Siswa" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 <?= navActive('students', $page, $sub)?>">
           <span class="material-symbols-outlined mr-3">school</span>
           <span class="menu-text">Siswa</span>
         </a>
-        <a href="index.php?page=teachers" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 <?= navActive('teachers', $page, $sub)?>">
+        <a href="index.php?page=teachers" title="Guru" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 <?= navActive('teachers', $page, $sub)?>">
           <span class="material-symbols-outlined mr-3">co_present</span>
           <span class="menu-text">Guru</span>
         </a>
@@ -383,31 +447,31 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
         <span class="ml-auto material-symbols-outlined chev">expand_more</span>
       </summary>
       <div class="mt-1 space-y-1 pl-10 group-children">
-        <a href="index.php?page=class" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('class', $page, $sub) ?>">
+        <a href="index.php?page=class" title="Kelas" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('class', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">school</span>
           <span class="menu-text">Kelas</span>
         </a>
-        <a href="index.php?page=subjects" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('subjects', $page, $sub) ?>">
+        <a href="index.php?page=subjects" title="Mata Pelajaran" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('subjects', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">menu_book</span>
           <span class="menu-text">Mata Pelajaran</span>
         </a>
-        <a href="index.php?page=schedule" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('schedule', $page, $sub) ?>">
+        <a href="index.php?page=schedule" title="Jadwal" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('schedule', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">calendar_month</span>
           <span class="menu-text">Jadwal</span>
         </a>
-        <a href="index.php?page=attendance" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('attendance', $page, $sub) ?>">
+        <a href="index.php?page=attendance" title="Absensi" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('attendance', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">how_to_reg</span>
           <span class="menu-text">Absensi</span>
         </a>
-        <a href="index.php?page=grades" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('grades', $page, $sub) ?>">
+        <a href="index.php?page=grades" title="Nilai" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('grades', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">bar_chart</span>
           <span class="menu-text">Nilai</span>
         </a>
-        <a href="index.php?page=tasks" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('tasks', $page, $sub) ?>">
+        <a href="index.php?page=tasks" title="Tugas" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('tasks', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">assignment</span>
           <span class="menu-text">Tugas</span>
         </a>
-        <a href="index.php?page=certificates&scope=all" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('certificates', $page, $sub) ?>">
+        <a href="index.php?page=certificates&scope=all" title="Sertifikat" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('certificates', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">workspace_premium</span>
           <span class="menu-text">Sertifikat</span>
         </a>
@@ -422,11 +486,11 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
         <span class="ml-auto material-symbols-outlined chev">expand_more</span>
       </summary>
       <div class="mt-1 space-y-1 pl-10 group-children">
-        <a href="index.php?page=announcement" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('announcement', $page, $sub) ?>">
+        <a href="index.php?page=announcement" title="Pengumuman" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('announcement', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">campaign</span>
           <span class="menu-text">Pengumuman</span>
         </a>
-        <a href="index.php?page=notifications" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('notifications', $page, $sub) ?>">
+        <a href="index.php?page=notifications" title="Notifikasi" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('notifications', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">notifications</span>
           <span class="menu-text">Notifikasi</span>
         </a>
@@ -442,11 +506,11 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
           <span class="ml-auto material-symbols-outlined chev">expand_more</span>
         </summary>
         <div class="mt-1 space-y-1 pl-10 group-children">
-          <a href="index.php?page=dashboard-admin-docs" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('dashboard-admin-docs', $page, $sub) ?>">
+          <a href="index.php?page=dashboard-admin-docs" title="Docs" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('dashboard-admin-docs', $page, $sub) ?>">
             <span class="material-symbols-outlined mr-3">library_books</span>
             <span class="menu-text">Docs</span>
           </a>
-          <a href="index.php?page=dashboard-admin-news" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('dashboard-admin-news', $page, $sub) ?>">
+          <a href="index.php?page=dashboard-admin-news" title="News" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('dashboard-admin-news', $page, $sub) ?>">
             <span class="material-symbols-outlined mr-3">newspaper</span>
             <span class="menu-text">News</span>
           </a>

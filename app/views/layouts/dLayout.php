@@ -50,7 +50,7 @@ if (strpos($current_page, 'attendance_manage') === 0) {
     <?php include __DIR__ . '/../components/dHeader.php'; ?>
     
 
-    <main id="content" class="transition-all duration-300 p-6">
+    <main id="content" class="p-6">
         <?php
         // Defensive include: ensure $content is set and file exists
         $viewToInclude = $content ?? '';
@@ -67,6 +67,6 @@ if (strpos($current_page, 'attendance_manage') === 0) {
     define('BASEPATH', true); // Security check for AI Helper
     include __DIR__ . '/../components/ai-helper/chat-modal.php'; 
     ?>
-
+        <script src="js/notifications.js"></script>
 </body>
 </html>

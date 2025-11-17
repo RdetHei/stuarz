@@ -74,6 +74,12 @@ $router->get('/profile', 'ProfileController@profile');
 $router->get('/settings', 'SettingsController@index');
 $router->post('/settings', 'SettingsController@update');
 $router->get('/notifications', 'NotificationController@index');
+// Notifications API
+$router->post('/notifications/mark-read', 'NotificationController@markRead');
+$router->post('/notifications/mark-unread', 'NotificationController@markUnread');
+$router->post('/notifications/delete', 'NotificationController@delete');
+$router->post('/notifications/mark-all-read', 'NotificationController@markAllRead');
+$router->get('/notifications/unread-count', 'NotificationController@unreadCount');
 $router->get('/dashboard', 'DashboardController@dashboard');
 $router->get('/account', 'AccountController@account');
 $router->get('/students', 'AccountController@students');

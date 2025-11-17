@@ -142,7 +142,7 @@ $user = $_SESSION['user'] ?? null;
                         }
                         ?>
 
-                        <div class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors <?= $isUnread ? 'ring-1 ring-[#5865F2]/20' : '' ?>">
+                        <div id="notif-<?= (int)$n['id'] ?>" class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors <?= $isUnread ? 'ring-1 ring-[#5865F2]/20' : '' ?>">
                             <div class="p-4">
                                 <div class="flex items-start gap-4">
                                     <!-- Icon -->
@@ -185,6 +185,18 @@ $user = $_SESSION['user'] ?? null;
                                             </a>
                                         </div>
                                         <?php endif; ?>
+                                        <div class="mt-3 flex items-center gap-2">
+                                            <?php if ($isUnread): ?>
+                                            <button onclick="NotificationsUI.markReadUI(<?= (int)$n['id'] ?>)"
+                                                class="px-3 py-1 bg-[#111827] text-sm text-gray-300 rounded">Tandai Dibaca</button>
+                                            <?php else: ?>
+                                            <button onclick="NotificationsUI.markUnreadUI(<?= (int)$n['id'] ?>)"
+                                                class="px-3 py-1 bg-[#111827] text-sm text-gray-300 rounded">Tandai Belum Dibaca</button>
+                                            <?php endif; ?>
+
+                                            <button onclick="(function(id){ if(!confirm('Hapus notifikasi ini?')) return; NotificationsUI.deleteUI(id); })(<?= (int)$n['id'] ?>)"
+                                                class="px-3 py-1 bg-red-700 text-sm text-white rounded">Hapus</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

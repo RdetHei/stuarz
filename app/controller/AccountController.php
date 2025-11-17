@@ -150,6 +150,14 @@ class AccountController
         ];
 
         $ok = $this->model->createUser($data);
+        // notify if created successfully
+        if ($ok) {
+            global $config;
+            require_once dirname(__DIR__) . '/helpers/notifier.php';
+            $newId = mysqli_insert_id($config);
+            $uid = $_SESSION['user']['id'] ?? 0;
+            notify_event($config, 'create', 'user', $newId, $uid, "Akun dibuat: {$username}", 'index.php?page=edit_user&id=' . $newId);
+        }
         $this->setFlash($ok ? 'Akun berhasil dibuat.' : 'Gagal membuat akun.', $ok ? 'success' : 'danger');
         header('Location: index.php?page=account');
         exit;
@@ -340,6 +348,12 @@ class AccountController
         if (isset($_SESSION['user']['id']) && (int)$_SESSION['user']['id'] === $id) {
             $_SESSION['user'] = $this->model->getUserById($id);
         }
+
+        // notify about update (if admin performed update or others)
+        global $config;
+        require_once dirname(__DIR__) . '/helpers/notifier.php';
+        $uid = $_SESSION['user']['id'] ?? 0;
+        notify_event($config, 'update', 'user', $id, $uid, "Akun diperbarui: {$username}", 'index.php?page=edit_user&id=' . $id);
 
         $this->setFlash('Akun diperbarui.', 'success');
 

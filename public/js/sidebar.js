@@ -95,6 +95,34 @@
         const profileModal = document.getElementById('profileModal');
         const header = document.getElementById('dHeader');
         const content = document.getElementById('content');
+        // Delay used for hiding the floating panel to allow cursor travel
+        // Increased to 600ms to give more time to move cursor onto panel
+        window.__PANEL_HIDE_DELAY_MS = window.__PANEL_HIDE_DELAY_MS || 600;
+        const PANEL_HIDE_DELAY_MS = window.__PANEL_HIDE_DELAY_MS;
+
+        // Delegated handlers: create panel on pointerenter to summary when collapsed.
+        // Hide logic (timers) is handled by per-summary + panel handlers only.
+        const delegatedEnter = (e) => {
+            try {
+                const summary = e.target.closest && e.target.closest('#sidebar details.sidebar-group > summary');
+                if (!summary) return;
+                const isCollapsed = sidebar.classList.contains('collapsed') || document.documentElement.classList.contains('sidebar-collapsed');
+                if (!isCollapsed) return;
+                const details = summary.parentElement;
+                if (!details) return;
+                // open lightweight popup when collapsed
+                if (window.openSidebarPopup) window.openSidebarPopup(details);
+            } catch (err) { }
+        };
+
+        // NOTE: delegatedLeave removed — hide/remove logic now solely managed by
+        // per-summary handlers (addHoverHandlersToSummary) + panel pointerleave.
+        // This prevents race conditions and auto-close bugs.
+
+        document.addEventListener('pointerenter', delegatedEnter, true);
+        document.addEventListener('focusin', delegatedEnter, true);
+
+        
 
         if (sidebar) {
             let modalMoved = false;
@@ -144,119 +172,39 @@
                 profileModal.style.left = left + 'px';
             };
 
-            const CSS_DURATION_MS = 520; // must match CSS transition duration
+            // Use fixed widths to avoid expensive layout measurements and thrashing
+            const COLLAPSED_WIDTH_REM = 4; // 4rem -> 64px
+            const EXPANDED_WIDTH_REM = 16; // 16rem -> 256px
+            const TRANSITION_MS = 220; // <=250ms for smooth header/content movement
 
-            // measure width for a given collapsed state using an off-screen clone to avoid flicker
-            const measureWidthForState = (collapsedState) => {
-                try {
-                    const clone = sidebar.cloneNode(true);
-                    clone.style.visibility = 'hidden';
-                    clone.style.position = 'absolute';
-                    clone.style.left = '-9999px';
-                    clone.style.top = '0';
-                    if (collapsedState) clone.classList.add('collapsed'); else clone.classList.remove('collapsed');
-                    document.body.appendChild(clone);
-                    const w = clone.getBoundingClientRect().width;
-                    document.body.removeChild(clone);
-                    return Math.round(w);
-                } catch (e) {
-                    // fallback to defaults
-                    return collapsedState ? 64 : 256;
-                }
-            };
-
+            // Lightweight setCollapsed: toggle classes and rely on CSS for animation.
             const setCollapsed = (collapsed) => {
                 try {
-                    // measure the start width (current visible sidebar)
-                    const startWidth = Math.round(sidebar.getBoundingClientRect().width);
+                    const isCollapsed = !!collapsed;
 
-                    // measure both states using clones to avoid layout jank
-                    const expandedWidth = measureWidthForState(false);
-                    const collapsedWidth = measureWidthForState(true);
-                    const targetWidth = collapsed ? collapsedWidth : expandedWidth;
-
-                    // Prepare menu-text elements: measure and set max-width for symmetric animation
-                    const menuTextWidths = [];
-                    menuTexts.forEach(el => {
-                        const w = Math.round(el.getBoundingClientRect().width) || 0;
-                        menuTextWidths.push(w);
-                        // set measured width so animation expands from/to correct size
-                        el.style.maxWidth = w + 'px';
-                    });
-
-                    // set explicit start width to make transition predictable
-                    sidebar.style.width = startWidth + 'px';
-                    // force reflow
-                    // eslint-disable-next-line no-unused-expressions
-                    sidebar.offsetHeight;
-
-                    if (collapsed) {
-                        // apply classes for target state so CSS rules for collapsed take effect
+                    // update minimal state only — avoid inline styles or measurements
+                    if (isCollapsed) {
                         sidebar.classList.add('collapsed');
-                        if (logo) logo.style.opacity = '0';
-                        localStorage.setItem('sidebarCollapsed', '1');
                         try { document.documentElement.classList.add('sidebar-collapsed'); } catch (e) { }
+                        try { localStorage.setItem('sidebarCollapsed', '1'); } catch (e) { }
                         if (window.__sidebarDebug) console.log('[sidebar] collapsed -> true');
-                        showDebugOverlay && showDebugOverlay('collapsed');
+                        window.__showSidebarDebug && window.__showSidebarDebug('collapsed');
                     } else {
                         sidebar.classList.remove('collapsed');
-                        if (logo) logo.style.opacity = '1';
-                        localStorage.setItem('sidebarCollapsed', '0');
                         try { document.documentElement.classList.remove('sidebar-collapsed'); } catch (e) { }
+                        try { localStorage.setItem('sidebarCollapsed', '0'); } catch (e) { }
                         if (window.__sidebarDebug) console.log('[sidebar] collapsed -> false');
-                        showDebugOverlay && showDebugOverlay('expanded');
+                        window.__showSidebarDebug && window.__showSidebarDebug('expanded');
                     }
 
-                    // animate to target width
-                    sidebar.style.width = targetWidth + 'px';
-                    // set page containers margin-left to match sidebar target
-                    if (header) header.style.marginLeft = targetWidth + 'px';
-                    if (content) content.style.marginLeft = targetWidth + 'px';
+                    // let CSS handle transitions for #dHeader and #content (no inline writes)
 
-                    // animate menu-text max-width: to 0 when collapsed, to measured width when expanded
-                    menuTexts.forEach((el, idx) => {
-                        if (collapsed) {
-                            el.style.maxWidth = '0px';
-                            el.style.opacity = '0';
-                            el.style.visibility = 'hidden';
-                        } else {
-                            el.style.maxWidth = (menuTextWidths[idx] || 0) + 'px';
-                            el.style.opacity = '1';
-                            el.style.visibility = 'visible';
-                        }
-                    });
-
-                    // cleanup after CSS transition
-                    setTimeout(() => {
-                        // remove inline widths so responsive CSS works later
-                        sidebar.style.width = '';
-                        menuTexts.forEach(el => {
-                            if (!collapsed) {
-                                el.style.maxWidth = '';
-                                el.style.opacity = '';
-                                el.style.visibility = '';
-                            } else {
-                                el.style.maxWidth = '0px';
-                                el.style.opacity = '0';
-                                el.style.visibility = 'hidden';
-                            }
-                        });
-                        // ensure collapsed class is in correct state
-                        if (collapsed) {
-                            sidebar.classList.add('collapsed');
-                            try { document.documentElement.classList.add('sidebar-collapsed'); } catch (e) { }
-                        } else {
-                            sidebar.classList.remove('collapsed');
-                            try { document.documentElement.classList.remove('sidebar-collapsed'); } catch (e) { }
-                            // clear inline margins when expanded
-                            if (header) header.style.marginLeft = '';
-                            if (content) content.style.marginLeft = '';
-                        }
-                    }, CSS_DURATION_MS + 40);
-
+                    // Call floating children adjuster
+                    try { adjustFloatingGroupChildren(isCollapsed); } catch (e) { }
                 } catch (err) {
-                    console.error('setCollapsed error', err);
+                    if (window.__sidebarDebug) console.error('setCollapsed error', err);
                 } finally {
+                    // ensure profile modal reposition in case layout changed
                     setTimeout(positionProfileModal, 50);
                 }
             };
@@ -373,4 +321,249 @@
     });
     // ensure overlay created when debug active on load
     if (window.__sidebarDebug) createOverlay();
+})();
+// Floating popup manager for collapsed sidebar
+(function () {
+    const COLLAPSED_CLASS = 'collapsed';
+    const POPUP_SHOW_MS = 180; // animation duration
+    const POPUP_HIDE_DELAY_MS = 200; // how long to wait before hiding after pointer leaves
+
+    let popupState = {
+        details: null,
+        popupEl: null,
+        hideTimer: null
+    };
+
+    // create popup DOM from a details element (do NOT clone event listeners)
+    function buildPopup(details) {
+        const children = details.querySelectorAll('.group-children > a');
+        if (!children || children.length === 0) return null;
+
+        const popup = document.createElement('div');
+        popup.className = 'sidebar-popup-card';
+        popup.setAttribute('role', 'menu');
+        popup.setAttribute('data-for', details.__sidebarId || '');
+
+        const list = document.createElement('div');
+        list.className = 'sidebar-popup-list';
+
+        // create shallow copies of anchors that forward to original nodes
+        children.forEach((orig, idx) => {
+            const item = document.createElement('a');
+            item.className = 'sidebar-popup-item';
+            // copy accessible attributes
+            if (orig.getAttribute('href')) item.setAttribute('href', orig.getAttribute('href'));
+            const title = (orig.getAttribute('title') || (orig.querySelector && (orig.querySelector('.menu-text') ? orig.querySelector('.menu-text').textContent : orig.textContent)) || '').trim();
+            if (title) item.setAttribute('title', title);
+            // copy inner icon + text structure for consistent visuals
+            try { item.innerHTML = orig.innerHTML; } catch (e) { item.textContent = title || orig.textContent; }
+
+            // forward clicks to original element if it exists (preserve JS handlers)
+            item.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                try {
+                    if (typeof orig.click === 'function') orig.click();
+                    else if (orig.getAttribute('href')) window.location.href = orig.getAttribute('href');
+                } catch (e) { if (orig.getAttribute('href')) window.location.href = orig.getAttribute('href'); }
+            });
+
+            list.appendChild(item);
+        });
+
+        popup.appendChild(list);
+        return popup;
+    }
+
+    function positionPopup(details, popup) {
+        if (!details || !popup) return;
+        const summary = details.querySelector('summary');
+        const sidebar = document.getElementById('sidebar');
+        if (!summary || !sidebar) return;
+        const sRect = summary.getBoundingClientRect();
+        const sbRect = sidebar.getBoundingClientRect();
+
+        const left = Math.round(sbRect.right + 8); // gap
+        // prefer aligning to summary top but clamp to viewport
+        let top = Math.round(sRect.top);
+        const maxH = window.innerHeight - 16;
+        const popupH = Math.min(maxH, popup.offsetHeight || 200);
+        if (top + popupH > window.innerHeight - 8) {
+            top = Math.max(8, window.innerHeight - popupH - 8);
+        }
+
+        popup.style.left = left + 'px';
+        popup.style.top = top + 'px';
+        popup.style.minWidth = '180px';
+        popup.style.maxWidth = Math.min(360, window.innerWidth - left - 24) + 'px';
+    }
+
+    function openPopup(details) {
+        if (!details) return;
+        // if already open for same details, refresh timer
+        if (popupState.details === details && popupState.popupEl) {
+            clearTimeout(popupState.hideTimer);
+            popupState.hideTimer = null;
+            return;
+        }
+
+        closePopup(true);
+
+        const popup = buildPopup(details);
+        if (!popup) return;
+
+        document.body.appendChild(popup);
+        popupState.details = details;
+        popupState.popupEl = popup;
+
+        // position after appended so offsetHeight is available (single read)
+        requestAnimationFrame(() => positionPopup(details, popup));
+
+        // entrance animation
+        requestAnimationFrame(() => popup.classList.add('show'));
+
+        // pointer handlers: don't hide while moving between summary and popup
+        popup.addEventListener('pointerenter', () => {
+            if (popupState.hideTimer) { clearTimeout(popupState.hideTimer); popupState.hideTimer = null; }
+        });
+        popup.addEventListener('pointerleave', (e) => {
+            // start hide timer when pointer leaves popup
+            if (popupState.hideTimer) clearTimeout(popupState.hideTimer);
+            popupState.hideTimer = setTimeout(() => closePopup(), POPUP_HIDE_DELAY_MS);
+        });
+
+        // ensure popup remains on top and visible when window changes
+        window.addEventListener('resize', onWindowChange);
+        window.addEventListener('scroll', onWindowChange, true);
+    }
+
+    function closePopup(forceImmediate) {
+        if (!popupState.popupEl) return;
+        const el = popupState.popupEl;
+        // remove listeners
+        try { window.removeEventListener('resize', onWindowChange); window.removeEventListener('scroll', onWindowChange, true); } catch (e) { }
+        if (popupState.hideTimer) { clearTimeout(popupState.hideTimer); popupState.hideTimer = null; }
+
+        // hide animation
+        if (forceImmediate) {
+            if (el.parentNode) el.parentNode.removeChild(el);
+        } else {
+            el.classList.remove('show');
+            // remove after animation
+            setTimeout(() => { try { if (el.parentNode) el.parentNode.removeChild(el); } catch (e) { } }, POPUP_SHOW_MS + 30);
+        }
+
+        popupState.details = null;
+        popupState.popupEl = null;
+    }
+
+    function onWindowChange() {
+        if (!popupState.details || !popupState.popupEl) return;
+        positionPopup(popupState.details, popupState.popupEl);
+    }
+
+    // attach summary handlers when collapsed, detach when expanded
+    const summaryListeners = new Map();
+    function attachSummaryHandlers(summary) {
+        if (summaryListeners.has(summary)) return;
+        const details = summary.parentElement;
+        if (!details) return;
+
+        const onPointerEnter = (e) => {
+            const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed') || (document.getElementById('sidebar') && document.getElementById('sidebar').classList.contains('collapsed'));
+            if (!isCollapsed) return;
+            // prevent native details toggle when collapsed
+            try { summary.addEventListener('click', preventDetailsToggle, { once: true }); } catch (e) { }
+            openPopup(details);
+        };
+
+        const onPointerLeave = (e) => {
+            // start hide timer after leaving the summary (but allow entering popup)
+            if (popupState.hideTimer) clearTimeout(popupState.hideTimer);
+            popupState.hideTimer = setTimeout(() => closePopup(), POPUP_HIDE_DELAY_MS);
+        };
+
+        const preventDetailsToggle = function (ev) {
+            // only prevent when collapsed
+            const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed') || (document.getElementById('sidebar') && document.getElementById('sidebar').classList.contains('collapsed'));
+            if (isCollapsed) {
+                ev.preventDefault();
+                ev.stopPropagation();
+            }
+        };
+
+        summary.addEventListener('pointerenter', onPointerEnter);
+        summary.addEventListener('pointerleave', onPointerLeave);
+        // keyboard access: open on Enter/Space when collapsed
+        const keyHandler = (ev) => {
+            if (ev.key === 'Enter' || ev.key === ' ') {
+                const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed') || (document.getElementById('sidebar') && document.getElementById('sidebar').classList.contains('collapsed'));
+                if (isCollapsed) {
+                    ev.preventDefault();
+                    openPopup(details);
+                }
+            }
+        };
+        summary.addEventListener('keydown', keyHandler);
+
+        summaryListeners.set(summary, { onPointerEnter, onPointerLeave, keyHandler });
+    }
+
+    function detachSummaryHandlers(summary) {
+        const entry = summaryListeners.get(summary);
+        if (!entry) return;
+        try {
+            summary.removeEventListener('pointerenter', entry.onPointerEnter);
+            summary.removeEventListener('pointerleave', entry.onPointerLeave);
+            summary.removeEventListener('keydown', entry.keyHandler);
+        } catch (e) { }
+        summaryListeners.delete(summary);
+    }
+
+    function adjustFloatingGroupChildren(collapsed) {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar) return;
+        const summaries = Array.from(document.querySelectorAll('#sidebar details.sidebar-group > summary'));
+        if (collapsed) {
+            summaries.forEach(summary => attachSummaryHandlers(summary));
+            // ensure any open details are closed so internal dropdowns don't fight popups
+            summaries.forEach(summary => {
+                const details = summary.parentElement;
+                try { if (details && details.hasAttribute('open')) details.removeAttribute('open'); } catch (e) { }
+            });
+        } else {
+            summaries.forEach(summary => detachSummaryHandlers(summary));
+            // close any popup when expanding
+            closePopup(true);
+        }
+    }
+
+    // capture summary clicks when collapsed: prevent native toggle and open popup instead
+    document.addEventListener('click', function (e) {
+        const summary = e.target.closest && e.target.closest('#sidebar details.sidebar-group > summary');
+        if (!summary) return;
+        const sidebarEl = document.getElementById('sidebar');
+        const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed') || (sidebarEl && sidebarEl.classList.contains('collapsed'));
+        if (!isCollapsed) return;
+        e.preventDefault();
+        e.stopPropagation();
+        try { openPopup(summary.parentElement); } catch (er) { }
+    }, true);
+
+    // close popup when clicking outside, or on blur/visibility change
+    document.addEventListener('pointerdown', function (e) {
+        const sidebar = document.getElementById('sidebar');
+        if (!popupState.popupEl) return;
+        const target = e.target;
+        if (sidebar && sidebar.contains(target)) return;
+        if (popupState.popupEl && popupState.popupEl.contains(target)) return;
+        closePopup();
+    }, true);
+    document.addEventListener('visibilitychange', function () { if (document.hidden) closePopup(true); });
+    window.addEventListener('blur', function () { closePopup(true); });
+
+    // expose API
+    window.adjustFloatingGroupChildren = adjustFloatingGroupChildren;
+    window.openSidebarPopup = openPopup;
+    window.closeSidebarPopup = closePopup;
+
 })();

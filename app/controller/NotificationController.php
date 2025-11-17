@@ -20,4 +20,67 @@ class NotificationController
         $content = dirname(__DIR__) . '/views/pages/notifications/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
+
+    private function jsonResponse(array $data)
+    {
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
+    }
+
+    public function markAllRead()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user_id'] ?? null;
+        global $config;
+        $nm = new NotificationsModel($config);
+        $ok = $nm->markAllRead($userId);
+        $this->jsonResponse(['success' => (bool)$ok]);
+    }
+
+    public function markRead()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+        $id = isset($input['id']) ? (int)$input['id'] : 0;
+        if ($id <= 0) $this->jsonResponse(['success' => false, 'error' => 'invalid_id']);
+        global $config;
+        $nm = new NotificationsModel($config);
+        $ok = $nm->setReadStatus($id, true);
+        $this->jsonResponse(['success' => (bool)$ok]);
+    }
+
+    public function markUnread()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+        $id = isset($input['id']) ? (int)$input['id'] : 0;
+        if ($id <= 0) $this->jsonResponse(['success' => false, 'error' => 'invalid_id']);
+        global $config;
+        $nm = new NotificationsModel($config);
+        $ok = $nm->setReadStatus($id, false);
+        $this->jsonResponse(['success' => (bool)$ok]);
+    }
+
+    public function delete()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+        $id = isset($input['id']) ? (int)$input['id'] : 0;
+        if ($id <= 0) $this->jsonResponse(['success' => false, 'error' => 'invalid_id']);
+        global $config;
+        $nm = new NotificationsModel($config);
+        $ok = $nm->deleteById($id);
+        $this->jsonResponse(['success' => (bool)$ok]);
+    }
+
+    public function unreadCount()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user_id'] ?? null;
+        global $config;
+        $nm = new NotificationsModel($config);
+        $count = $nm->countUnread($userId);
+        $this->jsonResponse(['count' => $count]);
+    }
 }
