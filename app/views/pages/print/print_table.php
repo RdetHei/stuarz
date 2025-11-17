@@ -4,127 +4,139 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Print <?= htmlspecialchars($tableName) ?> - Stuarz</title>
+
     <style>
+        /* Gaya Print: Mirip Word */
         @media print {
-            body { margin: 0; padding: 20px; }
+            body { 
+                margin: 0; 
+                padding: 0;
+                background: white;
+            }
             .no-print { display: none !important; }
-            @page { margin: 1cm; }
+            @page {
+                size: A4;
+                margin: 2cm;
+            }
         }
-        
+
+        /* Umum: tampilan seperti Word */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        
-        .print-container {
-            background: white;
+            font-family: Calibri, Arial, sans-serif;
+            background: #ffffff;
+            color: #000;
             padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            max-width: 1200px;
+            line-height: 1.4;
+        }
+
+        title{
+            display: none;
+        }
+
+        .print-container {
+            width: 100%;
+            max-width: 900px;
             margin: 0 auto;
         }
-        
+
+        /* Header Word-style */
         .header {
-            border-bottom: 3px solid #4f46e5;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            border-bottom: 2px solid #222;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
         }
-        
+
         .header h1 {
-            color: #1f2937;
-            margin: 0 0 10px 0;
-            font-size: 28px;
+            font-size: 26px;
+            margin: 0;
+            font-weight: bold;
         }
-        
+
         .header .meta {
-            color: #6b7280;
-            font-size: 14px;
+            font-size: 12px;
+            color: #555;
+            margin-top: 5px;
         }
-        
+
+        /* Tombol untuk browser */
+        .btn-print {
+            background: #2563eb;
+            color: white;
+            padding: 10px 22px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .btn-print:hover {
+            background: #1d4ed8;
+        }
+
+        /* Tabel seperti Excel */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 12px;
+            font-size: 13px;
+            margin-top: 15px;
         }
-        
+
+        th, td {
+            border: 1px solid #c2c2c2;
+            padding: 8px 6px;
+            vertical-align: top;
+        }
+
         th {
-            background: #4f46e5;
-            color: white;
-            padding: 12px 8px;
+            background: #e5f0ff; /* biru muda ala Excel */
+            color: #000;
+            font-weight: bold;
             text-align: left;
-            font-weight: 600;
-            border: 1px solid #4338ca;
         }
-        
-        td {
-            padding: 10px 8px;
-            border: 1px solid #e5e7eb;
-        }
-        
+
         tr:nth-child(even) {
-            background: #f9fafb;
+            background: #f8f8f8; /* zebra sangat lembut */
         }
-        
-        tr:hover {
-            background: #f3f4f6;
-        }
-        
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #e5e7eb;
-            text-align: center;
-            color: #6b7280;
-            font-size: 12px;
-        }
-        
+
         .no-data {
             text-align: center;
             padding: 40px;
-            color: #9ca3af;
             font-style: italic;
+            color: #777;
         }
-        
-        .btn-print {
-            background: #4f46e5;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-        
-        .btn-print:hover {
-            background: #4338ca;
+
+        /* Footer ala dokumen Word */
+        .footer {
+            margin-top: 40px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            font-size: 11px;
+            color: #555;
+            text-align: center;
         }
     </style>
 </head>
+
 <body>
     <div class="print-container">
-        <div class="no-print" style="text-align: center; margin-bottom: 20px;">
-            <button onclick="window.print()" class="btn-print">🖨️ Print</button>
-            <a href="index.php?page=print" style="margin-left: 10px; padding: 12px 24px; background: #6b7280; color: white; text-decoration: none; border-radius: 6px; display: inline-block;">← Kembali</a>
+
+        <!-- Tombol aksi -->
+        <div class="no-print" style="margin-bottom: 20px;">
+            <button onclick="window.print()" class="btn-print">Print Dokumen</button>
+            <a href="index.php?page=print" style="background:#6b7280; color:white; padding:10px 20px; border-radius:5px; text-decoration:none;">Kembali</a>
         </div>
-        
+
+        <!-- Header -->
         <div class="header">
             <h1><?= htmlspecialchars($tableName) ?></h1>
             <div class="meta">
-                Dicetak pada: <?= date('d F Y, H:i:s') ?> | 
-                Total Data: <?= count($data) ?>
+                Dicetak pada: <?= date('d F Y, H:i:s') ?> • Total Data: <?= count($data) ?>
             </div>
         </div>
-        
+
+        <!-- Isi -->
         <?php if (empty($data)): ?>
-            <div class="no-data">
-                <p>Tidak ada data dalam tabel ini.</p>
-            </div>
+            <div class="no-data">Tidak ada data dalam tabel ini.</div>
         <?php else: ?>
             <table>
                 <thead>
@@ -134,33 +146,37 @@
                         <?php endforeach; ?>
                     </tr>
                 </thead>
+
                 <tbody>
                     <?php foreach ($data as $row): ?>
                         <tr>
                             <?php foreach ($columns as $col): ?>
                                 <td>
                                     <?php
-                                    $value = $row[$col] ?? '';
-                                    if (is_null($value)) {
-                                        echo '<span style="color: #9ca3af; font-style: italic;">NULL</span>';
-                                    } elseif (strlen($value) > 100) {
-                                        echo htmlspecialchars(substr($value, 0, 100)) . '...';
-                                    } else {
-                                        echo htmlspecialchars($value);
-                                    }
+                                        $value = $row[$col] ?? '';
+
+                                        if (is_null($value)) {
+                                            echo '<span style="color:#777;font-style:italic;">NULL</span>';
+                                        } elseif (strlen($value) > 150) {
+                                            echo htmlspecialchars(substr($value, 0, 150)) . '...';
+                                        } else {
+                                            echo htmlspecialchars($value);
+                                        }
                                     ?>
                                 </td>
                             <?php endforeach; ?>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
+
             </table>
         <?php endif; ?>
-        
+
+        <!-- Footer -->
         <div class="footer">
-            <p>Dicetak dari Sistem Stuarz | <?= date('d F Y, H:i:s') ?></p>
+            Dicetak dari Sistem Stuarz • <?= date('d F Y, H:i:s') ?>
         </div>
+
     </div>
 </body>
 </html>
-

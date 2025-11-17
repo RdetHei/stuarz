@@ -13,28 +13,87 @@
 
 <div class="bg-gray-900 min-h-screen">
     <div class="max-w-7xl mx-auto p-6">
-        <!-- Page Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-100">Dashboard Overview</h1>
-                    <p class="text-gray-400 mt-1">Welcome back, Admin</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="window.location.href='index.php?page=notifications'" 
-                            class="p-2 text-gray-400 hover:text-gray-200 hover:bg-[#1f2937] rounded-lg transition-colors border border-gray-700"
-                            title="Notifications">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                        </svg>
-                    </button>
-                    <button onclick="window.location.href='index.php?page=logout'" 
-                            class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium text-sm text-white">
-                        Logout
-                    </button>
+       
+
+        
+
+<!-- Dashboard Overview Wrapper -->
+<div class="mb-8">
+    <div class="bg-[#1f2937] border border-gray-700 p-5 rounded-lg hover:border-gray-600 transition-colors">
+
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+            <!-- Bagian Kiri: Teks -->
+            <div class="w-full">
+                <h1 class="text-3xl font-bold text-gray-100">Dashboard Overview</h1>
+                <p class="text-gray-400 mt-1">Welcome back, Admin</p>
+
+                <!-- LOGO DENGAN BACKGROUND -->
+                <div class="mt-4 flex justify-start sm:justify-start">
+                    <div class="bg-gray-900 border border-gray-400 rounded-xl p-3 shadow-md inline-flex">
+                        <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/diamond.png', ENT_QUOTES, 'UTF-8') ?>"
+                             alt="Logo Sekolah"
+                             class="w-20 sm:w-24 md:w-28 object-contain opacity-95" />
+                    </div>
                 </div>
             </div>
+
+            <!-- Bagian Kanan -->
+            <div class="flex items-center gap-2">
+                <button onclick="window.location.href='index.php?page=notifications'"
+                    class="p-2 text-gray-400 hover:text-gray-200 hover:bg-[#1f2937] rounded-lg transition-colors border border-gray-700"
+                    title="Notifications">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                </button>
+
+                <button onclick="window.location.href='index.php?page=logout'"
+                    class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium text-sm text-white">
+                    Logout
+                </button>
+            </div>
         </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-6 mt-6">
+
+            <div class="flex flex-col">
+                <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Total Users</p>
+                <h3 class="text-2xl font-bold text-gray-100">
+                    <?= number_format($stats['total_users']) ?>
+                </h3>
+            </div>
+
+            <div class="flex flex-col">
+                <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Students</p>
+                <h3 class="text-2xl font-bold text-gray-100">
+                    <?= number_format($stats['total_students']) ?>
+                </h3>
+            </div>
+
+            <div class="flex flex-col">
+                <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Teachers</p>
+                <h3 class="text-2xl font-bold text-gray-100">
+                    <?= number_format($stats['total_certificates']) ?>
+                </h3>
+            </div>
+
+            <div class="flex flex-col">
+                <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Class</p>
+                <h3 class="text-2xl font-bold text-gray-100">
+                    <?= number_format($stats['average_grade'], 1) ?>
+                </h3>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
 
         <!-- Announcement Box -->
         <?php if (!empty($latestAnnouncement)): ?>
@@ -70,65 +129,6 @@
             </div>
         </div>
         <?php endif; ?>
-
-        <!-- Combined Stats Card -->
-        <div class="mb-6">
-            <div class="bg-[#1f2937] border border-gray-700 p-5 rounded-lg hover:border-gray-600 transition-colors">
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <!-- Total Users -->
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-[#5865F2]/10 rounded-lg flex items-center justify-center border border-[#5865F2]/20">
-                            <svg class="w-6 h-6 text-[#5865F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path  stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Total Users</p>
-                            <h3 class="text-2xl font-bold text-gray-100"><?= number_format($stats['total_users']) ?></h3>
-                        </div>
-                    </div>
-
-                    <!-- Total Students -->
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
-                            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Students</p>
-                            <h3 class="text-2xl font-bold text-gray-100"><?= number_format($stats['total_students']) ?></h3>
-                        </div>
-                    </div>
-
-                    <!-- Total Certificates -->
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-amber-500/10 rounded-lg flex items-center justify-center border border-amber-500/20">
-                            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Certificates</p>
-                            <h3 class="text-2xl font-bold text-gray-100"><?= number_format($stats['total_certificates']) ?></h3>
-                        </div>
-                    </div>
-
-                    <!-- Average Grade -->
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-rose-500/10 rounded-lg flex items-center justify-center border border-rose-500/20">
-                            <svg class="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Avg Grade</p>
-                            <h3 class="text-2xl font-bold text-gray-100"><?= number_format($stats['average_grade'], 1) ?></h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Charts Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">

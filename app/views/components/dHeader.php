@@ -16,6 +16,7 @@ $pageTitles = [
     'schedule' => 'Jadwal',
     'tasks' => 'Tugas',
     'attendance' => 'Kehadiran',
+    'print' => 'Print'
 ];
 
 $dashboardTitles = [
@@ -103,7 +104,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
         <!-- Notifications -->
         <button class="p-2 hover:bg-slate-700 rounded relative" aria-label="Notifications">
             <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-[10px] rounded-full px-1 leading-4">3</span>
+            <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-[10px] rounded-full px-1 leading-4">99+</span>
         </button>
 
         <?php
@@ -158,8 +159,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
             if (e.key === 'Escape') menu.classList.add('hidden');
         });
     })();
-</script>
-<script>
+
     (function(){
         var btn = document.getElementById('printDropdownBtn');
         var menu = document.getElementById('printDropdownMenu');
