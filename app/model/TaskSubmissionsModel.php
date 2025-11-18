@@ -22,6 +22,23 @@ class TaskSubmissionsModel {
         return $data;
     }
 
+    public function getByUser($user_id) {
+        $user_id = intval($user_id);
+        $sql = "SELECT ts.*, u.username, u.name, t.title as task_title FROM task_submissions ts "
+             . "LEFT JOIN users u ON ts.user_id = u.id "
+             . "LEFT JOIN tasks_completed t ON ts.task_id = t.id "
+             . "WHERE ts.user_id = ? ORDER BY ts.submitted_at DESC";
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) return [];
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $rows = [];
+        if ($res) while ($r = $res->fetch_assoc()) $rows[] = $r;
+        $stmt->close();
+        return $rows;
+    }
+
     public function getById($id) {
         $id = intval($id);
         $stmt = $this->db->prepare("SELECT * FROM task_submissions WHERE id = ? LIMIT 1");

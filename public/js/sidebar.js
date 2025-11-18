@@ -122,7 +122,7 @@
         document.addEventListener('pointerenter', delegatedEnter, true);
         document.addEventListener('focusin', delegatedEnter, true);
 
-        
+
 
         if (sidebar) {
             let modalMoved = false;

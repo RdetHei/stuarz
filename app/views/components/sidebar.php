@@ -413,7 +413,19 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
     <div class="px-3 mt-1 mb-1">
       <div class="menu-text text-[10px] tracking-wider uppercase text-gray-400">Utama</div>
     </div>
-    <a href="index.php?page=dashboard-admin" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg <?= navActive('dashboard-admin', $page, $sub) ?>">
+    <?php
+      $userLevel = $sessionUser['level'] ?? '';
+      $dashPage = 'dashboard';
+      $dashHref = 'index.php?page=dashboard';
+      if ($userLevel === 'admin') {
+        $dashPage = 'dashboard-admin';
+        $dashHref = 'index.php?page=dashboard-admin';
+      } elseif ($userLevel === 'guru') {
+        $dashPage = 'dashboard-guru';
+        $dashHref = 'index.php?page=dashboard-guru';
+      }
+    ?>
+    <a href="<?= $dashHref ?>" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg <?= navActive($dashPage, $page, $sub) ?>">
       <span class="material-symbols-outlined mr-3">home</span>
       <span class="menu-text">Dashboard</span>
     </a>
@@ -434,6 +446,10 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : ''; // kosong 
         <a href="index.php?page=teachers" title="Guru" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 <?= navActive('teachers', $page, $sub)?>">
           <span class="material-symbols-outlined mr-3">co_present</span>
           <span class="menu-text">Guru</span>
+        </a>
+        <a href="index.php?page=dashboard-guru" title="Dashboard Guru" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 <?= navActive('dashboard-guru', $page, $sub)?>">
+          <span class="material-symbols-outlined mr-3">workspace_premium</span>
+          <span class="menu-text">Dashboard Guru</span>
         </a>
       </div>
     </details>

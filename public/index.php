@@ -81,6 +81,7 @@ $router->post('/notifications/delete', 'NotificationController@delete');
 $router->post('/notifications/mark-all-read', 'NotificationController@markAllRead');
 $router->get('/notifications/unread-count', 'NotificationController@unreadCount');
 $router->get('/dashboard', 'DashboardController@dashboard');
+$router->get('/dashboard-guru', 'DashboardController@guru');
 $router->get('/account', 'AccountController@account');
 $router->get('/students', 'AccountController@students');
 $router->get('/teachers', 'AccountController@teachers');
