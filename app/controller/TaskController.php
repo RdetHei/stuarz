@@ -31,6 +31,12 @@ class TaskController {
         
         $tasks = $this->model->getAll($filters);
 
+        // detect AJAX fragment requests (used by header live-search / page fragments)
+        $ajax = false;
+        if ((isset($_GET['ajax']) && $_GET['ajax'] == '1') || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')) {
+            $ajax = true;
+        }
+
         // If the tasks table doesn't store schedule_id/subject_id, try to enrich tasks
         // with a best-effort schedule lookup. Use a batched approach to avoid one DB
         // query per task: 1) collect (class,teacher) pairs and class ids, 2) query
@@ -119,6 +125,12 @@ class TaskController {
             unset($tk);
         }
         $content = dirname(__DIR__) . '/views/pages/tasks/index.php';
+        if ($ajax) {
+            // include the page fragment directly (view checks for $ajax if needed)
+            include $content;
+            return;
+        }
+
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
     public function create() {

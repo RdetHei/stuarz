@@ -339,6 +339,15 @@ class DashboardAdminController
 
         // Expose variables used by the view: $docs, $total, $limit, $q
         $content = dirname(__DIR__) . '/views/pages/admin/admin_docs_list.php';
+
+        // support AJAX fragment for live admin search
+        $isAjax = !empty($_GET['ajax']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+        if ($isAjax) {
+            $ajax = true;
+            include $content;
+            return;
+        }
+
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
@@ -479,6 +488,15 @@ class DashboardAdminController
 
         // Expose variables used by the view: $news, $total, $limit, $q
         $content = dirname(__DIR__) . '/views/pages/admin/admin_news_list.php';
+
+        // support AJAX fragment for live admin search
+        $isAjax = !empty($_GET['ajax']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+        if ($isAjax) {
+            $ajax = true;
+            include $content;
+            return;
+        }
+
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 

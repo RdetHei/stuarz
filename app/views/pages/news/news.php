@@ -1,4 +1,5 @@
 <?php if (!isset($allNews)) { $allNews = []; $cats = []; $q = ''; $cat = ''; $page = 1; $totalPages = 1; } ?>
+<?php if (!isset($ajax)) $ajax = false; ?>
 <?php
 // Compute base URL similar to other pages
 if (!isset($baseUrl)) {
@@ -7,16 +8,19 @@ if (!isset($baseUrl)) {
 }
 ?>
 
+<?php if (!$ajax): ?>
 <div class="bg-gray-900 min-h-screen">
   <div class="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-    <!-- Header -->
+
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-100">News</h1>
-        <p class="text-sm text-gray-400 mt-1">Latest updates and announcements</p>
-      </div>
-    </div>
+    <h1 class="text-3xl font-bold text-gray-100">News</h1>
+    <p class="text-gray-400 mb-6">Latest updates and articles</p>
+  </div>
+</div>
 
+<?php endif; ?>
+<?php if (!$ajax): ?>
     <!-- Search & Filter -->
     <div class="mb-6 bg-[#1f2937] border border-gray-700 rounded-lg p-4">
       <form method="GET" action="index.php" class="flex flex-col sm:flex-row gap-3">
@@ -39,7 +43,7 @@ if (!isset($baseUrl)) {
                 class="px-3 py-2 bg-[#111827] border border-gray-700 text-sm text-gray-200 rounded-md focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors">
           <option value="">All Categories</option>
           <?php foreach ($cats as $c): ?>
-            <option value="<?= htmlspecialchars($c) ?>" <?= $cat === $c ? 'selected' : '' ?>>
+            <option value="<?= htmlspecialchars($c) ?>" <?= $cat === $c ? 'selected' : '' ?> >
               <?= htmlspecialchars($c) ?>
             </option>
           <?php endforeach; ?>
@@ -51,6 +55,13 @@ if (!isset($baseUrl)) {
         </button>
       </form>
     </div>
+<?php endif; ?>
+    
+<?php
+// News content wrapper: used by header/global live-search to replace only this section
+?>
+
+<div id="newsContent">
 
     <!-- News Grid -->
     <?php if (!empty($allNews)): ?>
@@ -153,6 +164,8 @@ if (!isset($baseUrl)) {
     </div>
     <?php endif; ?>
 
+    </div> <!-- #newsContent -->
+
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
     <div class="flex justify-center">
@@ -201,3 +214,59 @@ if (!isset($baseUrl)) {
     <?php endif; ?>
   </div>
 </div>
+
+<?php if (!$ajax): ?>
+<script>
+// Live search for News page (targets the news form only)
+(function(){
+  const pageInput = document.querySelector('input[name="page"][value="news"]');
+  const form = pageInput ? pageInput.closest('form') : null;
+  const contentEl = document.getElementById('newsContent') || document.querySelector('.grid.grid-cols-1') || document.querySelector('.bg-[#1f2937]');
+  if (!form || !contentEl) return;
+
+  const qInput = form.querySelector('input[name="q"]');
+  const catSelect = form.querySelector('select[name="cat"]');
+  let timer = null;
+
+  function serializeState() {
+    return { q: (qInput && qInput.value) || '', cat: (catSelect && catSelect.value) || '' };
+  }
+
+  function load(state, push = true) {
+    const params = new URLSearchParams();
+    params.set('page','news');
+    if (state.q) params.set('q', state.q);
+    if (state.cat) params.set('cat', state.cat);
+    params.set('ajax','1');
+
+    fetch('index.php?' + params.toString(), { credentials: 'same-origin' }).then(r => r.text()).then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      // Prefer exact fragment id
+      const newWrapper = doc.getElementById('newsContent') || doc.querySelector('.grid.grid-cols-1') || doc.querySelector('.bg-[#1f2937]');
+      if (newWrapper) {
+        // If we have an existing #newsContent, update its innerHTML; otherwise replace fallback element
+        const existingWrapper = document.getElementById('newsContent');
+        if (existingWrapper) {
+          existingWrapper.innerHTML = newWrapper.innerHTML;
+        } else {
+          const existingGrid = document.querySelector('.grid.grid-cols-1');
+          if (existingGrid) existingGrid.replaceWith(newWrapper);
+          else contentEl.innerHTML = newWrapper.outerHTML;
+        }
+      }
+
+      if (push) {
+        const friendly = 'index.php?page=news' + (state.q ? '&q=' + encodeURIComponent(state.q) : '') + (state.cat ? '&cat=' + encodeURIComponent(state.cat) : '');
+        try { history.pushState(state, '', friendly); } catch (e) {}
+      }
+    }).catch(()=>{});
+  }
+
+  form.addEventListener('submit', function(e){ e.preventDefault(); clearTimeout(timer); load(serializeState()); });
+  if (qInput) qInput.addEventListener('input', function(){ clearTimeout(timer); timer = setTimeout(function(){ load(serializeState()); }, 300); }, { passive:true });
+  if (catSelect) catSelect.addEventListener('change', function(){ clearTimeout(timer); load(serializeState()); });
+  window.addEventListener('popstate', function(ev){ const state = ev.state || {}; if (qInput) qInput.value = state.q || ''; if (catSelect) catSelect.value = state.cat || ''; load(state, false); });
+})();
+</script>
+<?php endif; ?>

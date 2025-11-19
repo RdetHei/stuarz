@@ -1,4 +1,5 @@
 <?php if (session_status() !== PHP_SESSION_ACTIVE) session_start(); ?>
+<?php if (!isset($ajax)) $ajax = false; ?>
 
 <?php
 // Pagination controls
@@ -36,6 +37,7 @@ $offset = ($page - 1) * $limit;
         </div>
     </div>
 
+<?php if (!$ajax): ?>
     <!-- Filter & Search Bar -->
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-6">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -79,6 +81,9 @@ $offset = ($page - 1) * $limit;
             </form>
         </div>
     </div>
+<?php endif; ?>
+
+    <div id="adminDocsContent">
 
     <!-- Table -->
     <?php if (!empty($docs)): ?>
@@ -257,5 +262,48 @@ $offset = ($page - 1) * $limit;
         </a>
         <?php endif; ?>
     </div>
-    <?php endif; ?>
-</div>
+        <?php endif; ?>
+        </div>
+
+<?php if (!$ajax): ?>
+<script>
+// Live search for Admin Docs (targets admin docs search form)
+(function(){
+    const pageInput = document.querySelector('input[name="page"][value="dashboard-admin-docs"]');
+    const form = pageInput ? pageInput.closest('form') : null;
+    const container = document.getElementById('adminDocsContent');
+    if (!form || !container) return;
+    const qInput = form.querySelector('input[name="q"]');
+    const limitSelect = form.querySelector('select[name="limit"]');
+    let timer = null;
+
+    function serializeState() {
+        return { q: (qInput && qInput.value) || '', limit: (limitSelect && limitSelect.value) || '' };
+    }
+
+    function load(state, push = true) {
+        const params = new URLSearchParams();
+        params.set('page','dashboard-admin-docs');
+        if (state.q) params.set('q', state.q);
+        if (state.limit) params.set('limit', state.limit);
+        params.set('ajax','1');
+
+        fetch('index.php?' + params.toString(), { credentials: 'same-origin' }).then(r => r.text()).then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContainer = doc.getElementById('adminDocsContent');
+            if (newContainer) container.innerHTML = newContainer.innerHTML;
+            if (push) {
+                const friendly = 'index.php?page=dashboard-admin-docs' + (state.q ? '&q=' + encodeURIComponent(state.q) : '') + (state.limit ? '&limit=' + encodeURIComponent(state.limit) : '');
+                try { history.pushState(state, '', friendly); } catch (e) {}
+            }
+        }).catch(()=>{});
+    }
+
+    form.addEventListener('submit', function(e){ e.preventDefault(); clearTimeout(timer); load(serializeState()); });
+    if (qInput) qInput.addEventListener('input', function(){ clearTimeout(timer); timer = setTimeout(function(){ load(serializeState()); }, 300); }, { passive:true });
+    if (limitSelect) limitSelect.addEventListener('change', function(){ clearTimeout(timer); load(serializeState()); });
+    window.addEventListener('popstate', function(ev){ const state = ev.state || {}; if (qInput) qInput.value = state.q || ''; if (limitSelect) limitSelect.value = state.limit || ''; load(state, false); });
+})();
+</script>
+<?php endif; ?>

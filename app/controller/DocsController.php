@@ -47,41 +47,85 @@ class DocsController
     public function docs()
     {
         $search = trim((string)($_GET['q'] ?? ''));
+        $cat = trim((string)($_GET['cat'] ?? ''));
 
         $docs = [];
+        $allDocs = [];
+
+        // Build WHERE clauses dynamically
+        $where = [];
+        $params = [];
+        $types = '';
 
         if ($search !== '') {
-            // prepared search
-            $sql = "SELECT * FROM documentation 
-                    WHERE title LIKE CONCAT('%', ?, '%') 
-                       OR description LIKE CONCAT('%', ?, '%') 
-                       OR content LIKE CONCAT('%', ?, '%') 
-                    ORDER BY section, title";
-            $stmt = mysqli_prepare($this->db, $sql);
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "sss", $search, $search, $search);
-                mysqli_stmt_execute($stmt);
-                $rows = $this->stmt_fetch_all($stmt);
-                foreach ($rows as $row) $docs[$row['section']][] = $row;
-                mysqli_stmt_close($stmt);
-            } else {
-                // fallback: safe escaped query to avoid fatal error if prepare fails
-                $esc = mysqli_real_escape_string($this->db, $search);
-                $qsql = "SELECT * FROM documentation 
-                         WHERE title LIKE '%{$esc}%' OR description LIKE '%{$esc}%' OR content LIKE '%{$esc}%'
-                         ORDER BY section, title";
-                if ($res = mysqli_query($this->db, $qsql)) {
-                    while ($row = mysqli_fetch_assoc($res)) $docs[$row['section']][] = $row;
-                    mysqli_free_result($res);
+            $where[] = "(title LIKE CONCAT('%', ?, '%') OR description LIKE CONCAT('%', ?, '%') OR content LIKE CONCAT('%', ?, '%'))";
+            $params[] = $search; $params[] = $search; $params[] = $search;
+            $types .= 'sss';
+        }
+
+        if ($cat !== '') {
+            $where[] = "section = ?";
+            $params[] = $cat;
+            $types .= 's';
+        }
+
+        $where_sql = '';
+        if (!empty($where)) $where_sql = 'WHERE ' . implode(' AND ', $where);
+
+        // Fetch all matching rows (no pagination)
+        $select_sql = "SELECT * FROM documentation " . $where_sql . " ORDER BY section, title";
+        $stmt = mysqli_prepare($this->db, $select_sql);
+        if ($stmt) {
+            if (!empty($params)) {
+                $bind_names = [];
+                $bind_names[] = $types;
+                for ($i = 0; $i < count($params); $i++) {
+                    $bind_names[] = & $params[$i];
                 }
+                call_user_func_array([$stmt, 'bind_param'], $bind_names);
+            }
+            mysqli_stmt_execute($stmt);
+            $rows = $this->stmt_fetch_all($stmt);
+            mysqli_stmt_close($stmt);
+            foreach ($rows as $row) {
+                $allDocs[] = $row;
+                $docs[$row['section']][] = $row;
             }
         } else {
-            $sql = "SELECT * FROM documentation ORDER BY section, title";
-            if ($res = mysqli_query($this->db, $sql)) {
-                while ($row = mysqli_fetch_assoc($res)) $docs[$row['section']][] = $row;
+            // fallback: escaped query
+            $escWhere = '';
+            if ($search !== '') {
+                $esc = mysqli_real_escape_string($this->db, $search);
+                $escWhere = "(title LIKE '%{$esc}%' OR description LIKE '%{$esc}%' OR content LIKE '%{$esc}%')";
+            }
+            if ($cat !== '') {
+                $escCat = mysqli_real_escape_string($this->db, $cat);
+                if ($escWhere !== '') $escWhere .= ' AND ';
+                $escWhere .= "section = '{$escCat}'";
+            }
+            if ($escWhere !== '') $escWhere = 'WHERE ' . $escWhere;
+            $qsql = "SELECT * FROM documentation {$escWhere} ORDER BY section, title";
+            if ($res = mysqli_query($this->db, $qsql)) {
+                while ($row = mysqli_fetch_assoc($res)) {
+                    $allDocs[] = $row;
+                    $docs[$row['section']][] = $row;
+                }
                 mysqli_free_result($res);
             }
         }
+
+        // categories list
+        $cats = [];
+        if ($res = mysqli_query($this->db, "SELECT DISTINCT section FROM documentation ORDER BY section")) {
+            while ($r = mysqli_fetch_assoc($res)) $cats[] = $r['section'];
+            mysqli_free_result($res);
+        }
+
+        // expose variables used by view
+        $q = $search;
+        // $cat already set above
+        $page = 1;
+        $totalPages = 1;
 
         // detail doc if slug provided
         $slug = trim((string)($_GET['doc'] ?? ''));
@@ -108,6 +152,15 @@ class DocsController
         $title = "Documentation - Stuarz";
         $description = "Panduan penggunaan Stuarz documentation";
         $content = dirname(__DIR__) . '/views/pages/docs/docs.php';
+
+        // If this is an AJAX request, return only the page fragment (no layout)
+        $isAjax = !empty($_GET['ajax']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+        if ($isAjax) {
+            $ajax = true;
+            include $content;
+            return;
+        }
+
         include dirname(__DIR__) . '/views/layouts/layout.php';
     }
 

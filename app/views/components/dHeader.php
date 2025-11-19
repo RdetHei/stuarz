@@ -1,5 +1,4 @@
 <?php
-// Title maps
 $pageTitles = [
     'dashboard' => 'Dashboard',
     'dashboard-admin' => 'Admin Dashboard',
@@ -26,31 +25,26 @@ $dashboardTitles = [
     'docs'     => 'Dokumentasi',
 ];
 
-// read same params as index.php / sidebar
+
 $currentPage = $_GET['page'] ?? 'home';
 $currentSub  = $_GET['dashboard'] ?? null;
 
-// decide title: prefer dashboard subpage title when on dashboard+sub
 if ($currentPage === 'dashboard' && $currentSub) {
     $title = $dashboardTitles[$currentSub] ?? '-';
 } else {
     $title = $pageTitles[$currentPage] ?? '-';
 }
 
-// Build dynamic breadcrumbs
 $breadcrumbs = [];
 $breadcrumbs[] = ['label' => 'Home', 'href' => 'index.php?page=dashboard-admin'];
 
-// add main page segment
 if ($currentPage === 'dashboard' && $currentSub) {
     $breadcrumbs[] = ['label' => 'Dashboard', 'href' => 'index.php?page=dashboard'];
     $breadcrumbs[] = ['label' => $title, 'href' => null];
 } else {
     $mainLabel = $pageTitles[$currentPage] ?? ucwords(str_replace(['-', '_'], ' ', (string)$currentPage));
-    // Link to the main list page when available
     $breadcrumbs[] = ['label' => $mainLabel, 'href' => "index.php?page=" . urlencode((string)$currentPage)];
 
-    // detect action-like params to append (create/edit/etc)
     $actionParam = null;
     foreach (['action', 'mode', 'op', 'view'] as $p) {
         if (isset($_GET[$p]) && $_GET[$p] !== '') { $actionParam = (string) $_GET[$p]; break; }
@@ -63,7 +57,6 @@ if ($currentPage === 'dashboard' && $currentSub) {
 ?>
 <header id="dHeader" class="sticky top-0 z-[60] bg-slate-900 opacity-100 text-white h-16 flex items-center border-b border-slate-700 justify-between px-4">
     <div class="flex items-center gap-3 sm:gap-4">
-        <!-- Mobile menu button -->
         <button id="mobileMenuToggle" class="lg:hidden p-2 hover:bg-slate-700 rounded" aria-label="Toggle mobile menu">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -94,7 +87,6 @@ if ($currentPage === 'dashboard' && $currentSub) {
         <div class="md:hidden font-bold"><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></div>
     </div>
     <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Search -->
         <form action="index.php" method="get" class="hidden sm:flex items-center bg-slate-800/60 border border-slate-700 rounded-md px-2 h-9 focus-within:border-slate-500 transition-colors">
             <input type="hidden" name="page" value="<?= htmlspecialchars($currentPage, ENT_QUOTES, 'UTF-8') ?>" />
             <span class="material-symbols-outlined text-slate-300 mr-1">search</span>
@@ -108,7 +100,6 @@ if ($currentPage === 'dashboard' && $currentSub) {
         </button>
 
         <?php
-        // Show Print dropdown only to admin and teacher users
         $userLevel = $_SESSION['level'] ?? null;
         if ($userLevel === 'admin' || $userLevel === 'teacher') :
         ?>
@@ -184,4 +175,71 @@ if ($currentPage === 'dashboard' && $currentSub) {
             }
         });
     })();
+</script>
+
+<script>
+(function(){
+    const headerForm = document.querySelector('header form[action="index.php"]');
+    if (!headerForm) return;
+    const pageInput = headerForm.querySelector('input[name="page"]');
+    const qInput = headerForm.querySelector('input[name="q"]');
+    if (!pageInput || !qInput) return;
+
+    let timer = null;
+
+    function serialize() {
+        const page = pageInput.value || 'home';
+        const q = qInput.value || '';
+        return { page, q };
+    }
+
+    function applyFragment(html) {
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const fragmentIds = ['docsContent','adminNewsContent','adminDocsContent','tasksContent','newsContent'];
+            for (let id of fragmentIds) {
+                const node = doc.getElementById(id);
+                if (node) {
+                    const target = document.getElementById(id);
+                    if (target) { target.innerHTML = node.innerHTML; return true; }
+                }
+            }
+
+            // Fallback: replace <main> content if present in response
+            const mainResp = doc.querySelector('main');
+            const mainEl = document.querySelector('main');
+            if (mainResp && mainEl) {
+                mainEl.innerHTML = mainResp.innerHTML;
+                return true;
+            }
+
+            // Last fallback: replace main with raw html
+            if (mainEl) { mainEl.innerHTML = html; return true; }
+        } catch (e) {
+            return false;
+        }
+        return false;
+    }
+
+    function load(state, push = true) {
+        const params = new URLSearchParams();
+        params.set('page', state.page || 'home');
+        if (state.q) params.set('q', state.q);
+        params.set('ajax','1');
+
+        fetch('index.php?' + params.toString(), { credentials: 'same-origin' }).then(r => r.text()).then(html => {
+            const applied = applyFragment(html);
+            if (push) {
+                const friendly = 'index.php?page=' + encodeURIComponent(state.page) + (state.q ? '&q=' + encodeURIComponent(state.q) : '');
+                try { history.pushState(state, '', friendly); } catch (e) {}
+            }
+        }).catch(()=>{});
+    }
+
+    headerForm.addEventListener('submit', function(e){ e.preventDefault(); clearTimeout(timer); load(serialize()); });
+    qInput.addEventListener('input', function(){ clearTimeout(timer); timer = setTimeout(function(){ load(serialize()); }, 300); }, { passive: true });
+    window.addEventListener('popstate', function(ev){ const state = ev.state || {}; if (state.q !== undefined) { qInput.value = state.q || ''; } if (state.page !== undefined) { pageInput.value = state.page || pageInput.value; } if (state.page) load(state, false); });
+})();
 </script>

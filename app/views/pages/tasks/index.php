@@ -1,4 +1,5 @@
 <!-- Tasks List UI - Discord/GitHub dark style -->
+<div id="tasksContent">
 <div class="max-w-7xl mx-auto p-6">
   <!-- Flash Messages -->
   <?php if (isset($_SESSION['success'])): ?>
@@ -310,4 +311,27 @@ document.getElementById('submissionsModal').addEventListener('click', function(e
   }
 });
 </script>
+
+<script>
+// Encapsulate page init so it can be called after fragment replacement if needed
+function initTasksPage() {
+  // Re-bind modal click-out listener (avoid duplicate bindings)
+  const modal = document.getElementById('submissionsModal');
+  if (!modal) return;
+  // remove previous listener if exists by replacing node listener registration
+  modal.removeEventListener('click', window._tasks_modal_click_handler || (()=>{}));
+  window._tasks_modal_click_handler = function(e) {
+    if (e.target === modal) {
+      document.getElementById('submissionsModal').classList.add('hidden');
+    }
+  };
+  modal.addEventListener('click', window._tasks_modal_click_handler);
+
+  // other per-page init points could go here
+}
+
+// run init on normal page load
+(function(){ initTasksPage(); })();
+</script>
+</div>
 

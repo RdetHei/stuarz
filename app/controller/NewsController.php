@@ -19,6 +19,15 @@ class NewsController{
         $totalPages = max(1, (int)ceil($total / $perPage));
 
         $content = dirname(__DIR__) . '/views/pages/news/news.php';
+
+        // support AJAX fragment for live search
+        $isAjax = !empty($_GET['ajax']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+        if ($isAjax) {
+            $ajax = true;
+            include $content;
+            return;
+        }
+
         include dirname(__DIR__) . '/views/layouts/layout.php';
     }
 

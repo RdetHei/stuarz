@@ -1,4 +1,5 @@
 <?php if (session_status() !== PHP_SESSION_ACTIVE) session_start(); ?>
+<?php if (!isset($ajax)) $ajax = false; ?>
 
 <?php
 // Pagination controls
@@ -64,6 +65,7 @@ if (!empty($news) && is_array($news)) {
       <?php unset($_SESSION['flash']); ?>
     <?php endif; ?>
 
+<?php if (!$ajax): ?>
     <!-- Filter & Search Bar -->
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-6">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -108,6 +110,9 @@ if (!empty($news) && is_array($news)) {
             </form>
         </div>
     </div>
+<?php endif; ?>
+
+    <div id="adminNewsContent">
 
     <!-- Table -->
     <?php if (!empty($news)): ?>
@@ -300,5 +305,48 @@ if (!empty($news) && is_array($news)) {
         </a>
         <?php endif; ?>
     </div>
-    <?php endif; ?>
-</div>
+        <?php endif; ?>
+        </div>
+
+<?php if (!$ajax): ?>
+<script>
+// Live search for Admin News (targets admin news search form)
+(function(){
+    const pageInput = document.querySelector('input[name="page"][value="dashboard-admin-news"]');
+    const form = pageInput ? pageInput.closest('form') : null;
+    const container = document.getElementById('adminNewsContent');
+    if (!form || !container) return;
+    const qInput = form.querySelector('input[name="q"]');
+    const limitInput = form.querySelector('input[name="limit"]');
+    let timer = null;
+
+    function serializeState() {
+        return { q: (qInput && qInput.value) || '', limit: (limitInput && limitInput.value) || '' };
+    }
+
+    function load(state, push = true) {
+        const params = new URLSearchParams();
+        params.set('page','dashboard-admin-news');
+        if (state.q) params.set('q', state.q);
+        if (state.limit) params.set('limit', state.limit);
+        params.set('ajax','1');
+
+        fetch('index.php?' + params.toString(), { credentials: 'same-origin' }).then(r => r.text()).then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContainer = doc.getElementById('adminNewsContent');
+            if (newContainer) container.innerHTML = newContainer.innerHTML;
+            if (push) {
+                const friendly = 'index.php?page=dashboard-admin-news' + (state.q ? '&q=' + encodeURIComponent(state.q) : '') + (state.limit ? '&limit=' + encodeURIComponent(state.limit) : '');
+                try { history.pushState(state, '', friendly); } catch (e) {}
+            }
+        }).catch(()=>{});
+    }
+
+    form.addEventListener('submit', function(e){ e.preventDefault(); clearTimeout(timer); load(serializeState()); });
+    if (qInput) qInput.addEventListener('input', function(){ clearTimeout(timer); timer = setTimeout(function(){ load(serializeState()); }, 300); }, { passive:true });
+    if (limitInput) limitInput.addEventListener('change', function(){ clearTimeout(timer); load(serializeState()); });
+    window.addEventListener('popstate', function(ev){ const state = ev.state || {}; if (qInput) qInput.value = state.q || ''; if (limitInput) limitInput.value = state.limit || ''; load(state, false); });
+})();
+</script>
+<?php endif; ?>
