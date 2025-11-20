@@ -1,9 +1,16 @@
 {
-    "classes": [],
+    "classes": [
+        {
+            "id": "8",
+            "name": "Jane",
+            "students": 3,
+            "time": " 07:00,  07:00"
+        }
+    ],
     "submissions": [],
     "summary": {
-        "classes": 0,
-        "students": 0,
+        "classes": 1,
+        "students": 3,
         "pending_grading": 0,
         "messages": 0
     },

@@ -328,10 +328,9 @@ $attendanceChart = $attendanceChart ?? [88,8,4]; // present, absent, late
 
 </main>
 
-<!-- Chart.js initialization -->
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  try{
+  try {
     const attData = <?= json_encode(array_values($attendanceChart)) ?>; // [present, absent, late]
     const userProgress = document.getElementById('userProgressChart');
     
@@ -354,4 +353,20 @@ document.addEventListener('DOMContentLoaded', function(){
           maintainAspectRatio: false, 
           cutout: '70%', 
           plugins: {
-            legend:
+            legend: {
+              display: true,
+              position: 'bottom',
+              labels: {
+                color: '#9ca3af',
+                font: { size: 12 }
+              }
+            }
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+});
+</script>
