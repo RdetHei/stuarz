@@ -1,10 +1,10 @@
+
 <?php if (session_status() !== PHP_SESSION_ACTIVE) session_start(); ?>
 <?php $isEdit = isset($doc) && $doc; ?>
 
 <div class="bg-gray-900 min-h-screen py-8 px-4 lg:px-8">
     <div class="max-w-4xl mx-auto">
         
-        <!-- Header -->
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-white"><?= $isEdit ? 'Edit Dokumentasi' : 'Tambah Dokumentasi Baru' ?></h1>
@@ -21,7 +21,6 @@
             </a>
         </div>
 
-        <!-- Form -->
         <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700">
             <form action="index.php?page=<?= $isEdit ? 'dashboard-admin-docs-update' : 'dashboard-admin-docs-store' ?>" 
                   method="post" 
@@ -31,7 +30,6 @@
                     <input type="hidden" name="id" value="<?= (int)$doc['id'] ?>">
                 <?php endif; ?>
 
-                <!-- Section & Title -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">
@@ -45,7 +43,6 @@
                             class="w-full px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors duration-200"
                             placeholder="General, API, Tutorial">
                     </div>
-                    
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">
                             Title <span class="text-red-400">*</span>
@@ -60,7 +57,6 @@
                     </div>
                 </div>
 
-                <!-- Slug -->
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Slug</label>
                     <input 
@@ -72,7 +68,6 @@
                     <p class="text-xs text-gray-500 mt-2">URL-friendly identifier. Akan dibuat otomatis jika dikosongkan</p>
                 </div>
 
-                <!-- Description -->
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
                     <textarea 
@@ -82,7 +77,6 @@
                         placeholder="Deskripsi singkat tentang dokumentasi ini..."><?= htmlspecialchars($doc['description'] ?? '') ?></textarea>
                 </div>
 
-                <!-- Content -->
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">
                         Content <span class="text-red-400">*</span>

@@ -6,9 +6,7 @@
             <a href="index.php?page=class_create" class="px-3 py-2 bg-indigo-600 rounded text-sm hover:bg-indigo-500">Tambah Kelas</a>
         </div>
 
-        <!-- Stats Grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <!-- Total Classes -->
             <div class="px-6 py-4 bg-gray-800/60 border border-gray-700 rounded-xl">
                 <div class="flex items-center gap-4">
                     <div class="p-2 bg-indigo-500/10 rounded-lg">
@@ -22,8 +20,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Total Students -->
             <div class="px-6 py-4 bg-gray-800/60 border border-gray-700 rounded-xl">
                 <div class="flex items-center gap-4">
                     <div class="p-2 bg-emerald-500/10 rounded-lg">
@@ -37,8 +33,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Active Classes -->
             <div class="px-6 py-4 bg-gray-800/60 border border-gray-700 rounded-xl">
                 <div class="flex items-center gap-4">
                     <div class="p-2 bg-yellow-500/10 rounded-lg">
@@ -52,8 +46,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Average Students -->
             <div class="px-6 py-4 bg-gray-800/60 border border-gray-700 rounded-xl">
                 <div class="flex items-center gap-4">
                     <div class="p-2 bg-rose-500/10 rounded-lg">

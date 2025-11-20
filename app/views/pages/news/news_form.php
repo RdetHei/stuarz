@@ -2,7 +2,6 @@
 
 <div class="bg-gray-900 min-h-screen py-8 px-4 lg:px-8">
   <div class="max-w-4xl mx-auto">
-    <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-white"><?= $isEdit ? 'Edit Berita' : 'Tambah Berita Baru' ?></h1>
@@ -19,7 +18,6 @@
       </a>
     </div>
 
-    <!-- Form -->
     <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
       <form action="index.php?page=<?= $isEdit ? 'dashboard-admin-news-update' : 'dashboard-admin-news-store' ?>" 
             method="POST" 
@@ -31,7 +29,6 @@
           <input type="hidden" name="thumbnail_existing" value="<?= htmlspecialchars($newsItem['thumbnail']) ?>">
         <?php endif; ?>
 
-        <!-- Judul -->
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">
             Judul Berita <span class="text-red-400">*</span>
@@ -45,7 +42,6 @@
             placeholder="Masukkan judul berita...">
         </div>
 
-        <!-- Kategori, Author, Tanggal -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Kategori</label>
@@ -77,7 +73,6 @@
           </div>
         </div>
 
-        <!-- Thumbnail -->
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">
             Thumbnail

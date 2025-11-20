@@ -1,12 +1,10 @@
 <?php
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-
 $user = $_SESSION['user'] ?? null;
 if (!$user) {
     header("Location: index.php?page=login");
     exit;
 }
-
 $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 if ($baseUrl === '/') $baseUrl = '';
 ?>
@@ -22,7 +20,7 @@ if ($baseUrl === '/') $baseUrl = '';
     <link rel="icon" type="image/png" sizes="16x16" href="<?= $baseUrl ?>/assets/diamond.png">
 </head>
 <body class="bg-gray-900 dark:bg-gray-900 bg-gray-50 min-h-screen transition-colors duration-200">
-    <!-- Header -->
+    
     <header class="bg-[#1f2937] dark:bg-[#1f2937] bg-white border-b border-gray-700 dark:border-gray-700 border-gray-200 sticky top-0 z-40 transition-colors duration-200">
         <div class="max-w-5xl mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
@@ -40,9 +38,9 @@ if ($baseUrl === '/') $baseUrl = '';
         </div>
     </header>
 
-    <!-- Main Content -->
+    
     <main class="max-w-5xl mx-auto px-6 py-8">
-        <!-- Flash Messages -->
+        
         <?php if (!empty($_SESSION['flash'])): ?>
             <div class="mb-6 bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
                 <div class="flex items-start gap-3">
@@ -67,9 +65,9 @@ if ($baseUrl === '/') $baseUrl = '';
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
 
-        <!-- Settings Grid -->
+        
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Sidebar Navigation -->
+            
             <div class="lg:col-span-1">
                 <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-2 sticky top-24">
                     <nav class="space-y-1">

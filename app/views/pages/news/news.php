@@ -1,7 +1,7 @@
-<?php if (!isset($allNews)) { $allNews = []; $cats = []; $q = ''; $cat = ''; $page = 1; $totalPages = 1; } ?>
-<?php if (!isset($ajax)) $ajax = false; ?>
+
 <?php
-// Compute base URL similar to other pages
+if (!isset($allNews)) { $allNews = []; $cats = []; $q = ''; $cat = ''; $page = 1; $totalPages = 1; }
+if (!isset($ajax)) $ajax = false;
 if (!isset($baseUrl)) {
   $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
   if ($baseUrl === '/') $baseUrl = '';
@@ -21,7 +21,6 @@ if (!isset($baseUrl)) {
 
 <?php endif; ?>
 <?php if (!$ajax): ?>
-    <!-- Search & Filter -->
     <div class="mb-6 bg-[#1f2937] border border-gray-700 rounded-lg p-4">
       <form method="GET" action="index.php" class="flex flex-col sm:flex-row gap-3">
         <input type="hidden" name="page" value="news">
@@ -34,7 +33,7 @@ if (!isset($baseUrl)) {
           </div>
           <input type="text" 
                  name="q" 
-                 placeholder="Search news..." 
+                 placeholder="Search Documentations or News..." 
                  value="<?= htmlspecialchars($q) ?>" 
                  class="w-full pl-10 pr-4 py-2 bg-[#111827] border border-gray-700 text-sm text-gray-200 rounded-md focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors placeholder-gray-500">
         </div>
@@ -57,16 +56,14 @@ if (!isset($baseUrl)) {
     </div>
 <?php endif; ?>
     
-<?php
-// News content wrapper: used by header/global live-search to replace only this section
-?>
+
 
 <div id="newsContent">
 
-    <!-- News Grid -->
+    
     <?php if (!empty($allNews)): ?>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-      <!-- Featured News (First Item) -->
+      
       <?php $first = $allNews[0]; ?>
       <a href="index.php?page=news_show&id=<?= (int)$first['id'] ?>" 
          class="lg:col-span-2 group relative rounded-lg overflow-hidden bg-[#1f2937] border border-gray-700 hover:border-gray-600 transition-all">
@@ -105,7 +102,7 @@ if (!isset($baseUrl)) {
         </div>
       </a>
 
-      <!-- Regular News Items -->
+      
       <?php foreach (array_slice($allNews, 1) as $n): ?>
         <a href="index.php?page=news_show&id=<?= (int)$n['id'] ?>" 
            class="group rounded-lg overflow-hidden bg-[#1f2937] border border-gray-700 hover:border-gray-600 transition-all flex flex-col">
@@ -143,7 +140,7 @@ if (!isset($baseUrl)) {
       <?php endforeach; ?>
     </div>
     <?php else: ?>
-    <!-- Empty State -->
+    
     <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-12 text-center">
       <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-800 flex items-center justify-center">
         <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +161,7 @@ if (!isset($baseUrl)) {
     </div>
     <?php endif; ?>
 
-    </div> <!-- #newsContent -->
+    </div>
 
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
@@ -217,7 +214,7 @@ if (!isset($baseUrl)) {
 
 <?php if (!$ajax): ?>
 <script>
-// Live search for News page (targets the news form only)
+ 
 (function(){
   const pageInput = document.querySelector('input[name="page"][value="news"]');
   const form = pageInput ? pageInput.closest('form') : null;

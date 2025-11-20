@@ -38,19 +38,18 @@ $bannerVal = $user['banner'] ?? '';
 $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
 ?>
 
-<!-- Profile Page -->
 <div class="bg-gray-900 min-h-screen py-8 px-4 lg:px-8">
   <div class="max-w-5xl mx-auto">
     <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
       
-      <!-- Banner -->
+      
       <div class="relative w-full h-48 sm:h-56 lg:h-72">
         <img src="<?= htmlspecialchars($bannerSrc, ENT_QUOTES, 'UTF-8') ?>"
              alt="Banner"
              class="w-full h-full object-cover" />
         <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60"></div>
 
-        <!-- Avatar positioned at bottom of banner -->
+        
         <div class="absolute bottom-0 left-0 right-0 px-6 pb-6 flex items-end">
           <div class="p-1.5 rounded-full bg-gray-800">
             <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden bg-gray-700 ring-[6px] ring-gray-800">
@@ -60,7 +59,7 @@ $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
             </div>
           </div>
           
-          <!-- Name and username on banner (desktop) -->
+          
           <div class="hidden sm:block ml-6 pb-4 text-white">
             <h1 class="text-3xl lg:text-4xl font-bold mb-1"><?= htmlspecialchars($user['name']) ?></h1>
             <p class="text-gray-300 text-lg">@<?= htmlspecialchars(strtolower(str_replace(' ', '', $user['class'] ?? 'user'))) ?></p>
@@ -68,16 +67,16 @@ $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
         </div>
       </div>
 
-      <!-- Main Content -->
+      
       <div class="px-6 pt-6 pb-8 bg-gray-800">
-        <!-- Mobile: Name and bio -->
+        
         <div class="sm:hidden mb-6">
           <h1 class="text-2xl font-bold text-white mb-1"><?= htmlspecialchars($user['name']) ?></h1>
           <p class="text-gray-300 mb-3">@<?= htmlspecialchars(strtolower(str_replace(' ', '', $user['class'] ?? 'user'))) ?></p>
           <p class="text-gray-400"><?= htmlspecialchars($user['bio'] ?? '') ?></p>
         </div>
 
-        <!-- Desktop: Bio -->
+        
         <div class="hidden sm:block mb-6">
           <div class="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
             <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">Tentang Saya</h3>
@@ -85,9 +84,9 @@ $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
           </div>
         </div>
 
-        <!-- Contact Information Grid -->
+        
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <!-- Email -->
+          
           <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
             <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,7 +97,7 @@ $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
             <p class="text-white"><?= htmlspecialchars($user['email']) ?></p>
           </div>
 
-          <!-- Phone -->
+          
           <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
             <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,7 +108,7 @@ $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
             <p class="text-white"><?= htmlspecialchars($user['phone'] ?? '-') ?></p>
           </div>
 
-          <!-- Address -->
+          
           <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
             <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -121,7 +120,7 @@ $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
             <p class="text-white"><?= htmlspecialchars($user['address'] ?? '-') ?></p>
           </div>
 
-          <!-- Join Date -->
+          
           <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
             <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -137,34 +136,34 @@ $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
 
         <div class="border-t border-gray-700 my-6"></div>
 
-        <!-- Statistics Cards -->
+        
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <!-- Tugas -->
+          
           <div class="bg-gray-900/50 rounded-lg p-5 text-center border border-gray-700">
             <p class="text-3xl lg:text-4xl font-bold text-white mb-2"><?= (int)$user['tasks_completed'] ?></p>
             <p class="text-gray-400 text-sm">Tugas Diselesaikan</p>
           </div>
 
-          <!-- Absensi -->
+          
           <div class="bg-gray-900/50 rounded-lg p-5 text-center border border-gray-700">
             <p class="text-3xl lg:text-4xl font-bold text-white mb-2"><?= (int)$user['attendance'] ?></p>
             <p class="text-gray-400 text-sm">Absensi</p>
           </div>
 
-          <!-- Sertifikat -->
+          
           <div class="bg-gray-900/50 rounded-lg p-5 text-center border border-gray-700">
             <p class="text-3xl lg:text-4xl font-bold text-white mb-2"><?= (int)$user['certificates'] ?></p>
             <p class="text-gray-400 text-sm">Sertifikat</p>
           </div>
 
-          <!-- Nilai -->
+          
           <div class="bg-gray-900/50 rounded-lg p-5 text-center border border-gray-700">
             <p class="text-3xl lg:text-4xl font-bold text-white mb-2"><?= htmlspecialchars($user['average_grade']) ?></p>
             <p class="text-gray-400 text-sm">Nilai Rata-rata</p>
           </div>
         </div>
 
-        <!-- Action Buttons -->
+        
         <div class="flex flex-col sm:flex-row justify-center gap-3">
           <a href="index.php?page=edit_user&id=<?= (int)$user['id']; ?>"
             class="px-6 py-2.5 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-center transition-colors duration-200">

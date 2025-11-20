@@ -135,10 +135,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : '';
       <span class="menu-text">Dashboard</span>
     </a>
 
-    <a href="index.php?page=dashboard-guru" title="Dashboard Guru" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 <?= navActive('dashboard-guru', $page, $sub)?>">
-      <span class="material-symbols-outlined mr-3">groups_2</span>
-      <span class="menu-text">Dashboard Guru</span>
-    </a>
+
 
 <?php if (($sessionUser['level'] ?? '') === 'admin'): ?>
     <details class="sidebar-group" <?= in_array($page, $manajemenPages, true) ? 'open' : '' ?>>

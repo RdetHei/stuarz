@@ -13,7 +13,7 @@ if (!isset($_SESSION['user'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Chart.js library and init script (kept in the view so data is available here) -->
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
@@ -22,13 +22,9 @@ if (!isset($_SESSION['user'])) {
     <link rel="icon" type="image/png" sizes="16x16" href="assets/diamond.png">
         <style>
         @media print {
-            /* hide admin chrome */
             #sidebar, .sidebar, .hamburger, nav, .ai-helper, .chat-modal, #sidebarToggle, #sidebarLogoToggle { display: none !important; }
-            /* hide dashboard header */
             #dHeader, .d-header, header { display: none !important; }
-            /* make main content full width */
             #content, main { margin: 0 !important; padding: 0 !important; width: 100% !important; }
-            /* normalize colors for printing */
             body, #content, article, .prose { background: #fff !important; color: #000 !important; }
             a:after { content: " (" attr(href) ")"; font-size: 90%; }
         }

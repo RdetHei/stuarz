@@ -1,11 +1,11 @@
 <?php
-// Prevent direct access
+ 
 if (!defined('BASEPATH')) exit('No direct script access allowed');
 ?>
 
-<!-- AI Helper Toggle Button -->
+ 
 <div class="fixed right-4 bottom-4 z-50">
-    <!-- Page Notification Tooltip -->
+ 
     <div id="shorekeeper-page-notification" 
          class="absolute bottom-full right-0 mb-2 px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-lg shadow-xl border border-gray-700 opacity-0 transform translate-y-2 transition-all duration-300 pointer-events-none whitespace-nowrap z-50">
         <span id="shorekeeper-page-text"></span>
@@ -21,7 +21,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
     </button>
 </div>
 
-<!-- AI Helper Modal -->
+ 
 <div id="ai-helper-modal" 
      class="fixed inset-0 bg-gray-900/75 z-50 hidden"
      aria-labelledby="modal-title" 
@@ -30,7 +30,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
     <div class="fixed inset-0 z-50 overflow-y-auto">
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <div class="relative transform overflow-hidden rounded-lg bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                <!-- Modal header with close button -->
+ 
                 <div class="flex items-center justify-between px-4 py-3 bg-gray-750 border-b border-gray-700">
                     <div class="flex items-center gap-2">
                         <span class="text-xl">💬</span>
@@ -48,11 +48,11 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
                     </button>
                 </div>
 
-                <!-- Chat container -->
+ 
                 <div class="bg-gray-800">
-                    <!-- Messages area -->
+ 
                     <div id="chat-messages" class="h-[400px] overflow-y-auto p-4 space-y-4 scrollbar-hide">
-                        <!-- Welcome message -->
+ 
                         <div class="flex items-start gap-2.5">
                             <div class="flex flex-col gap-1 w-full max-w-[320px]">
                                 <div class="flex items-center space-x-2 rtl:space-x-reverse">
@@ -67,7 +67,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
                         </div>
                     </div>
 
-                    <!-- Input area -->
+ 
                     <div class="p-4 bg-gray-750 border-t border-gray-700">
                         <form id="chat-form" class="flex gap-2">
                             <input type="text" 
@@ -87,7 +87,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
     </div>
 </div>
 
-<!-- AI Helper Styles -->
+ 
 <style>
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
@@ -98,7 +98,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
 }
 </style>
 
-<!-- AI Helper Scripts -->
+ 
 <script>
 const isAdmin = <?= isset($_SESSION['level']) && $_SESSION['level'] === 'admin' ? 'true' : 'false' ?>;
 
@@ -158,15 +158,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chat-messages');
     const userInput = document.getElementById('user-input');
 
-    // Check page on initial load
+    
     checkPageChange(true);
 
-    // Check page on URL change (for SPA-like navigation)
+    
     window.addEventListener('popstate', function() {
         checkPageChange(false);
     });
 
-    // Intercept link clicks
+    
     document.addEventListener('click', function(e) {
         const link = e.target.closest('a');
         if (link && link.href) {
@@ -180,31 +180,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Toggle modal
+    
     toggle.addEventListener('click', openAIHelper);
     
-    // Handle clicks outside modal to close
+    
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             closeAIHelper();
         }
     });
 
-    // Handle form submission
+    
     chatForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const question = userInput.value.trim();
         if (!question) return;
 
-        // Add user's question to chat
+        
         addMessage(question, true);
         
-        // Clear input
+        
         userInput.value = '';
 
         try {
-            // Show typing indicator
+            
             const typingDiv = document.createElement('div');
             typingDiv.id = 'typing-indicator';
             typingDiv.className = 'flex items-start gap-2.5';
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
             chatMessages.appendChild(typingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Send request to backend
+            
             const response = await fetch('/stuarz/ai-helper/ask.php', {
                 method: 'POST',
                 headers: {

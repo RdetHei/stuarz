@@ -2,7 +2,6 @@
 <?php if (!isset($ajax)) $ajax = false; ?>
 
 <?php
-// Pagination controls
 $total = $total ?? 0;
 $limit = (int)($limit ?? 10);
 $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;

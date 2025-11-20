@@ -4,7 +4,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
 
-// compute base URL for preview src
+//
 $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 if ($baseUrl === '/') $baseUrl = '';
 $prefix = ($baseUrl ? $baseUrl . '/' : '');
@@ -12,7 +12,6 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
 
 <div class="bg-gray-900 min-h-screen py-8 px-4 lg:px-8">
     <div class="max-w-4xl mx-auto">
-        <!-- Flash Message -->
         <?php if ($flash): ?>
             <div class="mb-6 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-200 text-sm">
                 <div class="flex items-center gap-2">
@@ -25,7 +24,6 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
         <?php endif; ?>
 
         <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-            <!-- Banner Preview Section -->
             <div class="relative w-full h-48 sm:h-56 lg:h-72 group cursor-pointer" id="bannerContainer">
                 <img id="bannerPreview" 
                      src="<?= htmlspecialchars($prefix . 'assets/default-banner.png', ENT_QUOTES, 'UTF-8') ?>" 
@@ -33,7 +31,6 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                      class="w-full h-full object-cover" />
                 <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60"></div>
                 
-                <!-- Upload Overlay -->
                 <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                     <div class="text-center text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,7 +41,6 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                     </div>
                 </div>
 
-                <!-- Avatar positioned at bottom -->
                 <div class="absolute bottom-0 left-0 right-0 px-6 pb-6 flex items-end justify-between">
                     <div class="flex items-end gap-4">
                         <div id="avatarContainer" class="relative group/avatar cursor-pointer">
@@ -56,7 +52,6 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                                          class="w-full h-full object-cover" />
                                 </div>
                             </div>
-                            <!-- Avatar Upload Overlay -->
                             <div class="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />

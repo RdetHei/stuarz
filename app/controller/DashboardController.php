@@ -36,81 +36,20 @@ class DashboardController
         $userId = (int) ($_SESSION['user_id'] ?? 0);
         $user = $this->userModel->getUserById($userId);
 
-        // If a teacher logs in, redirect to guru dashboard
-        if (!empty($user['level']) && $user['level'] === 'guru') {
-            header('Location: index.php?page=dashboard-guru');
-            exit;
-        }
-
-        // Prepare models
-        $tasksModel = new TasksCompletedModel($config);
-        $submissionsModel = new TaskSubmissionsModel($config);
-        $notificationsModel = new NotificationsModel($config);
-        $attendanceModel = new AttendanceModel($config);
-        $scheduleModel = new ScheduleModel($config);
-
-        // Collect student-related data
-        $tasks = $tasksModel->getByStudentClass($userId);
-        $submissions = $submissionsModel->getByUser($userId);
-
-        // Stats
-        $tasksCompleted = 0;
-        $grades = [];
-        foreach ($submissions as $s) {
-            if (isset($s['grade']) && $s['grade'] !== null && $s['grade'] !== '') {
-                $tasksCompleted++;
-                $grades[] = floatval($s['grade']);
+        // Redirect based on user level
+        if (!empty($user['level'])) {
+            if ($user['level'] === 'guru') {
+                header('Location: index.php?page=dashboard-guru');
+                exit;
+            } elseif ($user['level'] === 'admin') {
+                header('Location: index.php?page=dashboard-admin');
+                exit;
             }
         }
-        $avgGrade = $grades ? round(array_sum($grades) / count($grades)) : 0;
-
-        // Attendance for current month
-        $start = date('Y-m-01');
-        $end = date('Y-m-t');
-        $attendanceRecords = $attendanceModel->getFilteredAttendance($start, $end);
-        $present = 0; $total = 0;
-        foreach ($attendanceRecords as $a) {
-            if ((int)$a['user_id'] === $userId) {
-                $total++;
-                if (isset($a['status']) && strtolower($a['status']) === 'present') $present++;
-            }
-        }
-
-        // Schedule for user's class (find class id)
-        $classId = null;
-        if (!empty($user['class'])) {
-            $allClasses = (new ClassModel($config))->getAll();
-            foreach ($allClasses as $c) {
-                if (trim($c['name']) === trim($user['class'])) { $classId = $c['id']; break; }
-            }
-        }
-        $today = strftime('%A');
-        $todaySchedules = [];
-        if ($classId) {
-            $todaySchedules = $scheduleModel->getAll(['class_id' => $classId, 'day' => $today]);
-        }
-
-        $stats = [
-            'tasks_completed' => $tasksCompleted,
-            'attendance_present' => $present,
-            'attendance_total' => $total,
-            'certificates' => 0,
-            'average_grade' => $avgGrade
-        ];
-
-        $activities = [];
-        foreach (array_slice($submissions, 0, 8) as $s) {
-            $activities[] = ['title' => 'Submission: ' . ($s['task_title'] ?? 'Tugas'), 'meta' => ($s['status'] ?? 'submitted') . ' • ' . ($s['submitted_at'] ?? ''), 'time' => $s['submitted_at'] ?? ''];
-        }
-
-        $schedule = array_map(function($s){ return ['time' => ($s['start_time'] ?? '') . ' — ' . ($s['end_time'] ?? ''), 'subject' => $s['subject'] ?? '', 'teacher' => $s['teacher_id'] ?? '', 'room' => '']; }, $todaySchedules);
-
-        $learning = ['words_read' => 0, 'chapters' => 0, 'streak' => 0];
-        $attendanceChart = [$present, max(0, $total - $present), 0];
 
         $title = "Dashboard - Stuarz";
         $description = "Welcome to your dashboard";
-        $content = dirname(__DIR__) . '/views/pages/dashboard_user.php';
+        $content = dirname(__DIR__) . '/views/pages/dashboard/user.php';
 
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -127,9 +66,19 @@ class DashboardController
             exit;
         }
 
+        global $config;
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
+        $user = $this->userModel->getUserById($userId);
+
+        // If a teacher logs in, redirect to guru dashboard
+        if (!empty($user['level']) && $user['level'] === 'guru') {
+            header('Location: index.php?page=dashboard-guru');
+            exit;
+        }
+
         $title = "Dashboard - Stuarz";
         $description = "Welcome to your dashboard";
-        $content = dirname(__DIR__) . '/views/pages/dashboard/dashboard.php';
+        $content = dirname(__DIR__) . '/views/pages/dashboard/admin.php';
 
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -148,6 +97,13 @@ class DashboardController
 
         global $config;
         $teacherId = (int) ($_SESSION['user_id'] ?? 0);
+
+        // Only allow access if user is guru
+        $teacher = $this->userModel->getUserById($teacherId);
+        if (!$teacher || ($teacher['level'] ?? '') !== 'guru') {
+            header('Location: index.php?page=dashboard');
+            exit;
+        }
 
         $cacheTtl = 120; // seconds
         $cacheDir = dirname(__DIR__) . '/cache';
@@ -274,7 +230,7 @@ class DashboardController
 
         $title = "Dashboard Guru - Stuarz";
         $description = "Halaman dashboard untuk guru";
-        $content = dirname(__DIR__) . '/views/pages/dashboard_guru.php';
+        $content = dirname(__DIR__) . '/views/pages/dashboard/guru.php';
 
         // Normalize teacher fields expected by the view
         $teacher['subject'] = $teacher['subject'] ?? ($teacher['role'] ?? '');

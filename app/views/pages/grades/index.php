@@ -1,6 +1,4 @@
-<!-- Grades List UI - Discord/GitHub dark style -->
 <div class="max-w-7xl mx-auto p-6">
-  <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-4">
@@ -15,8 +13,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Filter Section -->
     <div class="mt-6 bg-gray-800 border border-gray-700 rounded-lg p-4">
       <form method="get" action="index.php" class="flex flex-wrap gap-3">
         <input type="hidden" name="page" value="grades">
@@ -66,7 +62,6 @@
     </div>
   </div>
 
-  <!-- Grades Table -->
   <?php if (!empty($grades ?? [])): ?>
   <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
     <div class="overflow-x-auto">
@@ -159,7 +154,6 @@
       </table>
     </div>
 
-    <!-- Table Footer -->
     <div class="px-6 py-4 bg-gray-900 border-t border-gray-700">
       <div class="flex items-center justify-between text-sm text-gray-400">
         <span>Total: <?= count($grades ?? []) ?> nilai</span>
@@ -186,7 +180,6 @@
   </div>
 
   <?php else: ?>
-  <!-- Empty State -->
   <div class="bg-gray-800 border border-gray-700 rounded-xl p-12 text-center">
     <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-indigo-600/20 flex items-center justify-center">
       <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +191,6 @@
   </div>
   <?php endif; ?>
 
-  <!-- Info Card -->
   <div class="mt-6 bg-gray-800 border border-gray-700 rounded-xl p-6">
     <div class="flex items-start gap-4">
       <div class="flex-shrink-0 w-12 h-12 bg-indigo-600/20 rounded-xl flex items-center justify-center">

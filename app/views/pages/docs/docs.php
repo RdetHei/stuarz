@@ -1,14 +1,14 @@
+
 <?php
-// Defaults (jaga agar tidak ada undefined variable)
-if (!isset($allDocs)) { $allDocs = []; }
-if (!isset($docs)) { $docs = []; }               // daftar dokumentasi terstruktur: ['Section' => [ ... ]]
-if (!isset($currentDoc)) { $currentDoc = null; } // dokumen yang sedang dibuka (assoc array) atau null
-if (!isset($cats)) { $cats = []; }               // daftar kategori
-if (!isset($q)) { $q = ''; }
-if (!isset($cat)) { $cat = ''; }
-if (!isset($page)) { $page = 1; }
-if (!isset($totalPages)) { $totalPages = 1; }
-if (!isset($ajax)) { $ajax = false; }
+if (!isset($allDocs)) $allDocs = [];
+if (!isset($docs)) $docs = [];
+if (!isset($currentDoc)) $currentDoc = null;
+if (!isset($cats)) $cats = [];
+if (!isset($q)) $q = '';
+if (!isset($cat)) $cat = '';
+if (!isset($page)) $page = 1;
+if (!isset($totalPages)) $totalPages = 1;
+if (!isset($ajax)) $ajax = false;
 ?>
 
 <?php if (!$ajax): ?>
@@ -19,7 +19,6 @@ if (!isset($ajax)) { $ajax = false; }
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Documentation</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <!-- Jika Anda memakai Material Symbols atau font lain, tambahkan di sini -->
 </head>
 <body class="bg-gray-900 min-h-screen">
   <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8">
@@ -46,7 +45,12 @@ if (!isset($ajax)) { $ajax = false; }
           <?php endforeach; ?>
         </select>
 
-        <button type="submit" class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap">Search</button>
+         <button type="submit"
+  class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium
+         rounded-md transition-colors whitespace-nowrap">
+  Search
+</button>
+
       </form>
     </div>
 
@@ -76,12 +80,10 @@ if (!isset($ajax)) { $ajax = false; }
       </aside>
 
       <main id="docsContent" class="lg:col-span-9">
-<?php endif; // end if !$ajax ?>
+<?php endif; ?>
 
         <?php if ($currentDoc): ?>
-          <!-- Detail Documentation -->
           <div class="space-y-6">
-            <!-- Breadcrumb -->
             <nav class="flex items-center gap-2 text-sm">
               <a href="index.php?page=docs" class="text-gray-400 hover:text-gray-200 transition-colors">Documentation</a>
               <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -178,7 +180,6 @@ if (!isset($ajax)) { $ajax = false; }
           </div>
 
         <?php else: ?>
-          <!-- Listing semua dokumentasi -->
           <div class="space-y-10">
             <?php if (!empty($docs)): ?>
               <?php foreach ($docs as $section => $items): ?>
@@ -312,4 +313,4 @@ if (!isset($ajax)) { $ajax = false; }
 
 </body>
 </html>
-<?php endif; // end if !$ajax ?>
+<?php endif; ?>

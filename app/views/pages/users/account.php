@@ -7,11 +7,9 @@ $canAdmin = isset($me['level']) && $me['level'] === 'admin';
 $rows = [];
 $errorMsg = '';
 
-// Prefer controller-provided $users array. Jika tidak ada, fallback ke query DB (safe check).
 if (isset($users) && is_array($users)) {
   $rows = $users;
 } else {
-  // coba gunakan $config jika tersedia
   if (isset($config) && $config instanceof mysqli) {
     $sql = "SELECT id, username, email, level, avatar, join_date FROM users ORDER BY join_date DESC";
     $res = mysqli_query($config, $sql);
@@ -20,7 +18,6 @@ if (isset($users) && is_array($users)) {
       mysqli_free_result($res);
     }
   } else {
-    // tidak ada koneksi DB tersedia
     $errorMsg = "Database connection not available. Pastikan controller mengirim \$users atau global \$config tersedia.";
   }
 }

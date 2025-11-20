@@ -31,7 +31,7 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
 
 <header class="bg-gray-800 sticky top-0 z-50 border-b border-gray-700">
   <nav aria-label="Global" class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
-    <!-- Logo -->
+    
     <div class="flex lg:flex-1">
       <a href="index.php?page=home" class="-m-1.5 p-1.5 hover:opacity-80 transition-opacity duration-200">
         <span class="sr-only">Your Company</span>
@@ -50,7 +50,7 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
       </a>
     </div>
 
-    <!-- Mobile menu button -->
+    
     <div class="flex lg:hidden">
       <button type="button" 
               command="show-modal" 
@@ -63,7 +63,7 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
       </button>
     </div>
 
-    <!-- Desktop Navigation -->
+    
     <el-popover-group class="hidden lg:flex lg:gap-x-8">
       <a href="index.php?page=home" class="nav-link text-sm font-semibold text-gray-300 py-2">
         Home
@@ -79,7 +79,7 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
       </a>
     </el-popover-group>
 
-    <!-- Auth Buttons -->
+    
     <div class="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-4">
       <a href="index.php?page=login" 
          class="text-sm font-semibold text-gray-300 hover:text-white transition-colors duration-200">
@@ -92,12 +92,12 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
     </div>
   </nav>
 
-  <!-- Mobile Menu Dialog -->
+  
   <el-dialog>
     <dialog id="mobile-menu" class="backdrop:bg-black/50 lg:hidden">
       <div tabindex="0" class="fixed inset-0 focus:outline-none">
         <el-dialog-panel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 p-6 sm:max-w-sm border-l border-gray-800">
-          <!-- Mobile Header -->
+          
           <div class="flex items-center justify-between">
             <a href="index.php?page=home" class="-m-1.5 p-1.5">
               <span class="sr-only">Your Company</span>
@@ -125,7 +125,7 @@ require_once dirname(__DIR__) . '../../../app/config/config.php';
             </button>
           </div>
 
-          <!-- Mobile Navigation -->
+          
           <div class="mt-6 flow-root">
             <div class="-my-6 divide-y divide-gray-800">
               <div class="space-y-2 py-6">

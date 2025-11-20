@@ -93,7 +93,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
             <input name="q" type="text" placeholder="Cari..." class="bg-transparent outline-none text-sm text-white placeholder:text-slate-400 w-48" />
         </form>
 
-        <!-- Notifications -->
+        
         <button id="notifBtn" class="p-2 hover:bg-slate-700 rounded relative" aria-label="Notifications" title="Notifications">
             <span class="material-symbols-outlined">notifications</span>
             <span id="notifBadge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-[10px] rounded-full px-1 leading-4" style="display:none">0</span>
@@ -114,7 +114,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
         </div>
         <?php endif; ?>
 
-        <!-- Support dropdown -->
+        
         <div class="relative">
             <button id="supportDropdownBtn" class="p-2 hover:bg-slate-700 rounded flex items-center gap-2" aria-haspopup="true" aria-expanded="false">
                 Support
@@ -207,7 +207,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
                 }
             }
 
-            // Fallback: replace <main> content if present in response
+            
             const mainResp = doc.querySelector('main');
             const mainEl = document.querySelector('main');
             if (mainResp && mainEl) {
@@ -215,7 +215,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
                 return true;
             }
 
-            // Last fallback: replace main with raw html
+            
             if (mainEl) { mainEl.innerHTML = html; return true; }
         } catch (e) {
             return false;

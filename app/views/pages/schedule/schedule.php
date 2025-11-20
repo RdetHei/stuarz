@@ -1,23 +1,19 @@
+
 <?php
-// Get data from controller
 $classesWithSchedules = $classesWithSchedules ?? [];
 $filterClasses = $filterClasses ?? [];
 $filterTeachers = $filterTeachers ?? [];
-
-// Days for grouping
 $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-
-// Get filters from query string
 $selectedClass = $_GET['class_id'] ?? '';
 $selectedTeacher = $_GET['teacher_id'] ?? '';
 $selectedDay = $_GET['day'] ?? '';
 ?>
 
 <style>
-  .schedule-card { 
-    transition: all 0.2s ease; 
+  .schedule-card {
+    transition: all 0.2s ease;
   }
-  .schedule-card:hover { 
+  .schedule-card:hover {
     background: #1f2937;
     border-color: #5865F2;
     transform: translateY(-1px);
@@ -33,7 +29,7 @@ $selectedDay = $_GET['day'] ?? '';
 
 <div class="min-h-screen bg-gray-900">
   <div class="max-w-[1400px] mx-auto p-6">
-    <!-- Header Section -->
+    
     <div class="mb-6">
       <div class="flex items-center justify-between mb-6">
         <div>
@@ -52,7 +48,7 @@ $selectedDay = $_GET['day'] ?? '';
         <?php endif; ?>
       </div>
 
-      <!-- Filter Section -->
+      
       <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-4">
         <form method="GET" action="index.php" class="grid grid-cols-1 md:grid-cols-4 gap-3">
           <input type="hidden" name="page" value="schedule">
@@ -105,7 +101,7 @@ $selectedDay = $_GET['day'] ?? '';
       </div>
     </div>
 
-    <!-- Classes Grid -->
+    
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
       <?php foreach ($classesWithSchedules as $classData): ?>
       <?php
@@ -158,7 +154,7 @@ $selectedDay = $_GET['day'] ?? '';
       ?>
       
       <div class="class-container bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden">
-        <!-- Class Header -->
+        
         <div class="px-4 py-3 bg-[#111827] border-b border-gray-700">
           <div class="flex items-center justify-between gap-3">
             <div class="flex-1 min-w-0">
@@ -181,7 +177,7 @@ $selectedDay = $_GET['day'] ?? '';
           </div>
         </div>
 
-        <!-- Schedules Content -->
+        
         <div class="p-3">
           <?php if ($totalSchedules > 0): ?>
           <div class="space-y-3">
@@ -192,13 +188,13 @@ $selectedDay = $_GET['day'] ?? '';
             ?>
             <?php if (!empty($schedulesByDay[$day])): ?>
             <div class="bg-[#111827] rounded-md border border-gray-700 overflow-hidden">
-              <!-- Day Header -->
+              
               <div class="px-3 py-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
                 <h3 class="text-xs font-semibold text-gray-300"><?= $day ?></h3>
                 <span class="text-xs text-gray-500"><?= count($schedulesByDay[$day]) ?></span>
               </div>
               
-              <!-- Day Schedules -->
+              
               <div class="p-2 space-y-2">
                 <?php foreach ($schedulesByDay[$day] as $schedule): ?>
                 <?php
@@ -278,7 +274,7 @@ $selectedDay = $_GET['day'] ?? '';
             <?php endforeach; ?>
           </div>
           <?php else: ?>
-          <!-- Empty State for Class -->
+                        
           <div class="text-center py-8">
             <div class="w-12 h-12 mx-auto mb-3 rounded-lg bg-gray-800 flex items-center justify-center">
               <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -303,7 +299,6 @@ $selectedDay = $_GET['day'] ?? '';
     </div>
 
     <?php if (empty($classesWithSchedules)): ?>
-    <!-- Empty State -->
     <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-12 text-center">
       <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-800 flex items-center justify-center">
         <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,7 +317,7 @@ $selectedDay = $_GET['day'] ?? '';
     </div>
     <?php endif; ?>
 
-    <!-- Info Footer -->
+    
     <div class="mt-6 bg-[#1f2937] border border-gray-700 rounded-lg p-4">
       <div class="flex items-start gap-3">
         <div class="flex-shrink-0 w-10 h-10 bg-[#5865F2]/10 rounded-lg flex items-center justify-center">
@@ -341,10 +336,10 @@ $selectedDay = $_GET['day'] ?? '';
   </div>
 </div>
 
-<!-- Schedule View Modal -->
+ 
 <div id="scheduleViewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
   <div class="bg-[#1f2937] border border-gray-700 rounded-lg max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-    <!-- Modal Header -->
+    
     <div class="px-6 py-4 bg-[#111827] border-b border-gray-700 flex items-center justify-between">
       <div>
         <h2 id="modalClassName" class="text-xl font-semibold text-gray-100"></h2>
@@ -357,10 +352,10 @@ $selectedDay = $_GET['day'] ?? '';
       </button>
     </div>
     
-    <!-- Modal Content -->
+    
     <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
       <div id="scheduleModalContent" class="space-y-4">
-        <!-- Content will be populated by JavaScript -->
+        
       </div>
     </div>
   </div>
@@ -494,17 +489,14 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Close modal when clicking outside
 document.getElementById('scheduleViewModal').addEventListener('click', function(e) {
   if (e.target === this) {
     closeScheduleModal();
   }
 });
-
-// Close modal with Escape key
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     closeScheduleModal();
   }
 });
-</script>********************************************
+</script>

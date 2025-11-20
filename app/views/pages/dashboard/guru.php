@@ -1,43 +1,38 @@
+
 <?php
-// Sample data fallbacks (controllers should provide real data)
 $teacher = $teacher ?? [
-    'name' => 'Nama Guru',
-    'subject' => 'Kimia',
-    'email' => 'guru@example.com',
-    'joined' => '2022-08-01',
-    'bio' => 'Pengajar Kimia dengan fokus praktik laboratorium.'
+  'name' => 'Nama Guru',
+  'subject' => 'Kimia',
+  'email' => 'guru@example.com',
+  'joined' => '2022-08-01',
+  'bio' => 'Pengajar Kimia dengan fokus praktik laboratorium.'
 ];
-
 $summary = $summary ?? [
-    'classes' => 3,
-    'students' => 92,
-    'pending_grading' => 12,
-    'messages' => 4
+  'classes' => 3,
+  'students' => 92,
+  'pending_grading' => 12,
+  'messages' => 4
 ];
-
 $submissions = $submissions ?? [
-    ['title'=>'Laporan Praktikum','class'=>'X IPA 2','meta'=>'12 submissions','age'=>'1d'],
-    ['title'=>'Ulangan Harian','class'=>'X IPA 1','meta'=>'8 submissions','age'=>'3d']
+  ['title'=>'Laporan Praktikum','class'=>'X IPA 2','meta'=>'12 submissions','age'=>'1d'],
+  ['title'=>'Ulangan Harian','class'=>'X IPA 1','meta'=>'8 submissions','age'=>'3d']
 ];
-
 $classes = $classes ?? [
-    ['name'=>'X IPA 1','students'=>25,'time'=>'Mon/Wed 08:00'],
-    ['name'=>'X IPA 2','students'=>27,'time'=>'Tue/Thu 10:00'],
-    ['name'=>'X IPA 3','students'=>40,'time'=>'Fri 09:00']
+  ['name'=>'X IPA 1','students'=>25,'time'=>'Mon/Wed 08:00'],
+  ['name'=>'X IPA 2','students'=>27,'time'=>'Tue/Thu 10:00'],
+  ['name'=>'X IPA 3','students'=>40,'time'=>'Fri 09:00']
 ];
-
 $performance = $performance ?? [
-    'average' => 84,
-    'min' => 55,
-    'max' => 98,
-    'grades' => [95,93,90,88,85,82,78,75,70,65]
+  'average' => 84,
+  'min' => 55,
+  'max' => 98,
+  'grades' => [95,93,90,88,85,82,78,75,70,65]
 ];
-
 ?>
 
-<!-- Dashboard Guru view (partial) -->
+ 
 <main class="max-w-7xl mx-auto p-6 bg-gray-900">
-  <!-- Header Profile -->
+  
   <section class="bg-gray-800 rounded-lg p-6 mb-6">
     <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
       <img src="<?= htmlspecialchars($teacher['avatar'] ?? ('https://ui-avatars.com/api/?name=' . urlencode($teacher['name']) . '&background=5865f2&color=fff')) ?>"
@@ -56,7 +51,7 @@ $performance = $performance ?? [
     </div>
   </section>
 
-  <!-- Summary Cards -->
+  
   <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="bg-gray-800 rounded-lg p-5 hover:bg-gray-750 transition-colors">
       <div class="flex items-center justify-between mb-3">
@@ -103,13 +98,13 @@ $performance = $performance ?? [
     </div>
   </section>
 
-  <!-- Main Content Grid -->
+  
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     
-    <!-- Left Column - Submissions & Performance -->
+    
     <div class="lg:col-span-2 space-y-6">
       
-      <!-- Submissions to Grade -->
+      
       <div class="bg-gray-800 rounded-lg p-6">
         <div class="flex items-center justify-between mb-5">
           <h2 class="text-lg font-semibold text-white">Submissions to Grade</h2>
@@ -133,7 +128,7 @@ $performance = $performance ?? [
         </div>
       </div>
 
-      <!-- Performance Chart -->
+      
       <div class="bg-gray-800 rounded-lg p-6">
         <div class="flex items-center justify-between mb-5">
           <h2 class="text-lg font-semibold text-white">Class Performance</h2>
@@ -164,10 +159,10 @@ $performance = $performance ?? [
 
     </div>
 
-    <!-- Right Column - Classes & Quick Actions -->
+    
     <div class="space-y-6">
       
-      <!-- Class Overview -->
+      
       <div class="bg-gray-800 rounded-lg p-6">
         <div class="flex items-center justify-between mb-5">
           <h2 class="text-lg font-semibold text-white">My Classes</h2>
@@ -190,7 +185,7 @@ $performance = $performance ?? [
         </div>
       </div>
 
-      <!-- Quick Actions -->
+      
       <div class="bg-gray-800 rounded-lg p-6">
         <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
         <div class="space-y-2">
@@ -215,7 +210,7 @@ $performance = $performance ?? [
 
 </main>
 
-<!-- Chart.js initialization for teacher performance -->
+ 
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   try{
@@ -267,6 +262,4 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 
-<?php
-// end of dashboard_guru.php
-?>
+ 

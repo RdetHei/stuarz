@@ -10,12 +10,13 @@
 </head>
 <body class="bg-gray-900 min-h-screen">
     <div class="flex min-h-screen">
-        <!-- Left Panel - Branding -->
-        <div class="hidden lg:flex lg:w-1/2 bg-[#1f2937] p-12 flex-col justify-center relative overflow-hidden">
-            <!-- Background Pattern -->
-            <div class="absolute inset-0 opacity-30">
-                <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(88, 101, 242, 0.1) 1px, transparent 0); background-size: 40px 40px;"></div>
-            </div>
+        <!--left pannel branding -->
+<div class="hidden lg:flex lg:w-1/2 bg-[#1f2937] p-12 flex-col justify-center relative overflow-hidden">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-30">
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(88, 101, 242, 0.1) 1px, transparent 0); background-size: 40px 40px;"></div>
+    </div>
+
 
             <div class="max-w-md mx-auto relative z-10">
                 <!-- Logo -->

@@ -2,7 +2,6 @@
 <?php if (!isset($baseUrl)) { $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/'); if ($baseUrl === '/') $baseUrl = ''; } ?>
 
 <div class="bg-gray-900 min-h-screen">
-  <!-- Sticky Header -->
   <header id="stickyHeader" class="bg-[#1f2937] border-b border-gray-700 sticky top-0 z-40 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-6 py-4">
       <div class="flex items-center justify-between gap-4">
@@ -51,19 +50,16 @@
     <!-- Article Header -->
     <article>
       <div class="mb-8" id="articleTop">
-        <!-- Category Badge -->
         <div class="mb-4">
           <span class="inline-block px-3 py-1.5 bg-[#5865F2]/10 text-[#5865F2] border border-[#5865F2]/20 rounded-md text-sm font-medium">
             <?= htmlspecialchars($newsItem['category']) ?>
           </span>
         </div>
 
-        <!-- Title -->
         <h1 class="text-4xl md:text-5xl font-bold text-gray-100 mb-6 leading-tight">
           <?= htmlspecialchars($newsItem['title']) ?>
         </h1>
 
-        <!-- Meta Information -->
         <div class="flex flex-wrap items-center gap-4 text-sm text-gray-400 pb-6 border-b border-gray-700">
           <div class="flex items-center gap-2">
             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#5865F2] to-[#4752C4] flex items-center justify-center">
@@ -97,7 +93,6 @@
         </div>
       </div>
 
-      <!-- Featured Image -->
       <?php if (!empty($newsItem['thumbnail'])): ?>
       <div class="mb-8 rounded-lg overflow-hidden border border-gray-700">
         <img

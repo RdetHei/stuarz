@@ -1,7 +1,7 @@
-<!-- Subjects List -->
+
 <div class="bg-gray-900 min-h-screen">
   <div class="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-    <!-- Header -->
+    
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-100">Subjects</h1>
@@ -16,9 +16,9 @@
       </a>
     </div>
 
-    <!-- Stats Grid -->
+    
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-      <!-- Subjects Stats -->
+      
       <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors">
         <div class="flex items-center gap-3">
           <div class="p-2 bg-[#5865F2]/10 rounded-lg">
@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <!-- Students Stats -->
+      
       <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors">
         <div class="flex items-center gap-3">
           <div class="p-2 bg-emerald-500/10 rounded-lg">
@@ -48,7 +48,7 @@
         </div>
       </div>
 
-      <!-- Teachers Stats -->
+      
       <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors">
         <div class="flex items-center gap-3">
           <div class="p-2 bg-amber-500/10 rounded-lg">
@@ -63,7 +63,7 @@
         </div>
       </div>
 
-      <!-- Classes Stats -->
+      
       <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors">
         <div class="flex items-center gap-3">
           <div class="p-2 bg-rose-500/10 rounded-lg">
@@ -79,7 +79,7 @@
       </div>
     </div>
 
-    <!-- Table -->
+    
     <div class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-700">

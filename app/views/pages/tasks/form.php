@@ -14,7 +14,6 @@ $schedules = $schedules ?? [];
 ?>
 
 <div class="max-w-4xl mx-auto p-6">
-  <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-4">
@@ -39,7 +38,6 @@ $schedules = $schedules ?? [];
     </div>
   </div>
 
-  <!-- Flash Messages -->
   <?php if (isset($_SESSION['error'])): ?>
     <div class="mb-6 bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg flex items-center gap-2">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +48,6 @@ $schedules = $schedules ?? [];
     <?php unset($_SESSION['error']); ?>
   <?php endif; ?>
 
-  <!-- Form Card -->
   <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
     <form method="post" action="<?= $action ?>" enctype="multipart/form-data" class="space-y-6" id="taskForm">
       <?php if ($edit): ?>
@@ -58,7 +55,6 @@ $schedules = $schedules ?? [];
       <?php endif; ?>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Title -->
         <div class="md:col-span-2">
           <label for="title" class="block text-sm font-medium text-gray-300 mb-2">
             Judul Task <span class="text-red-500">*</span>
@@ -79,7 +75,6 @@ $schedules = $schedules ?? [];
           </div>
         </div>
 
-        <!-- Class -->
         <div>
           <label for="class_id" class="block text-sm font-medium text-gray-300 mb-2">
             Kelas <span class="text-red-500">*</span>
@@ -97,7 +92,6 @@ $schedules = $schedules ?? [];
           </select>
         </div>
 
-        <!-- Teacher (assignment) -->
         <div>
           <label for="teacher_id" class="block text-sm font-medium text-gray-300 mb-2">Guru (penanggung jawab)</label>
           <?php $currentLevel = $_SESSION['level'] ?? 'user'; ?>

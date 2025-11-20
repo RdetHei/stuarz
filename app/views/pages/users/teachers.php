@@ -7,24 +7,19 @@ $canAdmin = isset($me['level']) && $me['level'] === 'admin';
 $rows = [];
 $errorMsg = '';
 
-// Filter untuk guru dengan level 'teacher' saja
 if (isset($users) && is_array($users)) {
   $rows = array_filter($users, fn($u) => ($u['level'] ?? '') === 'guru');
-  $rows = array_values($rows); // re-index array
-} else {
-  if (isset($config) && $config instanceof mysqli) {
-    $sql = "SELECT id, username, email, level, avatar, join_date FROM users WHERE level = 'guru' ORDER BY join_date DESC";
-    $res = mysqli_query($config, $sql);
-    if ($res) {
-      while ($r = mysqli_fetch_assoc($res)) $rows[] = $r;
-      mysqli_free_result($res);
-    }
-  } else {
-    $errorMsg = "Database connection not available. Pastikan controller mengirim \$users atau global \$config tersedia.";
+} else if (isset($config) && $config instanceof mysqli) {
+  $sql = "SELECT id, username, email, level, avatar, join_date FROM users WHERE level = 'guru' ORDER BY join_date DESC";
+  $res = mysqli_query($config, $sql);
+  if ($res) {
+    while ($r = mysqli_fetch_assoc($res)) $rows[] = $r;
+    mysqli_free_result($res);
   }
+} else {
+  $errorMsg = "Database connection not available. Pastikan controller mengirim $users atau global $config tersedia.";
 }
 
-// compute base URL
 if (!isset($baseUrl)) {
   $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
   if ($baseUrl === '/') $baseUrl = '';

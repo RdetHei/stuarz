@@ -1,3 +1,4 @@
+
 <?php
 $edit = isset($subject);
 $action = $edit ? 'index.php?page=subjects/update' : 'index.php?page=subjects/store';
@@ -8,7 +9,7 @@ $teachers = $teachers ?? [];
 ?>
 
 <div class="max-w-4xl mx-auto p-6">
-  <!-- Header -->
+  
   <div class="mb-8">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-4">
@@ -33,7 +34,7 @@ $teachers = $teachers ?? [];
     </div>
   </div>
 
-  <!-- Form Card -->
+  
   <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
     <form method="post" action="<?= $action ?>" class="space-y-6">
       <?php if ($edit): ?>
@@ -41,7 +42,7 @@ $teachers = $teachers ?? [];
       <?php endif; ?>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Subject Name -->
+        
         <div class="md:col-span-2">
           <label for="name" class="block text-sm font-medium text-gray-300 mb-2">
             Nama Mata Pelajaran <span class="text-red-500">*</span>
@@ -64,7 +65,7 @@ $teachers = $teachers ?? [];
           </div>
         </div>
 
-        <!-- Teacher -->
+        
         <div>
           <label for="teacher_id" class="block text-sm font-medium text-gray-300 mb-2">
             Guru Pengajar <span class="text-red-500">*</span>
@@ -83,7 +84,7 @@ $teachers = $teachers ?? [];
           </select>
         </div>
 
-        <!-- Status (Optional) -->
+        
         <div>
           <label for="status" class="block text-sm font-medium text-gray-300 mb-2">
             Status
@@ -97,7 +98,7 @@ $teachers = $teachers ?? [];
           </select>
         </div>
 
-        <!-- Description -->
+        
         <div class="md:col-span-2">
           <label for="description" class="block text-sm font-medium text-gray-300 mb-2">
             Deskripsi <span class="text-red-500">*</span>

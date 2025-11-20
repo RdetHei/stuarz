@@ -1,28 +1,22 @@
+
 <?php
-// Ensure session is started for error messages
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// Get error message if exists
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['error']);
-
-// Set default values
 $mode = $mode ?? 'create';
 $item = $item ?? null;
 $days = $days ?? ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 $classes = $classes ?? [];
 $subjects = $subjects ?? [];
 $teachers = $teachers ?? [];
-
-// Set form action and title based on mode
 $formAction = $mode === 'create' ? 'index.php?page=schedule/store' : 'index.php?page=schedule/update/' . ($item['id'] ?? '');
 $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
 ?>
 
 <div class="max-w-4xl mx-auto p-6">
-    <!-- Header -->
+    
     <div class="mb-8">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-4">
@@ -47,7 +41,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
         </div>
     </div>
 
-    <!-- Error Message -->
+    
     <?php if ($error): ?>
     <div class="mb-6 bg-red-500/10 border border-red-500/50 rounded-lg p-4">
         <div class="flex items-center gap-3">
@@ -59,11 +53,11 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
     </div>
     <?php endif; ?>
 
-    <!-- Form -->
+    
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
         <form method="POST" action="<?= $formAction ?>" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Kelas -->
+                
                 <div>
                     <label for="class_id" class="block text-sm font-medium text-gray-300 mb-2">
                         Kelas <span class="text-red-500">*</span>
@@ -72,7 +66,6 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
                             class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
                         <option value="">Pilih Kelas</option>
                         <?php 
-                        // Get class_id from query string if available (for pre-selection)
                         $preselectedClassId = $_GET['class_id'] ?? ($item['class_id'] ?? '');
                         foreach ($classes as $class): 
                         ?>
@@ -84,7 +77,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
                     </select>
                 </div>
 
-                <!-- Mata Pelajaran -->
+                
                 <div>
                     <label for="subject" class="block text-sm font-medium text-gray-300 mb-2">
                         Mata Pelajaran <span class="text-red-500">*</span>

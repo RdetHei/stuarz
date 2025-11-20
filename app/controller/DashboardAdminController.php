@@ -38,21 +38,21 @@ class DashboardAdminController
         ];
 
         // Ambil pengumuman terbaru untuk card di dashboard admin
-        $latestAnnouncement = null;
+        $latestAnnouncements = [];
         try {
             require_once __DIR__ . '/../model/AnnouncementModel.php';
             $annModel = new AnnouncementModel($this->db);
             $allAnnouncements = $annModel->getAll();
             if (!empty($allAnnouncements)) {
-                $latestAnnouncement = $allAnnouncements[0];
+                $latestAnnouncements = array_slice($allAnnouncements, 0, 3);
             }
         } catch (\Throwable $e) {
-            // jangan hentikan halaman jika ada error; biarkan $latestAnnouncement null
-            $latestAnnouncement = null;
+            // jangan hentikan halaman jika ada error; biarkan $latestAnnouncements kosong
+            $latestAnnouncements = [];
         }
 
         // Tentukan file view utama
-        $content = dirname(__DIR__) . '/views/pages/admin/dashboard.php';
+        $content = dirname(__DIR__) . '/views/pages/dashboard/admin.php';
 
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -86,7 +86,7 @@ class DashboardAdminController
         // Average Grade
         $result = $this->db->query("SELECT AVG(grade) as avg FROM average_grade");
         if ($result && $row = $result->fetch_assoc()) {
-            $stats['average_grade'] = round($row['avg'], 1);
+            $stats['average_grade'] = $row['avg'] !== null ? round($row['avg'], 1) : 0;
         }
 
         return $stats;
@@ -109,7 +109,7 @@ class DashboardAdminController
                 FROM attendance 
                 WHERE date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
                 GROUP BY DATE(date)
-                ORDER BY date";
+                ORDER BY tanggal";
 
         $result = $this->db->query($sql);
         if ($result) {

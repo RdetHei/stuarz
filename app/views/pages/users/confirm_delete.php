@@ -1,6 +1,5 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-// expect $userToDelete to be provided by controller
 $userToDelete = $userToDelete ?? null;
 if (!$userToDelete) {
     $_SESSION['flash'] = 'Pengguna tidak ditemukan.';

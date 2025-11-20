@@ -2,7 +2,6 @@
 <?php if (!isset($ajax)) $ajax = false; ?>
 
 <?php
-// Pagination controls
 $total = $total ?? 0;
 $limit = (int)($limit ?? 10);
 $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : (isset($_GET['p']) ? (int)$_GET['p'] : 1);
@@ -10,24 +9,22 @@ $q = $q ?? '';
 $totalPages = $limit > 0 ? (int)ceil($total / $limit) : 1;
 $offset = ($page - 1) * $limit;
 
-// compute base URL for asset resolution (same logic as other views)
 if (!isset($baseUrl)) {
-  $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
-  if ($baseUrl === '/') $baseUrl = '';
+    $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+    if ($baseUrl === '/') $baseUrl = '';
 }
 
-// normalize thumbnail URLs for each news item so the view can always use *_src fields
 if (!empty($news) && is_array($news)) {
-  foreach ($news as $idx => $item) {
-    $thumb = !empty($item['thumbnail']) ? $item['thumbnail'] : '';
-    if ($thumb && (strpos($thumb, 'http://') === 0 || strpos($thumb, 'https://') === 0)) {
-      $news[$idx]['thumbnail_src'] = $thumb;
-    } elseif ($thumb) {
-      $news[$idx]['thumbnail_src'] = ($baseUrl ? $baseUrl . '/' : '') . ltrim($thumb, '/');
-    } else {
-      $news[$idx]['thumbnail_src'] = '';
+    foreach ($news as $idx => $item) {
+        $thumb = !empty($item['thumbnail']) ? $item['thumbnail'] : '';
+        if ($thumb && (strpos($thumb, 'http://') === 0 || strpos($thumb, 'https://') === 0)) {
+            $news[$idx]['thumbnail_src'] = $thumb;
+        } elseif ($thumb) {
+            $news[$idx]['thumbnail_src'] = ($baseUrl ? $baseUrl . '/' : '') . ltrim($thumb, '/');
+        } else {
+            $news[$idx]['thumbnail_src'] = '';
+        }
     }
-  }
 }
 ?>
 

@@ -1,241 +1,208 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Sekolah - Educational Management System</title>
-  <meta name="description" content="Modern educational dashboard with Discord and GitHub inspired design">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'discord-blurple': '#5865F2',
-            'github-blue': '#58A6FF',
-            'dark-bg': '#111827',
-            'dark-card': '#1f2937',
-            'dark-card-hover': '#374151',
-            'dark-border': '#374151',
-            'dark-text': '#f9fafb',
-            'dark-muted': '#9ca3af',
-          }
-        }
-      }
+<?php
+// Sample data fallbacks (controllers should provide real data)
+$user = $user ?? [
+    'name' => 'Nama User',
+    'username' => 'username',
+    'level' => 'siswa',
+    'joined' => '2024-01-12',
+    'class' => 'X IPA 2',
+    'bio' => 'Pelajar antusias yang aktif di klub sains.'
+];
+
+$stats = $stats ?? [
+    'tasks_completed' => 18,
+    'attendance_present' => 22,
+    'attendance_total' => 22,
+    'certificates' => 5,
+    'average_grade' => 88
+];
+
+$activities = $activities ?? [
+    ['title' => "Tugas Matematika diselesaikan", 'meta' => "'Persamaan Kuadrat' • 2 jam lalu", 'time' => '2h'],
+    ['title' => "Absensi: Hadir", 'meta' => "Kelas Matematika • Hari ini", 'time' => 'Today'],
+    ['title' => "Sertifikat baru diterima", 'meta' => "Best Attendance • 3 hari lalu", 'time' => '3d']
+];
+
+$schedule = $schedule ?? [
+    ['time' => '07:30 — 08:15', 'subject' => 'Matematika', 'teacher' => 'Bu Sari', 'room' => 'R101'],
+    ['time' => '08:30 — 09:15', 'subject' => 'Biologi', 'teacher' => 'Pak Anton', 'room' => 'Lab'],
+];
+
+$learning = $learning ?? [
+    'words_read' => 12340,
+    'chapters' => 18,
+    'streak' => 14
+];
+
+$attendanceChart = $attendanceChart ?? [88,8,4]; // present, absent, late
+
+?>
+
+<!-- Dashboard User view (partial) -->
+<main class="max-w-7xl mx-auto p-8">
+  <!-- Header Profile -->
+  <section class="bg-[#11131a] border border-gray-800 rounded-xl p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+    <img src="<?= htmlspecialchars($user['avatar'] ?? ('https://ui-avatars.com/api/?name=' . urlencode($user['name']) . '&background=3b82f6&color=fff')) ?>"
+         alt="avatar" class="w-28 h-28 rounded-full border-2 border-gray-800 object-cover flex-shrink-0">
+    <div class="flex-1">
+      <div class="text-2xl font-semibold leading-tight"><?= htmlspecialchars($user['name']) ?></div>
+      <div class="text-sm text-gray-300 mt-1">@<?= htmlspecialchars($user['username']) ?> • <span class="text-gray-400"><?= htmlspecialchars($user['level']) ?></span></div>
+      <div class="mt-3 text-sm text-gray-400">Bergabung: <span class="text-gray-300"><?= htmlspecialchars($user['joined']) ?></span> • Kelas: <span class="text-gray-300"><?= htmlspecialchars($user['class']) ?></span></div>
+      <?php if (!empty($user['bio'])): ?><p class="mt-4 text-sm text-gray-300 max-w-2xl"><?= htmlspecialchars($user['bio']) ?></p><?php endif; ?>
+    </div>
+    <div class="w-full md:w-auto text-right">
+      <div class="inline-flex items-center gap-2">
+        <span class="px-4 py-2 rounded-full bg-[#0f1724] border border-gray-800 text-indigo-300 text-sm">Siswa Aktif</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Summary Cards -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+    <div class="bg-[#11131a] border border-gray-800 rounded-xl p-6">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-300">Tasks Completed</div>
+        <div class="inline-flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-[#4e6bff] to-[#3b82f6] text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/></svg>
+        </div>
+      </div>
+      <div class="mt-4 text-4xl font-semibold text-[#4e6bff]"><?= (int)$stats['tasks_completed'] ?></div>
+      <div class="mt-2 text-sm text-gray-400">Completed this month</div>
+    </div>
+
+    <div class="bg-[#11131a] border border-gray-800 rounded-xl p-6">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-300">Attendance</div>
+        <div class="inline-flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-[#4e6bff] to-[#3b82f6] text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7H3v12a2 2 0 002 2z"/></svg>
+        </div>
+      </div>
+      <div class="mt-4 text-4xl font-semibold text-[#4e6bff]"><?= (int)$stats['attendance_present'] ?> / <?= (int)$stats['attendance_total'] ?></div>
+      <div class="mt-2 text-sm text-gray-400">Present this month</div>
+    </div>
+
+    <div class="bg-[#11131a] border border-gray-800 rounded-xl p-6">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-300">Certificates</div>
+        <div class="inline-flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-[#4e6bff] to-[#3b82f6] text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/></svg>
+        </div>
+      </div>
+      <div class="mt-4 text-4xl font-semibold text-[#4e6bff]"><?= (int)$stats['certificates'] ?></div>
+      <div class="mt-2 text-sm text-gray-400">Earned</div>
+    </div>
+
+    <div class="bg-[#11131a] border border-gray-800 rounded-xl p-6">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-300">Average Grade</div>
+        <div class="inline-flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-[#4e6bff] to-[#3b82f6] text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/></svg>
+        </div>
+      </div>
+      <div class="mt-4 text-4xl font-semibold text-[#4e6bff]"><?= (int)$stats['average_grade'] ?>%</div>
+      <div class="mt-2 text-sm text-gray-400">Semester Average</div>
+    </div>
+  </section>
+
+  <!-- Recent Activities and side panels -->
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+    <div class="lg:col-span-2 bg-[#11131a] border border-gray-800 rounded-xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">Aktivitas Terbaru</h3>
+        <a href="#" class="text-sm text-[#4e6bff]">Lihat semua</a>
+      </div>
+      <ul class="space-y-3">
+        <?php foreach ($activities as $act): ?>
+        <li class="bg-[#0f1219] p-3 rounded-lg flex items-start justify-between">
+          <div class="flex items-start gap-3">
+            <div class="text-[#4e6bff] pt-1">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <div>
+              <div class="text-sm text-gray-300 font-medium"><?= htmlspecialchars($act['title']) ?></div>
+              <div class="text-xs text-gray-400 mt-1"><?= htmlspecialchars($act['meta']) ?></div>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500"><?= htmlspecialchars($act['time']) ?></div>
+        </li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+
+    <div class="space-y-6">
+      <div class="bg-[#11131a] border border-gray-800 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-lg font-semibold">Jadwal Hari Ini</h4>
+          <a href="#" class="text-sm text-[#4e6bff]">Lihat semua</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <?php foreach ($schedule as $s): ?>
+          <div class="p-3 bg-[#0f1219] rounded-lg">
+            <div class="text-sm text-gray-300 font-medium"><?= htmlspecialchars($s['time']) ?></div>
+            <div class="text-sm text-gray-400"><?= htmlspecialchars($s['subject']) ?> • <?= htmlspecialchars($s['teacher']) ?></div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+
+      <div class="bg-[#11131a] border border-gray-800 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-lg font-semibold">Learning Statistics</h4>
+          <a href="#" class="text-sm text-[#4e6bff]">Rincian</a>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-sm text-gray-300"><span>Words Read</span><span class="font-semibold text-gray-200"><?= number_format($learning['words_read']) ?></span></div>
+          <div class="flex items-center justify-between text-sm text-gray-300"><span>Chapters Completed</span><span class="font-semibold text-gray-200"><?= (int)$learning['chapters'] ?></span></div>
+          <div class="flex items-center justify-between text-sm text-gray-300"><span>Streak</span><span class="font-semibold text-[#4e6bff]"><?= (int)$learning['streak'] ?> days</span></div>
+          <div class="mt-3 p-3 bg-[#0f1219] rounded-lg text-sm text-gray-400 text-center">
+            <canvas id="userProgressChart" width="400" height="180"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Certificates and quick links -->
+  <section class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div class="bg-[#11131a] border border-gray-800 rounded-xl p-6">
+      <h4 class="text-lg font-semibold mb-4">Sertifikat</h4>
+      <div class="flex gap-3 overflow-x-auto">
+        <div class="min-w-[140px] p-3 bg-[#0f1219] rounded-lg text-sm">Best Attendance</div>
+        <div class="min-w-[140px] p-3 bg-[#0f1219] rounded-lg text-sm">Olimpiade Kimia</div>
+        <div class="min-w-[140px] p-3 bg-[#0f1219] rounded-lg text-sm">Essay Competition</div>
+      </div>
+    </div>
+
+    <div class="bg-[#11131a] border border-gray-800 rounded-xl p-6">
+      <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+      <div class="grid grid-cols-2 gap-3">
+        <a class="p-3 rounded-xl bg-[#0f1219] text-center text-sm" href="#">📅 Lihat Jadwal</a>
+        <a class="p-3 rounded-xl bg-[#0f1219] text-center text-sm" href="#">📝 Lihat Nilai</a>
+        <a class="p-3 rounded-xl bg-[#0f1219] text-center text-sm" href="#">🏅 Lihat Sertifikat</a>
+        <a class="p-3 rounded-xl bg-[#0f1219] text-center text-sm" href="#">📚 Dokumentasi</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Chart.js initialization (dLayout.php should load Chart.js) -->
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    const attData = <?= json_encode(array_values($attendanceChart)) ?>; // [present, absent, late]
+    const userProgress = document.getElementById('userProgressChart');
+    if (userProgress) {
+      new Chart(userProgress.getContext('2d'), {
+        type: 'doughnut',
+        data: { labels: ['Present','Absent','Late'], datasets:[{ data: attData, backgroundColor:['#10b981','#ef4444','#f59e0b'] }] },
+        options: { maintainAspectRatio: false, cutout: '70%', plugins:{legend:{display:false}} }
+      });
     }
-  </script>
-  
-  <style>
-    body {
-      background-color: #111827;
-      color: #f9fafb;
-    }
-  </style>
-</head>
-<body class="min-h-screen">
+  }catch(e){console.error(e)}
+});
+</script>
 
-  <!-- Header -->
-  <header class="border-b border-dark-border bg-dark-card/50 backdrop-blur-sm sticky top-0 z-10">
-    <div class="container mx-auto px-6 py-4">
-      <h1 class="text-3xl font-bold bg-gradient-to-r from-discord-blurple to-github-blue bg-clip-text text-transparent">
-        Dashboard Overview
-      </h1>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <main class="container mx-auto px-6 py-8 space-y-8">
-    
-    <!-- Stats Grid -->
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      
-      <!-- Total Siswa -->
-      <div class="bg-dark-card border border-dark-border p-6 rounded-xl">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-dark-muted mb-2">Total Siswa</p>
-            <p class="text-3xl font-bold">120</p>
-          </div>
-          <svg class="h-12 w-12 text-discord-blurple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Total Guru -->
-      <div class="bg-dark-card border border-dark-border p-6 rounded-xl">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-dark-muted mb-2">Total Guru</p>
-            <p class="text-3xl font-bold">15</p>
-          </div>
-          <svg class="h-12 w-12 text-github-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Tugas Selesai -->
-      <div class="bg-dark-card border border-dark-border p-6 rounded-xl">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-dark-muted mb-2">Tugas Selesai</p>
-            <p class="text-3xl font-bold">320</p>
-          </div>
-          <svg class="h-12 w-12 text-discord-blurple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Absensi Hari Ini -->
-      <div class="bg-dark-card border border-dark-border p-6 rounded-xl">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-dark-muted mb-2">Absensi Hari Ini</p>
-            <p class="text-3xl font-bold">98%</p>
-          </div>
-          <svg class="h-12 w-12 text-github-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-          </svg>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Chart & Announcements -->
-    <div class="grid gap-6 lg:grid-cols-3">
-      
-      <!-- Chart Section -->
-      <div class="lg:col-span-2 bg-dark-card border border-dark-border p-6 rounded-xl">
-        <div class="flex items-center gap-2 mb-6">
-          <svg class="h-5 w-5 text-discord-blurple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-          </svg>
-          <h2 class="text-xl font-bold">Statistik Absensi Mingguan</h2>
-        </div>
-        
-        <!-- Simple Bar Chart -->
-        <div class="space-y-4">
-          <!-- Senin -->
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm">
-              <span class="text-dark-muted">Senin</span>
-              <span class="font-semibold">95%</span>
-            </div>
-            <div class="h-3 bg-dark-card-hover rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-discord-blurple to-github-blue rounded-full" style="width: 95%"></div>
-            </div>
-          </div>
-
-          <!-- Selasa -->
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm">
-              <span class="text-dark-muted">Selasa</span>
-              <span class="font-semibold">97%</span>
-            </div>
-            <div class="h-3 bg-dark-card-hover rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-discord-blurple to-github-blue rounded-full" style="width: 97%"></div>
-            </div>
-          </div>
-
-          <!-- Rabu -->
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm">
-              <span class="text-dark-muted">Rabu</span>
-              <span class="font-semibold">92%</span>
-            </div>
-            <div class="h-3 bg-dark-card-hover rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-discord-blurple to-github-blue rounded-full" style="width: 92%"></div>
-            </div>
-          </div>
-
-          <!-- Kamis -->
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm">
-              <span class="text-dark-muted">Kamis</span>
-              <span class="font-semibold">94%</span>
-            </div>
-            <div class="h-3 bg-dark-card-hover rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-discord-blurple to-github-blue rounded-full" style="width: 94%"></div>
-            </div>
-          </div>
-
-          <!-- Jumat -->
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm">
-              <span class="text-dark-muted">Jumat</span>
-              <span class="font-semibold">98%</span>
-            </div>
-            <div class="h-3 bg-dark-card-hover rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-discord-blurple to-github-blue rounded-full" style="width: 98%"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Average -->
-        <div class="mt-6 pt-6 border-t border-dark-border">
-          <div class="flex items-center justify-between">
-            <span class="text-dark-muted">Rata-rata Absensi</span>
-            <span class="text-2xl font-bold text-discord-blurple">95.2%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Announcements -->
-      <div class="bg-dark-card border border-dark-border p-6 rounded-xl">
-        <div class="flex items-center gap-2 mb-6">
-          <svg class="h-5 w-5 text-github-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-          </svg>
-          <h2 class="text-xl font-bold">Pengumuman Terbaru</h2>
-        </div>
-        
-        <ul class="space-y-3">
-          <li class="p-4 bg-dark-card-hover rounded-lg">
-            <p class="text-sm">📝 Ujian Matematika minggu depan</p>
-          </li>
-          <li class="p-4 bg-dark-card-hover rounded-lg">
-            <p class="text-sm">🎉 Libur Nasional tanggal 20</p>
-          </li>
-          <li class="p-4 bg-dark-card-hover rounded-lg">
-            <p class="text-sm">📚 Pengumpulan tugas PPKN hari Jumat</p>
-          </li>
-        </ul>
-
-        <button class="mt-6 w-full py-3 bg-discord-blurple text-white font-semibold rounded-lg">
-          Lihat Semua
-        </button>
-      </div>
-
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="grid gap-6 md:grid-cols-3">
-      
-      <div class="bg-gradient-to-br from-discord-blurple/10 to-discord-blurple/5 border border-discord-blurple/20 p-6 rounded-xl">
-        <h3 class="text-lg font-bold mb-2">Tambah Siswa Baru</h3>
-        <p class="text-sm text-dark-muted">Daftarkan siswa baru ke sistem</p>
-      </div>
-      
-      <div class="bg-gradient-to-br from-github-blue/10 to-github-blue/5 border border-github-blue/20 p-6 rounded-xl">
-        <h3 class="text-lg font-bold mb-2">Input Nilai</h3>
-        <p class="text-sm text-dark-muted">Masukkan nilai siswa</p>
-      </div>
-      
-      <div class="bg-gradient-to-br from-discord-blurple/10 to-github-blue/5 border border-dark-border p-6 rounded-xl">
-        <h3 class="text-lg font-bold mb-2">Laporan Bulanan</h3>
-        <p class="text-sm text-dark-muted">Unduh laporan lengkap</p>
-      </div>
-
-    </div>
-
-  </main>
-
-</body>
-</html>
+<?php
+// end of dashboard_user.php
+?>
