@@ -66,9 +66,9 @@ class ScheduleController {
 
         // Get all classes (or filtered class if class_id filter is set)
         if (!empty($filters['class_id'])) {
-            $allClasses = $this->db->query("SELECT id, name, code, description FROM classes WHERE id = " . intval($filters['class_id']) . " ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
+            $allClasses = $this->db->query("SELECT id, name, code AS class_code, description FROM classes WHERE id = " . intval($filters['class_id']) . " ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
         } else {
-            $allClasses = $this->db->query("SELECT id, name, code, description FROM classes ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
+            $allClasses = $this->db->query("SELECT id, name, code AS class_code, description FROM classes ORDER BY name")?->fetch_all(MYSQLI_ASSOC) ?? [];
         }
         
         // For each class, get ALL its schedules regardless of teacher/day filters
@@ -140,7 +140,7 @@ class ScheduleController {
         $item = null;
         $days = $this->allowedDays;
         // load helper lists
-        $classes = $this->db->query("SELECT id, name, code FROM classes ORDER BY name")->fetch_all(MYSQLI_ASSOC) ?? [];
+        $classes = $this->db->query("SELECT id, name, code AS class_code FROM classes ORDER BY name")->fetch_all(MYSQLI_ASSOC) ?? [];
         $subjects = $this->db->query("SELECT id, name FROM subjects ORDER BY name")->fetch_all(MYSQLI_ASSOC) ?? [];
         
         // Admin: daftar guru/admin (menampilkan pengguna dengan level 'guru' atau 'admin')

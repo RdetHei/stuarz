@@ -9,15 +9,18 @@ $akademikPages  = ['class', 'subjects', 'schedule', 'attendance', 'grades', 'tas
 $informasiPages = ['announcement', 'notifications'];
 $adminPages     = ['dashboard-admin-docs', 'dashboard-admin-news'];
 
-function navActive(string $navPage, string $currentPage, ?string $currentSub = null): string
+function navActive($navPage, string $currentPage, ?string $currentSub = null): string
 {
-    if ($navPage === $currentPage) {
-        return 'bg-gray-800 dark:bg-gray-800 bg-gray-100 text-white dark:text-white text-gray-900';
+  $candidates = is_array($navPage) ? $navPage : [$navPage];
+  foreach ($candidates as $nav) {
+    if ($nav === $currentPage) {
+      return 'bg-gray-800 dark:bg-gray-800 bg-gray-100 text-white dark:text-white text-gray-900';
     }
-    if ($currentPage === 'dashboard' && $currentSub !== null && $navPage === $currentSub) {
-        return 'bg-gray-800 dark:bg-gray-800 bg-gray-100 text-white dark:text-white text-gray-900';
+    if ($currentPage === 'dashboard' && $currentSub !== null && $nav === $currentSub) {
+      return 'bg-gray-800 dark:bg-gray-800 bg-gray-100 text-white dark:text-white text-gray-900';
     }
-    return 'hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 text-white dark:text-white text-gray-900';
+  }
+  return 'hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200 text-white dark:text-white text-gray-900';
 }
 
 function initialsFromName(string $name, int $len = 2): string
@@ -164,10 +167,18 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : '';
         <span class="ml-auto material-symbols-outlined chev">expand_more</span>
       </summary>
       <div class="mt-1 space-y-1 pl-10 group-children">
-        <a href="index.php?page=class" title="Kelas" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('class', $page, $sub) ?>">
+        <a href="index.php?page=class" title="Kelas" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive(['class', 'join_form'], $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">groups_3</span>
-          <span class="menu-text">Kelas</span>
+          <span class="menu-text">Kelas Saya</span>
         </a>
+
+        <?php if (!empty($sessionUser)): ?>
+        <a href="index.php?page=join_form" title="Gabung Kelas" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('join_form', $page, $sub) ?>">
+          <span class="material-symbols-outlined mr-3">add_circle</span>
+          <span class="menu-text">Gabung Kelas</span>
+        </a>
+        <?php endif; ?>
+
         <a href="index.php?page=subjects" title="Mata Pelajaran" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('subjects', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">menu_book</span>
           <span class="menu-text">Mata Pelajaran</span>

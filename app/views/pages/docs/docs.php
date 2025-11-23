@@ -24,6 +24,7 @@ if (!isset($ajax)) $ajax = false;
   <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8">
     <div class="mb-6">
       <h1 class="text-3xl font-bold text-white">Documentation</h1>
+      <p class="text-gray-400 mb-6">The documentations of how the website should work and what it's use</p>
     </div>
 
     <div class="mb-6 bg-[#1f2937] border border-gray-700 rounded-lg p-4">

@@ -57,7 +57,7 @@ class AuthController
                             header('Location: index.php?page=dashboard-guru');
                             break;
                         default:
-                            header('Location: index.php?page=dashboard-user');
+                            header('Location: index.php?page=dashboard');
                             break;
                     }
                     exit;

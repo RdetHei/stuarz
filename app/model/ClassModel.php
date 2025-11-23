@@ -26,20 +26,79 @@ class ClassModel {
         return $errors;
     }
 
-    public function getAll() {
+    public function getAll($userId = null) {
         $result = [];
-        $sql = 'SELECT c.*, u.username as creator FROM classes c LEFT JOIN users u ON c.created_by = u.id ORDER BY c.id DESC';
-        $res = $this->db->query($sql);
-        if ($res) {
-            while ($row = $res->fetch_assoc()) $result[] = $row;
-            $res->free();
+        // Base query with member count
+        $sql = 'SELECT c.*, u.username as creator, 
+                (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count
+                FROM classes c 
+                LEFT JOIN users u ON c.created_by = u.id';
+        
+        // If userId provided, filter to only classes user is a member of
+        if ($userId !== null) {
+            $sql .= ' INNER JOIN class_members cm ON c.id = cm.class_id WHERE cm.user_id = ?';
+        }
+        
+        $sql .= ' ORDER BY c.id DESC';
+        
+        if ($userId !== null) {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param('i', $userId);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            while ($row = $res->fetch_assoc()) {
+                // Get user's role in this class
+                $roleStmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ?');
+                $roleStmt->bind_param('ii', $row['id'], $userId);
+                $roleStmt->execute();
+                $roleRes = $roleStmt->get_result();
+                $roleRow = $roleRes->fetch_assoc();
+                $row['my_role'] = $roleRow['role'] ?? null;
+                $roleStmt->close();
+                $result[] = $row;
+            }
+            $stmt->close();
+        } else {
+            $res = $this->db->query($sql);
+            if ($res) {
+                while ($row = $res->fetch_assoc()) {
+                    $result[] = $row;
+                }
+                $res->free();
+            }
         }
         return $result;
     }
 
-    public function getById($id) {
-        $stmt = $this->db->prepare('SELECT * FROM classes WHERE id = ?');
+    public function getById($id, $userId = null) {
+        $sql = 'SELECT c.*, 
+                (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count
+                FROM classes c WHERE c.id = ?';
+        $stmt = $this->db->prepare($sql);
         $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res->fetch_assoc();
+        $stmt->close();
+        
+        // If userId provided, get user's role in this class
+        if ($row && $userId !== null) {
+            $roleStmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ?');
+            $roleStmt->bind_param('ii', $id, $userId);
+            $roleStmt->execute();
+            $roleRes = $roleStmt->get_result();
+            $roleRow = $roleRes->fetch_assoc();
+            $row['my_role'] = $roleRow['role'] ?? null;
+            $roleStmt->close();
+        }
+        
+        return $row;
+    }
+
+    // Find class by its code
+    public function findByCode($code) {
+        $stmt = $this->db->prepare('SELECT * FROM classes WHERE code = ?');
+        $stmt->bind_param('s', $code);
         $stmt->execute();
         $res = $stmt->get_result();
         $row = $res->fetch_assoc();
@@ -71,6 +130,44 @@ class ClassModel {
         $ok = $stmt->execute();
         $stmt->close();
         return $ok;
+    }
+
+    // Get classes managed by user (admin/guru)
+    public function getManagedClasses($userId) {
+        $result = [];
+        $sql = 'SELECT c.*, u.username as creator,
+                (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count
+                FROM classes c 
+                LEFT JOIN users u ON c.created_by = u.id
+                WHERE c.created_by = ? OR EXISTS (
+                    SELECT 1 FROM class_members cm 
+                    WHERE cm.class_id = c.id 
+                    AND cm.user_id = ? 
+                    AND cm.role IN ("teacher", "admin")
+                )
+                ORDER BY c.id DESC';
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param('ii', $userId, $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            // Get user's role in this class
+            $roleStmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ?');
+            $roleStmt->bind_param('ii', $row['id'], $userId);
+            $roleStmt->execute();
+            $roleRes = $roleStmt->get_result();
+            $roleRow = $roleRes->fetch_assoc();
+            // If user is creator but not in class_members, set role as teacher
+            if (!$roleRow && intval($row['created_by']) === intval($userId)) {
+                $row['my_role'] = 'teacher';
+            } else {
+                $row['my_role'] = $roleRow['role'] ?? null;
+            }
+            $roleStmt->close();
+            $result[] = $row;
+        }
+        $stmt->close();
+        return $result;
     }
 
     // Anggota kelas

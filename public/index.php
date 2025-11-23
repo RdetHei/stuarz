@@ -102,6 +102,12 @@ $router->post('/class_update', 'ClassController@update');
 $router->post('/class_delete', 'ClassController@delete');
 $router->get('/class_members', 'ClassController@members');
 $router->post('/class_add_member', 'ClassController@addMember');
+$router->get('/class/detail/{id}', 'ClassController@detail');
+// Join class routes
+$router->get('/join_class', 'ClassController@joinForm');
+$router->get('/join_form', 'ClassController@joinForm'); // Alias for sidebar navigation
+$router->post('/join_class', 'ClassController@join');
+$router->post('/join-class', 'ClassController@join');
 $router->get('/grades', 'GradeController@index');
 $router->get('/grades/create', 'GradeController@create');
 $router->post('/grades/store', 'GradeController@store');
