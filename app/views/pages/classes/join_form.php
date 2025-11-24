@@ -15,7 +15,7 @@ $hasClasses = $hasClasses ?? false;
         Kembali ke Kelas Saya
       </a>
       <h1 class="text-3xl font-bold text-white mb-2">Gabung Kelas</h1>
-      <p class="text-sm text-gray-400">Masukkan kode kelas untuk bergabung</p>
+      <p class="text-sm">Masukkan kode kelas untuk bergabung</p>
     </div>
 
     <?php if ($hasClasses): ?>
@@ -48,7 +48,7 @@ $hasClasses = $hasClasses ?? false;
 
       <form id="joinClassForm" method="POST" action="index.php?page=join_class" novalidate>
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-300 mb-2">Kode Kelas</label>
+          <label class="block text-sm font-medium text-white-100 mb-2">Kode Kelas</label>
           <div class="flex gap-2">
             <input 
               type="text" 

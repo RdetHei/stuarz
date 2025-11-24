@@ -55,7 +55,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
     }
 }
 ?>
-<header id="dHeader" class="sticky top-0 z-[60] bg-slate-900 opacity-100 text-white h-16 flex items-center border-b border-slate-700 justify-between px-4">
+<header id="dHeader" class="sticky top-0 z-40 bg-slate-900 opacity-100 text-white h-16 flex items-center border-b border-slate-700 justify-between px-4">
     <div class="flex items-center gap-3 sm:gap-4">
         <button id="mobileMenuToggle" class="lg:hidden p-2 hover:bg-slate-700 rounded" aria-label="Toggle mobile menu">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
