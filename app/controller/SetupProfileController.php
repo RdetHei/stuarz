@@ -60,10 +60,6 @@ class SetupProfileController {
             $errors[] = 'Alamat wajib diisi';
         }
         
-        if (empty($class)) {
-            $errors[] = 'Kelas wajib diisi';
-        }
-        
         // Handle file uploads
         $avatarPath = null;
         $bannerPath = null;
@@ -120,7 +116,15 @@ class SetupProfileController {
             if ($bannerPath) $_SESSION['user']['banner'] = $bannerPath;
             
             $_SESSION['success'] = 'Profile berhasil diselesaikan!';
-            header('Location: index.php?page=dashboard-admin');
+            // Redirect user to appropriate dashboard based on their level
+            $level = $_SESSION['user']['level'] ?? '';
+            if ($level === 'admin') {
+                header('Location: index.php?page=dashboard-admin');
+            } elseif ($level === 'guru') {
+                header('Location: index.php?page=dashboard-guru');
+            } else {
+                header('Location: index.php?page=dashboard');
+            }
             exit;
         } else {
             $_SESSION['setup_errors'] = ['Gagal menyimpan profile. Silakan coba lagi.'];
@@ -135,7 +139,7 @@ class SetupProfileController {
         if (!$user) return false;
         
         // Check if essential fields are filled
-        $requiredFields = ['name', 'phone', 'address', 'class'];
+        $requiredFields = ['name', 'phone', 'address'];
         
         foreach ($requiredFields as $field) {
             if (empty($user[$field])) {

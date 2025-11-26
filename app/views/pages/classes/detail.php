@@ -143,6 +143,40 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
           <!-- Main Content -->
           <div class="lg:col-span-2 space-y-6">
             
+            <!-- Attendance Quick Actions -->
+            <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 rounded-lg bg-emerald-500/10">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-bold text-white">Absensi Kelas Ini</h3>
+                    <p class="text-xs text-gray-400">Catatan kehadiran akan otomatis dikaitkan dengan kelas ini.</p>
+                  </div>
+                </div>
+                <a href="index.php?page=attendance" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">Lihat Riwayat →</a>
+              </div>
+              <div class="flex flex-wrap items-center gap-3">
+                <button id="classCheckInBtn" data-class-id="<?= intval($class['id'] ?? 0) ?>" class="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition-colors flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                  </svg>
+                  Check In
+                </button>
+                <button id="classCheckOutBtn" data-class-id="<?= intval($class['id'] ?? 0) ?>" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                  </svg>
+                  Check Out
+                </button>
+                <p class="text-xs text-gray-500">Tekan setelah masuk / selesai sesi belajar.</p>
+              </div>
+              <div id="classAttendanceMessage" class="mt-4"></div>
+            </div>
+            
             <!-- Description Card -->
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
               <div class="flex items-center gap-3 mb-4">
@@ -334,6 +368,47 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     });
   });
+
+  var classCheckInBtn = document.getElementById('classCheckInBtn');
+  var classCheckOutBtn = document.getElementById('classCheckOutBtn');
+  var classAttendanceMessage = document.getElementById('classAttendanceMessage');
+  function showClassAttendanceMessage(message, isSuccess) {
+    if (!classAttendanceMessage) return;
+    classAttendanceMessage.innerHTML = `
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg ${isSuccess ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30'}">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          ${isSuccess ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>'}
+        </svg>
+        <span>${message}</span>
+      </div>
+    `;
+  }
+  async function handleClassAttendance(type) {
+    var classIdSource = (classCheckInBtn && classCheckInBtn.dataset.classId) || (classCheckOutBtn && classCheckOutBtn.dataset.classId) || '0';
+    var classId = parseInt(classIdSource, 10);
+    if (!classId) {
+      showClassAttendanceMessage('Kelas tidak valid untuk absensi.', false);
+      return;
+    }
+    try {
+      var response = await fetch(`index.php?page=attendance_${type}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `class_id=${classId}`
+      });
+      var data = await response.json();
+      showClassAttendanceMessage(data.message || 'Permintaan diproses.', !!data.success);
+    } catch (err) {
+      console.error('Attendance error:', err);
+      showClassAttendanceMessage('Terjadi kesalahan saat mencatat absensi.', false);
+    }
+  }
+  if (classCheckInBtn) {
+    classCheckInBtn.addEventListener('click', function(){ handleClassAttendance('checkin'); });
+  }
+  if (classCheckOutBtn) {
+    classCheckOutBtn.addEventListener('click', function(){ handleClassAttendance('checkout'); });
+  }
 });
 </script>
 

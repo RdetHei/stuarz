@@ -41,6 +41,7 @@
         <!-- Setup Form -->
         <div class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden">
             <form method="post" action="index.php?page=setup-profile/store" enctype="multipart/form-data" id="setupForm">
+                <?php if (function_exists('csrf_field')) csrf_field(); ?>
                 
                 <!-- Personal Information Section -->
                 <div class="px-6 py-5 border-b border-gray-700 bg-[#111827]">
@@ -97,37 +98,20 @@
                                   class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors resize-none"></textarea>
                     </div>
 
-                    <!-- Class -->
+                    <!-- Class Code -->
                     <div>
-                        <label for="class" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            Kelas <span class="text-red-400">*</span>
-                        </label>
-                        <select name="class" 
-                                id="class" 
-                                required 
-                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors">
-                            <option value="">Pilih Kelas</option>
-                            <optgroup label="PPLG (Pengembangan Perangkat Lunak)">
-                                <option value="X-PPLG">X-PPLG</option>
-                                <option value="XI-PPLG">XI-PPLG</option>
-                                <option value="XII-PPLG">XII-PPLG</option>
-                            </optgroup>
-                            <optgroup label="TKJ (Teknik Komputer Jaringan)">
-                                <option value="X-TKJ">X-TKJ</option>
-                                <option value="XI-TKJ">XI-TKJ</option>
-                                <option value="XII-TKJ">XII-TKJ</option>
-                            </optgroup>
-                            <optgroup label="MM (Multimedia)">
-                                <option value="X-MM">X-MM</option>
-                                <option value="XI-MM">XI-MM</option>
-                                <option value="XII-MM">XII-MM</option>
-                            </optgroup>
-                            <optgroup label="TKRO (Teknik Kendaraan Ringan Otomotif)">
-                                <option value="X-TKRO">X-TKRO</option>
-                                <option value="XI-TKRO">XI-TKRO</option>
-                                <option value="XII-TKRO">XII-TKRO</option>
-                            </optgroup>
-                        </select>
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="class" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                Kode Kelas (Opsional)
+                            </label>
+                            <span class="text-[11px] text-gray-500">Bisa dilewati, isi jika sudah punya kode kelas.</span>
+                        </div>
+                        <input type="text" 
+                               id="class"
+                               name="class" 
+                               placeholder="Contoh: ABC123"
+                               maxlength="12"
+                               class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" />
                     </div>
 
                     <!-- Bio -->
@@ -290,7 +274,7 @@
                 const name = document.getElementById('name').value.trim();
                 const phone = document.getElementById('phone').value.trim();
                 const address = document.getElementById('address').value.trim();
-                const classSelect = document.getElementById('class').value;
+                const classValue = document.getElementById('class').value.trim();
                 
                 let errors = [];
                 
@@ -301,7 +285,9 @@
                     errors.push('Format nomor telepon tidak valid');
                 }
                 if (!address) errors.push('Alamat wajib diisi');
-                if (!classSelect) errors.push('Kelas wajib dipilih');
+                if (classValue && !/^[A-Za-z0-9_-]{3,}$/.test(classValue)) {
+                    errors.push('Kode kelas minimal 3 karakter dan hanya huruf/angka.');
+                }
                 
                 if (errors.length > 0) {
                     e.preventDefault();

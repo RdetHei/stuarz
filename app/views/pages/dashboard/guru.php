@@ -98,6 +98,69 @@ $performance = $performance ?? [
     </div>
   </section>
 
+  <!-- Announcements Section -->
+        <?php
+        $announcementsList = [];
+        if (!empty($latestAnnouncements) && is_array($latestAnnouncements)) {
+            $announcementsList = $latestAnnouncements;
+        } elseif (!empty($latestAnnouncement)) {
+            $announcementsList = [ $latestAnnouncement ];
+        }
+        ?>
+
+        <?php if (!empty($announcementsList)): ?>
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                    </svg>
+                    Pengumuman Terbaru
+                </h2>
+                <a href="#" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">Lihat semua →</a>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <?php foreach ($announcementsList as $a): ?>
+                <a href="index.php?page=announcement&id=<?= (int)($a['id'] ?? 0) ?>"
+                   class="group bg-gray-800 border border-gray-700 rounded-xl p-5 hover:border-blue-500/50 hover:bg-gray-750 transition-all">
+
+                    <?php if (!empty($a['image']) || !empty($a['banner'])): ?>
+                    <div class="w-full h-32 bg-gray-900 rounded-lg overflow-hidden mb-4 border border-gray-700">
+                        <img src="<?= htmlspecialchars(($prefix ?? '') . ($a['image'] ?? $a['banner']), ENT_QUOTES, 'UTF-8') ?>"
+                             alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                    <?php else: ?>
+                    <div class="w-full h-32 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex items-center justify-center border border-blue-500/20 mb-4">
+                        <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                        </svg>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <span class="px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">Pengumuman</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-blue-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+
+                    <h4 class="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+                        <?= htmlspecialchars($a['title'] ?? '-') ?>
+                    </h4>
+
+                    <div class="flex items-center gap-2 text-xs text-gray-500">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <?= htmlspecialchars(date('d F Y', strtotime($a['created_at'] ?? ''))) ?>
+                    </div>
+                </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
   
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     

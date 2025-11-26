@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/../model/AttendanceModel.php';
+require_once __DIR__ . '/../model/ClassModel.php';
 
 class AttendanceController {
     private $db;
     private $model;
+    private $classModel;
 
     public function __construct($db = null) {
         if ($db === null) {
@@ -12,6 +14,7 @@ class AttendanceController {
         }
         $this->db = $db;
         $this->model = new AttendanceModel($db);
+        $this->classModel = new ClassModel($db);
         // Ensure timezone follows session if available (login sets it)
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (isset($_SESSION['timezone'])) {
@@ -30,6 +33,11 @@ class AttendanceController {
 
         $records = $this->model->getFilteredAttendance($startDate, $endDate, $filterClass);
         $classes = $this->model->getClasses();
+        $activeClass = null;
+        $activeClassId = intval($_SESSION['active_class_id'] ?? 0);
+        if ($activeClassId) {
+            $activeClass = $this->classModel->getById($activeClassId, $_SESSION['user']['id'] ?? null);
+        }
 
         $content = dirname(__DIR__) . '/views/pages/attendance/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
@@ -56,6 +64,9 @@ class AttendanceController {
         try {
             $userId = $_SESSION['user_id'] ?? 0;
             $classId = intval($_POST['class_id'] ?? 0);
+            if (!$classId) {
+                $classId = intval($_SESSION['active_class_id'] ?? 0);
+            }
             if (!$classId) throw new Exception('Pilih kelas terlebih dahulu.');
             $date = date('Y-m-d');
             $time = date('H:i:s');
@@ -76,6 +87,9 @@ class AttendanceController {
         try {
             $userId = $_SESSION['user_id'] ?? 0;
             $classId = intval($_POST['class_id'] ?? 0);
+            if (!$classId) {
+                $classId = intval($_SESSION['active_class_id'] ?? 0);
+            }
             if (!$classId) throw new Exception('Pilih kelas terlebih dahulu.');
             $date = date('Y-m-d');
             $time = date('H:i:s');

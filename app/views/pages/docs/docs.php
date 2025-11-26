@@ -60,6 +60,11 @@ if (!isset($ajax)) $ajax = false;
         <div class="lg:sticky lg:top-16 lg:self-start lg:z-10">
           <?php if (!empty($docs)): ?>
             <nav class="space-y-8">
+              <ul>
+                <li>
+                  <div class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">All Documents</div>
+                </li>
+              </ul>
               <?php foreach ($docs as $section => $items): ?>
                 <div>
                   <div class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3"><?= htmlspecialchars($section) ?></div>
@@ -204,7 +209,6 @@ if (!isset($ajax)) $ajax = false;
                 </section>
               <?php endforeach; ?>
             <?php else: ?>
-              <p class="text-gray-400">No documentation found.</p>
             <?php endif; ?>
           </div>
         <?php endif; ?>

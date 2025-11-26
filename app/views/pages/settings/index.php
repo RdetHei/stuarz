@@ -114,6 +114,7 @@ if ($baseUrl === '/') $baseUrl = '';
                     </div>
 
                     <form method="post" action="index.php?page=settings" class="space-y-4">
+                        <?php if (function_exists('csrf_field')) csrf_field(); ?>
                         <input type="hidden" name="update_profile" value="1">
                         
                         <div>
@@ -167,6 +168,7 @@ if ($baseUrl === '/') $baseUrl = '';
                     </div>
 
                     <form method="post" action="index.php?page=settings" class="space-y-4">
+                        <?php if (function_exists('csrf_field')) csrf_field(); ?>
                         <input type="hidden" name="update_password" value="1">
                         
                         <div>

@@ -2,6 +2,8 @@
 // Get attendance statistics from controller
 $records = $records ?? [];
 $classes = $classes ?? [];
+$activeClass = $activeClass ?? null;
+$activeClassId = intval($activeClass['id'] ?? 0);
 
 // Calculate stats from records
 $stats = [
@@ -82,25 +84,44 @@ $displayStats = [
             </div>
             
             <div class="mb-6">
-                <label for="classSelect" class="block text-sm font-medium text-gray-300 mb-2">
-                    Select Class <span class="text-red-500">*</span>
-                </label>
-                <select id="classSelect" class="w-full max-w-md mx-auto px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
-                    <option value="">Choose a class</option>
-                    <?php foreach($classes as $class): ?>
-                        <option value="<?= $class['id'] ?>"><?= htmlspecialchars($class['name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <?php if ($activeClass): ?>
+                <div class="w-full max-w-2xl mx-auto bg-gray-900 border border-gray-700 rounded-xl p-5 text-left">
+                    <p class="text-xs uppercase tracking-[0.2em] text-gray-500 mb-2">Kelas Aktif</p>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-xl font-semibold text-white"><?= htmlspecialchars($activeClass['name'] ?? 'Tanpa Nama') ?></h3>
+                            <p class="text-sm text-gray-400">Kode: <span class="font-mono text-gray-200"><?= htmlspecialchars($activeClass['code'] ?? '-') ?></span></p>
+                        </div>
+                        <a href="index.php?page=class/detail/<?= intval($activeClassId) ?>" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
+                            Ganti kelas →
+                        </a>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">Absensi akan dicatat otomatis untuk kelas ini berdasarkan kelas terakhir yang Anda masuki.</p>
+                </div>
+                <?php else: ?>
+                <div class="w-full max-w-2xl mx-auto bg-gray-900 border border-dashed border-red-500/40 rounded-xl p-5 text-left">
+                    <p class="text-sm font-semibold text-red-300 mb-2">Belum memilih kelas aktif</p>
+                    <p class="text-sm text-gray-300">Masuk ke salah satu kelas dari halaman <a href="index.php?page=class" class="underline text-indigo-400 hover:text-indigo-300">Kelas Saya</a> untuk mengatur konteks absensi.</p>
+                    <div class="mt-4">
+                        <a href="index.php?page=class" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-all">
+                            Pergi ke Kelas
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
             
             <div class="flex items-center justify-center gap-4">
-                <button id="checkInBtn" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg">
+                <button id="checkInBtn" data-class-id="<?= $activeClassId ?>" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg <?= $activeClassId ? '' : 'opacity-40 cursor-not-allowed' ?>" <?= $activeClassId ? '' : 'disabled' ?>>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                     </svg>
                     Check In
                 </button>
-                <button id="checkOutBtn" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg">
+                <button id="checkOutBtn" data-class-id="<?= $activeClassId ?>" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg <?= $activeClassId ? '' : 'opacity-40 cursor-not-allowed' ?>" <?= $activeClassId ? '' : 'disabled' ?>>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
@@ -271,11 +292,12 @@ function showToast(message, isSuccess = true) {
 }
 
 // Handle check in/out
+const ACTIVE_CLASS_ID = <?= json_encode($activeClassId) ?>;
+
 async function handleAttendance(type) {
     try {
-        const classId = document.getElementById('classSelect').value;
-        if (!classId) {
-            showMessage('Please select a class first', false);
+        if (!ACTIVE_CLASS_ID) {
+            showMessage('Masuk ke salah satu kelas terlebih dahulu.', false);
             return;
         }
 
@@ -284,7 +306,7 @@ async function handleAttendance(type) {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `class_id=${classId}`
+            body: `class_id=${ACTIVE_CLASS_ID}`
         });
         
         const data = await response.json();

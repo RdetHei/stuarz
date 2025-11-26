@@ -17,6 +17,7 @@
             <?php endif; ?>
             <form method="post" action="index.php?page=announcement_add_comment" class="mb-4">
                 <input type="hidden" name="announcement_id" value="<?= (int)($announcement['id'] ?? 0) ?>">
+                <?php if (function_exists('csrf_field')) csrf_field(); ?>
                 <textarea name="content" class="w-full px-3 py-2 rounded bg-gray-900 border border-gray-700 text-gray-100 mb-2" rows="2" required></textarea>
                 <button type="submit" class="px-3 py-2 bg-green-600 rounded text-sm hover:bg-green-500 text-white">Tambah Komentar</button>
             </form>

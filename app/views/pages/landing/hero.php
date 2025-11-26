@@ -32,21 +32,82 @@
 
     <div class="h-px bg-gray-700"></div>
     
-    <!-- Hero Illustration -->
-     
-     <div class="relative bg-gray-900 py-24 sm:py-24">
-     <div class="text-center mx-auto max-w-7xl px-6 lg:px-30">
-      <h2 class="text-base font-semibold leading-7 text-indigo-600">Dashboard</h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-        Overview
-      </p>
-    </div>
-    <div class="mt-16 flex justify-center">
-      <div class="relative w-full max-w-5xl">
-        <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES, 'UTF-8') ?>" alt="Tampilan aplikasi Stuarz" class="w-full rounded-2xl bg-gray-800 border border-gray-700 shadow-lg" />
+    <div class="bg-gray-900 py-24">
+  <div class="text-center mx-auto max-w-7xl px-6">
+    <h2 class="text-base font-semibold leading-7 text-indigo-600">Dashboard</h2>
+    <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+      Overview
+    </p>
+  </div>
+
+  <div class="mt-16 mx-auto max-w-7xl overflow-hidden relative">
+
+    <!-- Container yang bisa pause -->
+    <div id="slider-container" class="overflow-hidden">
+
+      <!-- Track bergerak -->
+      <div id="slider-track" class="flex gap-8 animate-slide">
+
+        <!-- SET 1 -->
+        <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
+             class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
+
+        <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
+             class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
+
+        <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
+             class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
+
+        <!-- SET 2 (CLONE untuk infinite loop) -->
+        <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
+             class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
+
+        <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
+             class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
+
+        <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
+             class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
+
       </div>
     </div>
+
   </div>
+</div>
+
+<style>
+@keyframes slide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-slide {
+  animation: slide 22s linear infinite;
+}
+
+/* Ketika pause ditambahkan dari JS */
+.paused {
+  animation-play-state: paused !important;
+}
+</style>
+
+<script>
+const sliderTrack = document.getElementById("slider-track");
+const sliderContainer = document.getElementById("slider-container");
+
+// Pause ketika hover
+sliderContainer.addEventListener("mouseenter", () => {
+  sliderTrack.classList.add("paused");
+});
+
+// Resume ketika kursor keluar
+sliderContainer.addEventListener("mouseleave", () => {
+  sliderTrack.classList.remove("paused");
+});
+</script>
+
+
+
+
  
 <!-- Divider -->
 <div class="h-px bg-gray-700"></div>

@@ -245,8 +245,7 @@ class DashboardController
     {
         $user = $this->userModel->getUserById($userId);
         if (!$user) return false;
-
-        $requiredFields = ['name', 'phone', 'address', 'class'];
+        $requiredFields = ['name', 'phone', 'address'];
         foreach ($requiredFields as $field) {
             if (empty($user[$field])) return false;
         }

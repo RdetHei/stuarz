@@ -136,8 +136,9 @@ $attendanceChart = $attendanceChart ?? [88,8,4]; // present, absent, late
       <div class="text-3xl font-bold text-white mb-1"><?= (int)$stats['average_grade'] ?><span class="text-lg text-gray-500">%</span></div>
       <div class="text-xs text-gray-500">Semester average</div>
     </div>
-
   </section>
+
+  
 
   <!-- Main Content Grid -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -350,8 +351,16 @@ document.addEventListener('DOMContentLoaded', function(){
           }] 
         },
         options: { 
-          responsive: true,
-          maintainAspectRatio: false, 
-          cutout: '70%', 
+          cutout: '70%',
           plugins: {
-            legend:
+            legend: { display: true, position: 'bottom', labels: { color: '#9ca3af', font: { size: 12 } } },
+            tooltip: { enabled: true }
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.error('Error initializing charts:', e);
+  }
+});
+</script>
