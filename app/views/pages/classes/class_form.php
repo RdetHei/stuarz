@@ -37,7 +37,6 @@
         <!-- Form -->
         <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700">
             <form method="post" action="index.php?page=<?= $isEdit ? 'class_update' : 'class_store' ?>" class="p-6 space-y-6">
-                <?php if (function_exists('csrf_field')) csrf_field(); ?>
                 
                 <?php if ($isEdit): ?>
                     <input type="hidden" name="id" value="<?= (int)$class['id'] ?>">

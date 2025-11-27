@@ -173,7 +173,6 @@ class TaskController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
     public function store() {
-        if (function_exists('csrf_require')) csrf_require();
         // Check if user can create tasks (admin or guru only)
         $userLevel = $_SESSION['level'] ?? 'user';
         if ($userLevel === 'user') {
@@ -252,7 +251,6 @@ class TaskController {
      */
     public function storeSubmission() {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        if (function_exists('csrf_require')) csrf_require();
         $task_id = intval($_POST['task_id'] ?? 0);
         $user_id = intval($_SESSION['user_id'] ?? 0);
         $class_id = intval($_POST['class_id'] ?? 0);
@@ -409,7 +407,6 @@ class TaskController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
     public function update() {
-        if (function_exists('csrf_require')) csrf_require();
         $id = intval($_POST['id'] ?? 0);
         $data = [
             'title' => trim($_POST['title'] ?? ''),
@@ -434,7 +431,6 @@ class TaskController {
         header('Location: index.php?page=tasks'); exit;
     }
     public function delete() {
-        if (function_exists('csrf_require')) csrf_require();
         $id = intval($_POST['id'] ?? 0);
         $ok = $this->model->delete($id);
         $_SESSION['flash'] = $ok ? 'Tugas dihapus.' : 'Gagal hapus tugas.';

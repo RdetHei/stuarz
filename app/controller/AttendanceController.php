@@ -33,16 +33,13 @@ class AttendanceController {
 
         $records = $this->model->getFilteredAttendance($startDate, $endDate, $filterClass);
         $classes = $this->model->getClasses();
-<<<<<<< HEAD
         $activeClass = null;
         $activeClassId = intval($_SESSION['active_class_id'] ?? 0);
         if ($activeClassId) {
             $activeClass = $this->classModel->getById($activeClassId, $_SESSION['user']['id'] ?? null);
         }
-=======
         // Get aggregated stats from DB (respect current filters)
         $stats = $this->getStats($startDate, $endDate, $filterClass);
->>>>>>> 3ddfc08 (buset)
 
         $content = dirname(__DIR__) . '/views/pages/attendance/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';

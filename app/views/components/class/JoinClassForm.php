@@ -6,7 +6,6 @@ $error = $error ?? null;
 ?>
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
   <form id="joinClassForm" method="POST" action="<?= $action ?>" novalidate>
-    <?php if (function_exists('csrf_field')) csrf_field(); ?>
     <?php if ($error): ?>
       <div class="mb-3 text-sm text-red-500"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
     <?php endif; ?>

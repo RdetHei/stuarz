@@ -22,7 +22,7 @@
           </svg>
           Mulai Sekarang
         </a>
-        <a href="#" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
+        <a href="index.php?page=docs" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
           Pelajari lebih lanjut
         </a>
       </div>
@@ -32,13 +32,10 @@
 
     <div class="h-px bg-gray-700"></div>
     
-<<<<<<< HEAD
     <div class="bg-gray-900 py-24">
-=======
     <!-- Hero Illustration -->
      
 <div class="bg-gray-900 py-24">
->>>>>>> 3ddfc08 (buset)
   <div class="text-center mx-auto max-w-7xl px-6">
     <h2 class="text-base font-semibold leading-7 text-indigo-600">Dashboard</h2>
     <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -57,8 +54,7 @@
         <!-- SET 1 -->
         <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
              class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
-
-        <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
+    <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
              class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
 
         <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
@@ -111,12 +107,9 @@ sliderContainer.addEventListener("mouseleave", () => {
 });
 </script>
 
-<<<<<<< HEAD
 
 
 
-=======
->>>>>>> 3ddfc08 (buset)
  
 <!-- Divider -->
 <div class="h-px bg-gray-700"></div>

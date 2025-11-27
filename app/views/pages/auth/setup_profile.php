@@ -41,7 +41,6 @@
         <!-- Setup Form -->
         <div class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden">
             <form method="post" action="index.php?page=setup-profile/store" enctype="multipart/form-data" id="setupForm">
-                <?php if (function_exists('csrf_field')) csrf_field(); ?>
                 
                 <!-- Personal Information Section -->
                 <div class="px-6 py-5 border-b border-gray-700 bg-[#111827]">
@@ -109,7 +108,7 @@
                         <input type="text" 
                                id="class"
                                name="class" 
-                               placeholder="Contoh: ABC123"
+                               placeholder="Contoh: ABCD😂"
                                maxlength="12"
                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" />
                     </div>

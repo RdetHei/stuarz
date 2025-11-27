@@ -152,7 +152,6 @@
                   </svg>
                 </a>
                 <form method="post" action="index.php?page=tasks/delete" class="inline" onsubmit="return confirm('Delete this task?')">
-                  <?php if (function_exists('csrf_field')) csrf_field(); ?>
                   <input type="hidden" name="id" value="<?= $t['id'] ?>">
                   <button type="submit" 
                           class="p-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 rounded-lg transition-all duration-200" 
@@ -167,7 +166,6 @@
                 <?php if ($userLevel === 'user' && !empty($_SESSION['user_id'])): ?>
                 <!-- Submission form for students -->
                 <form method="post" action="index.php?page=tasks/submit" enctype="multipart/form-data" class="inline" onsubmit="return confirm('Submit your file for this task?')">
-                  <?php if (function_exists('csrf_field')) csrf_field(); ?>
                   <input type="hidden" name="task_id" value="<?= $t['id'] ?>">
                   <input type="hidden" name="class_id" value="<?= $t['class_id'] ?? '' ?>">
                   <label class="p-2 bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 text-green-400 rounded-lg transition-all duration-200 cursor-pointer">

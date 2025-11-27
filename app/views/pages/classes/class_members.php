@@ -11,7 +11,6 @@
         <?php endif; ?>
         <div class="mb-6">
             <form method="post" action="index.php?page=class_add_member" class="flex gap-2 items-end">
-                <?php if (function_exists('csrf_field')) csrf_field(); ?>
                 <input type="hidden" name="class_id" value="<?= (int)($class['id'] ?? 0) ?>">
                 <div>
                     <label class="block mb-1">User ID</label>
@@ -45,7 +44,6 @@
                                 <td class="px-6 py-3 text-gray-400 text-sm"> <?= htmlspecialchars($m['role']) ?> </td>
                                 <td class="px-6 py-3">
                                     <form method="post" action="index.php?page=class_remove_member" style="display:inline" onsubmit="return confirm('Hapus anggota ini?')">
-                                        <?php if (function_exists('csrf_field')) csrf_field(); ?>
                                         <input type="hidden" name="class_id" value="<?= (int)$class['id'] ?>">
                                         <input type="hidden" name="user_id" value="<?= (int)$m['user_id'] ?>">
                                         <button type="submit" class="px-3 py-1 bg-red-600/80 text-white text-xs rounded-md hover:bg-red-500 border border-red-500/30">Hapus</button>

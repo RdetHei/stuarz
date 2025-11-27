@@ -45,7 +45,6 @@ class AnnouncementController {
     }
 
     public function store() {
-        if (function_exists('csrf_require')) csrf_require();
         $photo = '';
         $uploadedNewPhoto = false;
         try {
@@ -119,7 +118,6 @@ class AnnouncementController {
     }
 
     public function addComment() {
-        if (function_exists('csrf_require')) csrf_require();
         global $config;
         $announcement_id = intval($_POST['announcement_id'] ?? 0);
         $user_id = $_SESSION['user']['id'] ?? 0;
@@ -179,7 +177,6 @@ class AnnouncementController {
     }
 
     public function update() {
-        if (function_exists('csrf_require')) csrf_require();
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {
             $_SESSION['flash'] = 'ID pengumuman tidak valid.';
@@ -237,7 +234,6 @@ class AnnouncementController {
     }
 
     public function delete() {
-        if (function_exists('csrf_require')) csrf_require();
         $id = intval($_POST['id'] ?? $_GET['id'] ?? 0);
         if ($id <= 0) {
             $_SESSION['flash'] = 'ID pengumuman tidak valid.';

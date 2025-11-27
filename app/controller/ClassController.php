@@ -63,7 +63,6 @@ class ClassController {
     }
 
     public function store() {
-        if (function_exists('csrf_require')) csrf_require();
         $data = [
             'name' => trim($_POST['name'] ?? ''),
             'code' => trim($_POST['code'] ?? ''),
@@ -166,7 +165,6 @@ class ClassController {
 
     // Handle join class POST
     public function join() {
-        if (function_exists('csrf_require')) csrf_require();
         try {
             if (session_status() === PHP_SESSION_NONE) session_start();
             if (empty($_SESSION['user'])) {
@@ -286,7 +284,6 @@ class ClassController {
     }
 
     public function update() {
-        if (function_exists('csrf_require')) csrf_require();
         $id = intval($_POST['id'] ?? 0);
         $data = [
             'name' => trim($_POST['name'] ?? ''),
@@ -306,7 +303,6 @@ class ClassController {
     }
 
     public function delete() {
-        if (function_exists('csrf_require')) csrf_require();
         $id = intval($_POST['id'] ?? 0);
         $ok = $this->model->delete($id);
         $_SESSION['flash'] = $ok ? 'Kelas dihapus.' : 'Gagal menghapus kelas.';
@@ -323,7 +319,6 @@ class ClassController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
     public function addMember() {
-        if (function_exists('csrf_require')) csrf_require();
         try {
             $classId = intval($_POST['class_id'] ?? 0);
             $userId = intval($_POST['user_id'] ?? 0);
@@ -348,7 +343,6 @@ class ClassController {
         exit;
     }
     public function removeMember() {
-        if (function_exists('csrf_require')) csrf_require();
         $class_id = intval($_POST['class_id'] ?? 0);
         $user_id = intval($_POST['user_id'] ?? 0);
         $ok = $this->model->removeMember($class_id, $user_id);

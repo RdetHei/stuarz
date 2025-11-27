@@ -16,5 +16,4 @@ function base_url($path = '') {
     return "http://localhost/stuarz/public/" . ltrim($path, '/');
 }
 // Load helpers
-if (is_file(__DIR__ . '/../helpers/csrf.php')) require_once __DIR__ . '/../helpers/csrf.php';
 if (is_file(__DIR__ . '/../helpers/media_helper.php')) require_once __DIR__ . '/../helpers/media_helper.php';
