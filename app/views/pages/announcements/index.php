@@ -133,12 +133,16 @@
                         </div>
                         
                         <div class="flex items-center gap-2 text-sm text-gray-400">
-                          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                            <span class="text-xs font-bold text-white">
-                              <?= strtoupper(substr($a['username'] ?? 'A', 0, 1)) ?>
-                            </span>
-                          </div>
-                          <span class="font-medium text-gray-300"><?= htmlspecialchars($a['username'] ?? 'Anonim') ?></span>
+                            <?php if (!empty($a['avatar'])): ?>
+                            <img src="<?= htmlspecialchars($a['avatar'], ENT_QUOTES) ?>" alt="Avatar" class="w-6 h-6 rounded-full object-cover border border-gray-600">
+                            <?php else: ?>
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                              <span class="text-xs font-bold text-white">
+                                <?= strtoupper(substr($a['username'] ?? 'A', 0, 1)) ?>
+                              </span>
+                            </div>
+                            <?php endif; ?>
+                            <span class="font-medium text-gray-300"><?= htmlspecialchars($a['username'] ?? 'Anonim') ?></span>
                           
                           <!-- Mobile: Show time here -->
                           <span class="md:hidden text-gray-600">•</span>
@@ -264,7 +268,12 @@ function showAnnouncementModal(announcement) {
   const photo = document.getElementById('modalPhoto');
   
   title.textContent = announcement.title;
-  avatar.textContent = announcement.username ? announcement.username.charAt(0).toUpperCase() : 'A';
+  // Show avatar image if available, otherwise show initial
+  if (announcement.avatar) {
+    avatar.innerHTML = '<img src="' + announcement.avatar + '" alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-700">';
+  } else {
+    avatar.textContent = announcement.username ? announcement.username.charAt(0).toUpperCase() : 'A';
+  }
   author.textContent = announcement.username || 'Anonim';
   
   const createdDate = new Date(announcement.created_at);

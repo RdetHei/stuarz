@@ -107,9 +107,9 @@ if ($currentPage === 'dashboard' && $currentSub) {
             <button id="printDropdownBtn" class="p-2 hover:bg-slate-700 rounded flex items-center gap-2" aria-haspopup="true" aria-expanded="false" title="Print Options">
                 <span class="material-symbols-outlined">print</span>
             </button>
-            <div id="printDropdownMenu" class="absolute right-0 mt-2 w-44 bg-white text-black rounded shadow-lg hidden z-10">
-                <a href="index.php?page=print_all" class="block px-4 py-2 hover:bg-slate-100">Print All</a>
-                <a href="index.php?page=print" class="block px-4 py-2 hover:bg-slate-100">Print Table</a>
+            <div id="printDropdownMenu" class="absolute right-0 mt-2 w-44 bg-slate-800 text-white rounded shadow-lg hidden z-10 border border-slate-700">
+                <a href="index.php?page=print_all" class="block px-4 py-2 hover:bg-slate-700">Print All</a>
+                <a href="index.php?page=print" class="block px-4 py-2 hover:bg-slate-700">Print Table</a>
             </div>
         </div>
         <?php endif; ?>
@@ -122,10 +122,10 @@ if ($currentPage === 'dashboard' && $currentSub) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
-            <div id="supportDropdownMenu" class="absolute right-0 mt-2 w-44 bg-white text-black rounded shadow-lg hidden z-10">
-                <a href="mailto:support@example.com" class="block px-4 py-2 hover:bg-slate-100">Email Support</a>
-                <a href="https://wa.me/628123456789" class="block px-4 py-2 hover:bg-slate-100">WhatsApp</a>
-                <a href="index.php?page=docs" class="block px-4 py-2 hover:bg-slate-100">Dokumentasi</a>
+            <div id="supportDropdownMenu" class="absolute right-0 mt-2 w-44 bg-slate-800 text-white rounded shadow-lg hidden z-10 border border-slate-700">
+                <a href="mailto:support@example.com" class="block px-4 py-2 hover:bg-slate-700">Email Support</a>
+                <a href="https://wa.me/628123456789" class="block px-4 py-2 hover:bg-slate-700">WhatsApp</a>
+                <a href="index.php?page=docs" class="block px-4 py-2 hover:bg-slate-700">Dokumentasi</a>
             </div>
         </div>
     </div>

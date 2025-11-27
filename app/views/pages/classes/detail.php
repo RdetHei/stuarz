@@ -221,7 +221,11 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
           <!-- Sidebar -->
           <aside class="space-y-6">
             
-            <!-- Teacher Info Card -->
+            <!-- Wali Kelas / Creator Info Card -->
+            <?php
+              $creatorName = $class['creator_name'] ?? $class['created_by_name'] ?? $class['teacher_name'] ?? ($sessionUser['name'] ?? 'Tidak ada wali');
+              $creatorInitial = strtoupper(substr(trim((string)$creatorName), 0, 1));
+            ?>
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
               <div class="flex items-center gap-3 mb-4">
                 <div class="p-2 rounded-lg bg-emerald-500/10">
@@ -229,15 +233,64 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                   </svg>
                 </div>
-                <h3 class="text-sm font-bold text-white">Pengajar</h3>
+                <h3 class="text-sm font-bold text-white">Wali Kelas</h3>
               </div>
               <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold">
-                  <?= strtoupper(substr($class['teacher_name'] ?? 'N', 0, 1)) ?>
-                </div>
+                <?php
+                  $creatorAvatar = $class['creator_avatar'] ?? $class['created_by_avatar'] ?? $class['creator_photo'] ?? $class['teacher_avatar'] ?? $class['teacher_photo'] ?? $class['avatar'] ?? null;
+                  // Determine URL prefix similar to profile.php
+                  // DAPATKAN ROOT PATH PUBLIC
+$publicPath = dirname($_SERVER['SCRIPT_NAME']); // contoh: /stuarz/public
+
+// NORMALISASI
+$publicPath = rtrim(str_replace('\\', '/', $publicPath), '/');
+
+// Prefix final
+$prefix = $publicPath . '/uploads/avatars/';
+
+// Jika avatar disimpan hanya nama file
+$avatarSrc = $prefix . basename($creatorAvatar);
+
+                  $avatarSrc = '';
+                    if (!empty($creatorAvatar)) {
+                      if (preg_match('#^https?://#i', $creatorAvatar)) {
+                        $avatarSrc = $creatorAvatar;
+                      } else {
+                        // Try to resolve file on disk to decide correct URL
+                        $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'], '\\/');
+                        $candidate1 = $docRoot . '/' . ltrim($creatorAvatar, '/');
+                        $candidate2 = $docRoot . '/' . ltrim($prefix . ltrim($creatorAvatar, '/'), '/');
+
+                        if (file_exists($candidate1)) {
+                          $avatarSrc = $prefix . ltrim($creatorAvatar, '/');
+                        } elseif (file_exists($candidate2)) {
+                          $avatarSrc = $prefix . ltrim($creatorAvatar, '/');
+                        } else {
+                          // Fallback: assume relative URL and prefix it; browser will fallback to default via onerror
+                          $avatarSrc = $prefix . ltrim($creatorAvatar, '/');
+                        }
+                      }
+                    }
+
+                  $creatorId = $class['creator_id'] ?? $class['created_by'] ?? $class['teacher_id'] ?? null;
+                ?>
+                <?php if (!empty($avatarSrc)): ?>
+                  <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-700">
+                    <img src="<?= htmlspecialchars($avatarSrc, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($creatorName, ENT_QUOTES, 'UTF-8') ?>" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='<?= htmlspecialchars($prefix . 'assets/default-avatar.png', ENT_QUOTES, 'UTF-8') ?>'"/>
+                  </div>
+                <?php else: ?>
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold">
+                    <?= htmlspecialchars($creatorInitial, ENT_QUOTES, 'UTF-8') ?>
+                  </div>
+                <?php endif; ?>
+
                 <div>
-                  <div class="text-sm font-medium text-white"><?= htmlspecialchars($class['teacher_name'] ?? 'Tidak ada guru', ENT_QUOTES, 'UTF-8') ?></div>
-                  <div class="text-xs text-gray-400">Guru Pengampu</div>
+                  <?php if ($creatorId): ?>
+                    <a href="index.php?page=edit_user&id=<?= (int)$creatorId ?>" class="text-sm font-medium text-white hover:underline"><?= htmlspecialchars($creatorName, ENT_QUOTES, 'UTF-8') ?></a>
+                  <?php else: ?>
+                    <div class="text-sm font-medium text-white"><?= htmlspecialchars($creatorName, ENT_QUOTES, 'UTF-8') ?></div>
+                  <?php endif; ?>
+                  <div class="text-xs text-gray-400">Pembuat Kelas &amp; Wali Kelas</div>
                 </div>
               </div>
             </div>

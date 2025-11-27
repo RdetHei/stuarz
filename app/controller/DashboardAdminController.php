@@ -66,15 +66,15 @@ class DashboardAdminController
         ];
 
         // Total Users
-        $result = $this->db->query("SELECT COUNT(*) as total FROM users");
+        $result = $this->db->query("SELECT COUNT(*) as total FROM users WHERE level = 'user'");
         if ($result && $row = $result->fetch_assoc()) {
             $stats['total_users'] = $row['total'];
         }
 
         // Total Students (count users with level = 'student')
-        $result = $this->db->query("SELECT COUNT(*) as total FROM users WHERE `level` = 'student'");
+        $result = $this->db->query("SELECT COUNT(*) as total FROM users WHERE level = 'guru'");
         if ($result && $row = $result->fetch_assoc()) {
-            $stats['total_students'] = $row['total'];
+            $stats['total_teachers'] = $row['total'];
         }
 
         // Total Certificates
@@ -84,9 +84,9 @@ class DashboardAdminController
         }
 
         // Average Grade
-        $result = $this->db->query("SELECT AVG(grade) as avg FROM average_grade");
+        $result = $this->db->query("SELECT COUNT(*) as total FROM classes");
         if ($result && $row = $result->fetch_assoc()) {
-            $stats['average_grade'] = $row['avg'] !== null ? round($row['avg'], 1) : 0;
+            $stats['total_classes'] = $row['total'];
         }
 
         return $stats;

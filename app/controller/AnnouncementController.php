@@ -18,6 +18,23 @@ class AnnouncementController {
 
     public function index() {
         $announcements = $this->model->getAll();
+
+        // Normalize fields so views can rely on `username` and `avatar` keys
+        // Also prefix relative upload paths with the base URL so JSON/photo srcs resolve correctly
+        $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+        if ($baseUrl === '/') $baseUrl = '';
+        $prefix = ($baseUrl ? $baseUrl . '/' : '');
+
+        if (!empty($announcements) && is_array($announcements)) {
+            foreach ($announcements as &$a) {
+                $a['username'] = $a['creator'] ?? $a['username'] ?? 'Anonim';
+                $avatar = $a['creator_avatar'] ?? $a['avatar'] ?? '';
+                $a['avatar'] = $avatar ? $prefix . ltrim($avatar, '/') : '';
+                $a['photo'] = !empty($a['photo']) ? $prefix . ltrim($a['photo'], '/') : '';
+            }
+            unset($a);
+        }
+
         $content = dirname(__DIR__) . '/views/pages/announcements/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -258,6 +275,21 @@ class AnnouncementController {
 
     public function adminList() {
         $announcements = $this->model->getAll();
+
+        $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+        if ($baseUrl === '/') $baseUrl = '';
+        $prefix = ($baseUrl ? $baseUrl . '/' : '');
+
+        if (!empty($announcements) && is_array($announcements)) {
+            foreach ($announcements as &$a) {
+                $a['username'] = $a['creator'] ?? $a['username'] ?? 'Anonim';
+                $avatar = $a['creator_avatar'] ?? $a['avatar'] ?? '';
+                $a['avatar'] = $avatar ? $prefix . ltrim($avatar, '/') : '';
+                $a['photo'] = !empty($a['photo']) ? $prefix . ltrim($a['photo'], '/') : '';
+            }
+            unset($a);
+        }
+
         $content = dirname(__DIR__) . '/views/pages/announcements/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }

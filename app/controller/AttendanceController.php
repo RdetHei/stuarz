@@ -33,11 +33,16 @@ class AttendanceController {
 
         $records = $this->model->getFilteredAttendance($startDate, $endDate, $filterClass);
         $classes = $this->model->getClasses();
+<<<<<<< HEAD
         $activeClass = null;
         $activeClassId = intval($_SESSION['active_class_id'] ?? 0);
         if ($activeClassId) {
             $activeClass = $this->classModel->getById($activeClassId, $_SESSION['user']['id'] ?? null);
         }
+=======
+        // Get aggregated stats from DB (respect current filters)
+        $stats = $this->getStats($startDate, $endDate, $filterClass);
+>>>>>>> 3ddfc08 (buset)
 
         $content = dirname(__DIR__) . '/views/pages/attendance/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
@@ -55,6 +60,8 @@ class AttendanceController {
 
         $records = $this->model->getFilteredAttendance($startDate, $endDate, $filterClass);
         $classes = $this->model->getClasses();
+        // Get aggregated stats from DB (respect current filters)
+        $stats = $this->getStats($startDate, $endDate, $filterClass);
 
         $content = dirname(__DIR__) . '/views/pages/attendance/manage.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
@@ -167,5 +174,67 @@ class AttendanceController {
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Get attendance stats optionally filtered by date range and class.
+     *
+     * @param string|null $startDate  YYYY-MM-DD
+     * @param string|null $endDate    YYYY-MM-DD
+     * @param int|null    $classId
+     * @return array Associative keys: Hadir, Absen, Terlambat, Izin, Sakit
+     */
+    private function getStats($startDate = null, $endDate = null, $classId = null) {
+        $stats = [
+            'Hadir' => 0,
+            'Absen' => 0,
+            'Terlambat' => 0,
+            'Izin' => 0,
+            'Sakit' => 0
+        ];
+
+        // Build WHERE clause for optional filters
+        $conds = [];
+        if ($startDate) {
+            $sd = $this->db->real_escape_string($startDate);
+            $conds[] = "date >= '" . $sd . "'";
+        }
+        if ($endDate) {
+            $ed = $this->db->real_escape_string($endDate);
+            $conds[] = "date <= '" . $ed . "'";
+        }
+        if ($classId) {
+            $conds[] = "class_id = " . intval($classId);
+        }
+
+        $where = '';
+        if (!empty($conds)) {
+            $where = ' AND ' . implode(' AND ', $conds);
+        }
+
+        // Map statuses in DB to localized keys
+        $mapping = [
+            'present' => 'Hadir',
+            'late' => 'Terlambat',
+            'absent' => 'Absen',
+            'excused' => 'Izin',
+            'sick' => 'Sakit'
+        ];
+
+        // Use a single query to count per status for efficiency
+        $sql = "SELECT status, COUNT(*) as total FROM attendance WHERE 1=1 " . $where . " GROUP BY status";
+        $res = $this->db->query($sql);
+        if ($res) {
+            while ($row = $res->fetch_assoc()) {
+                $status = $row['status'];
+                $total = (int)$row['total'];
+                if (isset($mapping[$status])) {
+                    $stats[$mapping[$status]] = $total;
+                }
+            }
+            $res->free();
+        }
+
+        return $stats;
     }
 }

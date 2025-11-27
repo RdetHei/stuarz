@@ -58,9 +58,9 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                 </svg>
                             </div>
-                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Students</span>
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Teachers</span>
                         </div>
-                        <h3 class="text-3xl font-bold text-white"><?= number_format($stats['total_students']) ?></h3>
+                        <h3 class="text-3xl font-bold text-white"><?= number_format($stats['total_teachers']) ?></h3>
                         <p class="text-xs text-gray-500 mt-1">Active learners</p>
                     </div>
 
@@ -71,7 +71,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                 </svg>
                             </div>
-                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Teachers</span>
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Certificates</span>
                         </div>
                         <h3 class="text-3xl font-bold text-white"><?= number_format($stats['total_certificates']) ?></h3>
                         <p class="text-xs text-gray-500 mt-1">Educators</p>
@@ -86,7 +86,7 @@
                             </div>
                             <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Classes</span>
                         </div>
-                        <h3 class="text-3xl font-bold text-white"><?= number_format($stats['average_grade'], 1) ?></h3>
+                        <h3 class="text-3xl font-bold text-white"><?= number_format($stats['total_classes']) ?></h3>
                         <p class="text-xs text-gray-500 mt-1">Active classes</p>
                     </div>
 
@@ -113,7 +113,7 @@
                     </svg>
                     Pengumuman Terbaru
                 </h2>
-                <a href="#" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">Lihat semua →</a>
+                <a href="index.php?page=announcement" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">Lihat semua →</a>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -121,9 +121,22 @@
                 <a href="index.php?page=announcement&id=<?= (int)($a['id'] ?? 0) ?>"
                    class="group bg-gray-800 border border-gray-700 rounded-xl p-5 hover:border-blue-500/50 hover:bg-gray-750 transition-all">
 
-                    <?php if (!empty($a['image']) || !empty($a['banner'])): ?>
+                    <!-- Creator avatar & name -->
+                    <div class="flex items-center gap-3 mb-3">
+                        <?php
+                            $creatorAvatar = $a['creator_avatar'] ?? 'assets/default-avatar.png';
+                            $creatorAvatarSrc = ($prefix ?? '') . ltrim($creatorAvatar, '/');
+                        ?>
+                        <img src="<?= htmlspecialchars($creatorAvatarSrc, ENT_QUOTES, 'UTF-8') ?>" alt="Creator Avatar" class="w-9 h-9 rounded-full border border-gray-700 object-cover" />
+                        <div>
+                            <div class="text-sm font-semibold text-white"><?= htmlspecialchars($a['creator'] ?? '-') ?></div>
+                            <div class="text-xs text-gray-500"><?= htmlspecialchars(date('d F Y', strtotime($a['created_at'] ?? ''))) ?></div>
+                        </div>
+                    </div>
+
+                    <?php if (!empty($a['photo'])): ?>
                     <div class="w-full h-32 bg-gray-900 rounded-lg overflow-hidden mb-4 border border-gray-700">
-                        <img src="<?= htmlspecialchars(($prefix ?? '') . ($a['image'] ?? $a['banner']), ENT_QUOTES, 'UTF-8') ?>"
+                        <img src="<?= htmlspecialchars(($prefix ?? '') . ltrim($a['photo'], '/'), ENT_QUOTES, 'UTF-8') ?>"
                              alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
                     <?php else: ?>

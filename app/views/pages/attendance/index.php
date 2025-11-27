@@ -1,31 +1,24 @@
 <?php
-// Get attendance statistics from controller
+// Use records/classes passed from controller
 $records = $records ?? [];
 $classes = $classes ?? [];
 $activeClass = $activeClass ?? null;
 $activeClassId = intval($activeClass['id'] ?? 0);
 
-// Calculate stats from records
-$stats = [
-  'Hadir' => 0,
-  'Absen' => 0,
-  'Terlambat' => 0,
-  'Izin' => 0,
-  'Sakit' => 0
+// Stats should be provided by controller (from DB). Provide safe fallback here.
+$stats = $stats ?? [
+    'Hadir' => 0,
+    'Absen' => 0,
+    'Terlambat' => 0,
+    'Izin' => 0,
+    'Sakit' => 0
 ];
-
-foreach ($records as $record) {
-    $status = $record['status'] ?? '';
-    if (isset($stats[$status])) {
-        $stats[$status]++;
-    }
-}
 
 // Convert to display format
 $displayStats = [
-  ['title' => 'Hari Hadir', 'value' => $stats['Hadir'], 'color' => 'success', 'icon' => 'check'],
-  ['title' => 'Hari Absen',  'value' => $stats['Absen'],  'color' => 'danger',  'icon' => 'x'],
-  ['title' => 'Hari Terlambat',    'value' => $stats['Terlambat'],  'color' => 'warning','icon' => 'clock'],
+    ['title' => 'Hari Hadir', 'value' => (int)($stats['Hadir'] ?? 0), 'color' => 'success', 'icon' => 'check'],
+    ['title' => 'Hari Absen',  'value' => (int)($stats['Absen'] ?? 0),  'color' => 'danger',  'icon' => 'x'],
+    ['title' => 'Hari Terlambat', 'value' => (int)($stats['Terlambat'] ?? 0),  'color' => 'warning','icon' => 'clock'],
 ];
 ?>
 
@@ -140,7 +133,7 @@ $displayStats = [
             <div class="flex items-center justify-between">
                 <div>
                     <div class="text-sm font-medium text-gray-400 mb-2"><?= htmlspecialchars($s['title']) ?></div>
-                    <div class="text-3xl font-bold text-white"><?= (int)$s['value'] ?></div>
+                    <div class="text-3xl font-bold text-white"><?= number_format($s['value']) ?></div>
                     <div class="text-xs text-gray-500 mt-1">total hari</div>
                 </div>
                 <div class="w-14 h-14 rounded-xl flex items-center justify-center <?php

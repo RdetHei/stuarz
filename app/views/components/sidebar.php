@@ -167,7 +167,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : '';
         <span class="ml-auto material-symbols-outlined chev">expand_more</span>
       </summary>
       <div class="mt-1 space-y-1 pl-10 group-children">
-        <a href="index.php?page=class" title="Kelas" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive(['class', 'join_form'], $page, $sub) ?>">
+        <a href="index.php?page=class" title="Kelas" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive(['class'], $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">groups_3</span>
           <span class="menu-text">Kelas Saya</span>
         </a>

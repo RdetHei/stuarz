@@ -17,12 +17,23 @@ $user = $_SESSION['user'] ?? null;
                     <?php endif; ?>
                 </p>
             </div>
-            <?php if (!empty($notifications)): ?>
-            <button onclick="markAllAsRead()" 
-                    class="px-4 py-2 bg-[#1f2937] hover:bg-gray-700 border border-gray-700 text-sm text-gray-300 rounded-md transition-colors">
-                Tandai Semua Dibaca
-            </button>
-            <?php endif; ?>
+            
+            
+<?php if (!empty($notifications)): ?>
+<div class="flex items-center gap-3">
+    <button onclick="markAllAsRead()" 
+            class="px-4 py-2 bg-[#1f2937] hover:bg-gray-700 border border-gray-700 text-sm text-gray-300 rounded-md transition-colors">
+        Tandai Semua Dibaca
+    </button>
+
+
+    <button onclick="clearAllNotifications()" 
+            class="px-4 py-2 bg-red-700 hover:bg-red-600 border border-red-800 text-sm text-white rounded-md transition-colors">
+        Hapus Semua
+    </button>
+</div>
+<?php endif; ?>
+
         </div>
 
         <!-- Notifications List -->
@@ -224,5 +235,34 @@ function markAllAsRead() {
         }
     })
     .catch(error => console.error('Error:', error));
+}
+
+function clearAllNotifications() {
+    if (!confirm("Yakin ingin menghapus semua notifikasi?")) return;
+
+    fetch("index.php?page=notifications/clear", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            const errorMsg = data.error === 'not_authenticated' 
+                ? 'Anda harus login terlebih dahulu.' 
+                : 'Gagal menghapus notifikasi.';
+            alert(errorMsg);
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert("Terjadi kesalahan saat menghapus notifikasi.");
+    });
 }
 </script>

@@ -200,4 +200,23 @@ class NotificationsModel
         mysqli_stmt_close($stmt);
         return $count;
     }
+
+public function clearAll(): bool
+{
+    $sql = "TRUNCATE TABLE notifications";
+    return (bool) mysqli_query($this->conn, $sql);
+}
+
+public function clearByUser(int $userId): bool
+{
+    $stmt = mysqli_prepare($this->conn, "DELETE FROM notifications WHERE user_id = ?");
+    if (!$stmt) return false;
+    mysqli_stmt_bind_param($stmt, "i", $userId);
+    $ok = mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    return (bool)$ok;
+}
+
+
+
 }

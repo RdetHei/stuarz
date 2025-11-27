@@ -32,7 +32,13 @@
 
     <div class="h-px bg-gray-700"></div>
     
+<<<<<<< HEAD
     <div class="bg-gray-900 py-24">
+=======
+    <!-- Hero Illustration -->
+     
+<div class="bg-gray-900 py-24">
+>>>>>>> 3ddfc08 (buset)
   <div class="text-center mx-auto max-w-7xl px-6">
     <h2 class="text-base font-semibold leading-7 text-indigo-600">Dashboard</h2>
     <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -105,9 +111,12 @@ sliderContainer.addEventListener("mouseleave", () => {
 });
 </script>
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 3ddfc08 (buset)
  
 <!-- Divider -->
 <div class="h-px bg-gray-700"></div>

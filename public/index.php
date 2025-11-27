@@ -79,6 +79,7 @@ $router->post('/notifications/mark-read', 'NotificationController@markRead');
 $router->post('/notifications/mark-unread', 'NotificationController@markUnread');
 $router->post('/notifications/delete', 'NotificationController@delete');
 $router->post('/notifications/mark-all-read', 'NotificationController@markAllRead');
+$router->post('/notifications/clear', 'NotificationController@clear');
 $router->get('/notifications/unread-count', 'NotificationController@unreadCount');
 $router->get('/dashboard', 'DashboardController@dashboard');
 $router->get('/dashboard-guru', 'DashboardController@guru');

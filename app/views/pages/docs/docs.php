@@ -55,9 +55,26 @@ if (!isset($ajax)) $ajax = false;
       </form>
     </div>
 
-    <div class="grid gap-8 lg:grid-cols-12">
+    <div class="grid gap-9 lg:grid-cols-12">
       <aside class="lg:col-span-3">
         <div class="lg:sticky lg:top-16 lg:self-start lg:z-10">
+          <h2 class="text-sm uppercase tracking-wide text-gray-400 mb-4">Documentation Sections</h2>
+          <ul class="mb-3">
+            <a href="index.php?page=docs" class="block rounded-lg px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800">
+              <span class="inline-flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>All Documentations</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <hr class="border-gray-700 mb-3">
+          </li>
+          </ul>
+
+          </ul>
           <?php if (!empty($docs)): ?>
             <nav class="space-y-8">
               <ul>

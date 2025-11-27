@@ -77,7 +77,7 @@ $hasClasses = $hasClasses ?? !empty($classes);
       <!-- Main Content with Classes Table -->
       <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-lg overflow-hidden">
         <!-- Table Header with Stats -->
-        <div class="px-6 py-4 border-b border-gray-700 bg-gray-800/50">
+        <div class="px-6 py-4 border-b border-gray-700 bg-[#111827]">
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-lg font-semibold text-white">Daftar Kelas</h2>
@@ -103,7 +103,7 @@ $hasClasses = $hasClasses ?? !empty($classes);
         <!-- Table -->
         <div class="overflow-x-auto">
           <table class="w-full">
-            <thead class="bg-gray-900/50 border-b border-gray-700">
+            <thead class="bg-[#111827] border-b border-gray-700">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Nama Kelas</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Kode</th>
@@ -113,7 +113,7 @@ $hasClasses = $hasClasses ?? !empty($classes);
                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
-            <tbody class="bg-gray-800 divide-y divide-gray-700">
+            <tbody class="bg-[#1f2937] divide-y divide-gray-700">
               <?php foreach ($classes as $c): ?>
                 <?php
                   $name = $c['name'] ?? 'Kelas';

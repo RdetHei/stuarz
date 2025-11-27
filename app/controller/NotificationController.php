@@ -74,6 +74,25 @@ class NotificationController
         $this->jsonResponse(['success' => (bool)$ok]);
     }
 
+public function clear()
+{
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    $userId = $_SESSION['user_id'] ?? null;
+    
+    if (!$userId) {
+        $this->jsonResponse(['success' => false, 'error' => 'not_authenticated']);
+    }
+
+    global $config;
+    $nm = new NotificationsModel($config);
+
+    // Hapus hanya notifikasi milik user yang sedang login
+    $ok = $nm->clearByUser($userId);
+
+    $this->jsonResponse(['success' => (bool)$ok]);
+}
+
+
     public function unreadCount()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
