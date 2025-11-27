@@ -1,6 +1,7 @@
+<!-- Tasks List UI - Discord/GitHub dark style -->
 <div id="tasksContent">
 <div class="max-w-7xl mx-auto p-6">
-  
+  <!-- Flash Messages -->
   <?php if (isset($_SESSION['success'])): ?>
     <div class="mb-6 bg-green-500/20 border border-green-500/30 text-green-300 px-4 py-3 rounded-lg flex items-center gap-2">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +22,7 @@
     <?php unset($_SESSION['error']); ?>
   <?php endif; ?>
 
-  
+  <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-4">
@@ -51,7 +52,7 @@
     </div>
   </div>
 
-  
+  <!-- Tasks Table -->
   <?php if (!empty($tasks ?? [])): ?>
   <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
     <div class="overflow-x-auto">
@@ -196,7 +197,7 @@
       </table>
     </div>
 
-    
+    <!-- Table Footer -->
     <div class="px-6 py-4 bg-gray-900 border-t border-gray-700">
       <div class="flex items-center justify-between text-sm text-gray-400">
         <span>Total: <?= count($tasks ?? []) ?> tasks</span>
@@ -209,7 +210,7 @@
   </div>
 
   <?php else: ?>
-  
+  <!-- Empty State -->
   <div class="bg-gray-800 border border-gray-700 rounded-xl p-12 text-center">
     <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-indigo-600/20 flex items-center justify-center">
       <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +234,7 @@
   </div>
   <?php endif; ?>
 
-  
+  <!-- Info Card -->
   <div class="mt-6 bg-gray-800 border border-gray-700 rounded-xl p-6">
     <div class="flex items-start gap-4">
       <div class="flex-shrink-0 w-12 h-12 bg-indigo-600/20 rounded-xl flex items-center justify-center">
@@ -262,7 +263,7 @@
   </div>
 </div>
 
- 
+<!-- Submissions Modal -->
 <div id="submissionsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
   <div class="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
     <div class="flex items-center justify-between p-6 border-b border-gray-700">
@@ -284,11 +285,11 @@ function viewSubmissions(taskId) {
   const modal = document.getElementById('submissionsModal');
   const content = document.getElementById('submissionsContent');
   
-  
+  // Show loading
   content.innerHTML = '<div class="text-center text-gray-400">Loading submissions...</div>';
   modal.classList.remove('hidden');
   
-  
+  // Fetch submissions (you'll need to implement this endpoint)
   fetch(`index.php?page=tasks/submissions&task_id=${taskId}`)
     .then(response => response.text())
     .then(data => {
@@ -303,7 +304,7 @@ function closeSubmissionsModal() {
   document.getElementById('submissionsModal').classList.add('hidden');
 }
 
- 
+// Close modal when clicking outside
 document.getElementById('submissionsModal').addEventListener('click', function(e) {
   if (e.target === this) {
     closeSubmissionsModal();
@@ -312,12 +313,12 @@ document.getElementById('submissionsModal').addEventListener('click', function(e
 </script>
 
 <script>
- 
+// Encapsulate page init so it can be called after fragment replacement if needed
 function initTasksPage() {
-  
+  // Re-bind modal click-out listener (avoid duplicate bindings)
   const modal = document.getElementById('submissionsModal');
   if (!modal) return;
-  
+  // remove previous listener if exists by replacing node listener registration
   modal.removeEventListener('click', window._tasks_modal_click_handler || (()=>{}));
   window._tasks_modal_click_handler = function(e) {
     if (e.target === modal) {
@@ -326,10 +327,10 @@ function initTasksPage() {
   };
   modal.addEventListener('click', window._tasks_modal_click_handler);
 
-  
+  // other per-page init points could go here
 }
 
- 
+// run init on normal page load
 (function(){ initTasksPage(); })();
 </script>
 </div>

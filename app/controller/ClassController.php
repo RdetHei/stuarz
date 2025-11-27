@@ -14,24 +14,7 @@ class ClassController {
     }
 
     public function index() {
-        $user = $_SESSION['user'] ?? null;
-        $userId = $user['id'] ?? null;
-        $userLevel = $user['level'] ?? 'user';
-        
-        // Filter classes based on user level
-        if ($userLevel === 'user' && $userId) {
-            // User biasa: hanya kelas yang diikuti
-            $classes = $this->model->getAll($userId);
-        } elseif (($userLevel === 'admin' || $userLevel === 'guru') && $userId) {
-            // Admin/guru: kelas yang mereka kelola
-            $classes = $this->model->getManagedClasses($userId);
-        } else {
-            // Fallback: semua kelas (untuk non-logged in atau edge cases)
-            $classes = $this->model->getAll();
-        }
-        
-        // Check if user has any classes
-        $hasClasses = !empty($classes);
+        $classes = $this->model->getAll();
         
         // Get statistics
         $totalClasses = count($classes);
@@ -89,16 +72,6 @@ class ClassController {
             // Auto-generate default schedules for this class (Mon-Sat) so it appears in schedule table
             $newClassId = $this->db->insert_id;
             $creatorId = intval($data['created_by']);
-            
-            // Auto-add creator as teacher member
-            try {
-                $userLevel = $_SESSION['user']['level'] ?? 'user';
-                $role = ($userLevel === 'admin') ? 'admin' : 'teacher';
-                $this->model->addMember($newClassId, $creatorId, $role);
-            } catch (\Exception $e) {
-                // Ignore if already member (shouldn't happen, but safe)
-            }
-            
             // Fetch class name for logging if needed (optional)
             // Prepare insert statement
             $stmt = $this->db->prepare("INSERT INTO schedule (`class`,`subject`,`teacher_id`,`class_id`,`day`,`start_time`,`end_time`) VALUES (?,?,?,?,?,?,?)");
@@ -137,29 +110,8 @@ class ClassController {
             header('Location: index.php?page=login');
             exit;
         }
-        $user = $_SESSION['user'];
-        $userLevel = $user['level'] ?? 'user';
-        $userId = $user['id'] ?? null;
-        
-        // Check if user already has classes
-        if ($userLevel === 'user' && $userId) {
-            $userClasses = $this->model->getAll($userId);
-            $hasClasses = !empty($userClasses);
-        } elseif (($userLevel === 'admin' || $userLevel === 'guru') && $userId) {
-            $userClasses = $this->model->getManagedClasses($userId);
-            $hasClasses = !empty($userClasses);
-        } else {
-            $hasClasses = false;
-        }
-        
-        // For admin/guru, show all classes for selection; for user, show their classes
-        if ($userLevel === 'admin' || $userLevel === 'guru') {
-            $classes = $this->model->getAll(); // All classes for admin/guru to select
-        } else {
-            $classes = $this->model->getAll($userId); // User's classes
-        }
-        
-        $content = dirname(__DIR__) . '/views/pages/classes/join_form.php';
+        $classes = $this->model->getAll();
+        $content = dirname(__DIR__) . '/views/pages/classes/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
@@ -213,20 +165,12 @@ class ClassController {
                 $_SESSION['error'] = 'Gagal bergabung ke kelas.';
             }
         } catch (\Exception $e) {
-            $errorMsg = $e->getMessage();
-            if (!empty($_GET['ajax']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)) {
-                header('Content-Type: application/json');
-                echo json_encode(['ok' => false, 'message' => $errorMsg]);
-                exit;
-            }
-            $_SESSION['error'] = $errorMsg;
+            $_SESSION['error'] = $e->getMessage();
         }
-        // Redirect back to referrer or class list (only if not AJAX)
-        if (empty($_GET['ajax']) && (!isset($_SERVER['HTTP_ACCEPT']) || strpos($_SERVER['HTTP_ACCEPT'], 'application/json') === false)) {
-            $back = $_SERVER['HTTP_REFERER'] ?? 'index.php?page=class';
-            header('Location: ' . $back);
-            exit;
-        }
+        // Redirect back to referrer or class list
+        $back = $_SERVER['HTTP_REFERER'] ?? 'index.php?page=class';
+        header('Location: ' . $back);
+        exit;
     }
 
     public function edit() {
@@ -258,17 +202,12 @@ class ClassController {
             header('Location: index.php?page=class');
             exit;
         }
-        $userId = $_SESSION['user']['id'] ?? null;
-        $class = $this->model->getById($id, $userId);
+        $class = $this->model->getById($id);
         if (!$class) {
             $_SESSION['flash'] = 'Kelas tidak ditemukan.';
             header('Location: index.php?page=class');
             exit;
         }
-        // Mark this class as the current active class for attendance context
-        $_SESSION['active_class_id'] = $id;
-        $_SESSION['active_class_name'] = $class['name'] ?? null;
-        $_SESSION['active_class_code'] = $class['code'] ?? null;
         // members and schedules
         $members = $this->model->getMembers($id);
         // use ScheduleModel to fetch schedules with relations if available

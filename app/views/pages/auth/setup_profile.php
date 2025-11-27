@@ -108,7 +108,7 @@
                         <input type="text" 
                                id="class"
                                name="class" 
-                               placeholder="Contoh: ABCD😂"
+                               placeholder="Contoh: ABC123"
                                maxlength="12"
                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" />
                     </div>
