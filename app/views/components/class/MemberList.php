@@ -1,6 +1,5 @@
 <?php
-// MemberList component
-// Expects: $members (array of ['id','username','email','role','avatar','banner'])
+
 $members = $members ?? [];
 $sessionUser = $_SESSION['user'] ?? [];
 ?>
