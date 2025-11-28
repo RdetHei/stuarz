@@ -1,64 +1,173 @@
 <?php
 require_once dirname(__DIR__) . '/config/config.php';
+require_once dirname(__DIR__) . '/model/GradesModel.php';
 
 class GradeController
 {
     private $db;
+    private $model;
 
     public function __construct()
     {
         global $config; // Use the global database connection
         $this->db = $config;
+        $this->model = new GradesModel($config);
     }
     public function index()
     {
+        $user = $this->requireUser();
+
+        $level = $_SESSION['level'] ?? 'user';
+        $requestedUser = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+        $userId = ($level === 'admin' || $level === 'guru') ? ($requestedUser ?: (int)$user['id']) : (int)$user['id'];
+
+        $stats = $this->buildStats($userId);
+        $subjectsSidebar = $this->fetchSubjectStats($userId);
+        $recent = $this->fetchRecentGrades($userId);
+
+        $filterSubject = isset($_GET['subject_id']) ? intval($_GET['subject_id']) : null;
+        $filterClass = isset($_GET['class_id']) ? intval($_GET['class_id']) : null;
+
+        $grades = $this->fetchGradesList($level, $userId, $filterSubject, $filterClass);
+
+        $subjectsList = $this->db->query('SELECT * FROM subjects ORDER BY name ASC');
+        $subjects = $subjectsList ? $subjectsList->fetch_all(MYSQLI_ASSOC) : [];
+        $classesList = $this->db->query('SELECT * FROM classes ORDER BY name ASC');
+        $classes = $classesList ? $classesList->fetch_all(MYSQLI_ASSOC) : [];
+
+        $data = [
+            'totalGrades' => $stats['total'],
+            'avgGrade' => $stats['avg'],
+            'highGrade' => $stats['max'],
+            'thisWeek' => $stats['week'],
+            'subjects' => $subjectsSidebar,
+            'recent' => $recent,
+        ];
+
+        $content = dirname(__DIR__) . '/views/pages/grades/index.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    public function print()
+    {
+        // Reuse same data gathering as index but render print view
         if (session_status() === PHP_SESSION_NONE) session_start();
-        if (!isset($_SESSION['user'])) {
-            header('Location: index.php?page=login');
+        $user = $this->requireUser();
+        $level = $_SESSION['level'] ?? 'user';
+        $targetUser = ($level === 'admin' || $level === 'guru') && isset($_GET['user_id'])
+            ? intval($_GET['user_id'])
+            : intval($user['id']);
+
+        $grades = $this->fetchGradesList($level, $targetUser);
+        $subjectsList = $this->db->query('SELECT * FROM subjects ORDER BY name ASC');
+        $subjects = $subjectsList ? $subjectsList->fetch_all(MYSQLI_ASSOC) : [];
+        $classesList = $this->db->query('SELECT * FROM classes ORDER BY name ASC');
+        $classes = $classesList ? $classesList->fetch_all(MYSQLI_ASSOC) : [];
+
+        $content = dirname(__DIR__) . '/views/pages/grades/grades_print.php';
+        include dirname(__DIR__) . '/views/layouts/print.php';
+    }
+
+    public function create() {
+        $this->ensureCanManage();
+        $content = dirname(__DIR__) . '/views/pages/grades/form.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    public function store() {
+        $this->ensureCanManage();
+        $payload = $this->validatePayload($_POST);
+        if (isset($payload['error'])) {
+            $_SESSION['error'] = $payload['error'];
+            header('Location: index.php?page=grades/create');
             exit;
         }
+        $ok = $this->model->create($payload);
+        $_SESSION['success'] = $ok ? 'Nilai berhasil disimpan' : 'Gagal menyimpan nilai';
+        header('Location: index.php?page=grades');
+        exit;
+    }
 
-        global $config; // mysqli connection
-        $userId = (int)($_SESSION['user']['id'] ?? 0);
-        if ($userId <= 0) {
-            echo 'User tidak valid';
-            return;
+    public function edit() {
+        $this->ensureCanManage();
+        $id = intval($_GET['id'] ?? 0);
+        $grade = $this->model->getById($id);
+        if (!$grade) {
+            $_SESSION['error'] = 'Data nilai tidak ditemukan';
+            header('Location: index.php?page=grades');
+            exit;
         }
+        $content = dirname(__DIR__) . '/views/pages/grades/form.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
 
-        // Queries
-        // Total Grades
-        $totalGrades = 0;
+    public function update() {
+        $this->ensureCanManage();
+        $id = intval($_POST['id'] ?? 0);
+        if (!$id) {
+            $_SESSION['error'] = 'Data tidak valid';
+            header('Location: index.php?page=grades');
+            exit;
+        }
+        $payload = $this->validatePayload($_POST);
+        if (isset($payload['error'])) {
+            $_SESSION['error'] = $payload['error'];
+            header('Location: index.php?page=grades/edit&id='.$id);
+            exit;
+        }
+        $ok = $this->model->update($id, $payload);
+        $_SESSION['success'] = $ok ? 'Nilai diperbarui' : 'Gagal memperbarui nilai';
+        header('Location: index.php?page=grades');
+        exit;
+    }
+
+    public function delete() {
+        $this->ensureCanManage();
+        $id = intval($_POST['id'] ?? 0);
+        if (!$id) {
+            $_SESSION['error'] = 'Data tidak valid';
+            header('Location: index.php?page=grades');
+            exit;
+        }
+        $ok = $this->model->delete($id);
+        $_SESSION['success'] = $ok ? 'Nilai dihapus' : 'Gagal menghapus nilai';
+        header('Location: index.php?page=grades');
+        exit;
+    }
+
+    private function buildStats($userId) {
+        global $config;
+        $stats = ['total' => 0, 'avg' => 0, 'max' => 0, 'week' => 0];
+
         $stmt = mysqli_prepare($config, 'SELECT COUNT(*) AS total FROM grades WHERE user_id = ?');
         mysqli_stmt_bind_param($stmt, 'i', $userId);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
-        if ($res) { $row = mysqli_fetch_assoc($res); $totalGrades = (int)($row['total'] ?? 0); }
+        if ($res) { $row = mysqli_fetch_assoc($res); $stats['total'] = (int)($row['total'] ?? 0); }
 
-        // Average Grade
-        $avgGrade = 0.0;
         $stmt = mysqli_prepare($config, 'SELECT ROUND(AVG(score), 1) AS avg_score FROM grades WHERE user_id = ?');
         mysqli_stmt_bind_param($stmt, 'i', $userId);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
-        if ($res) { $row = mysqli_fetch_assoc($res); $avgGrade = (float)($row['avg_score'] ?? 0); }
+        if ($res) { $row = mysqli_fetch_assoc($res); $stats['avg'] = (float)($row['avg_score'] ?? 0); }
 
-        // Highest Grade
-        $highGrade = 0.0;
         $stmt = mysqli_prepare($config, 'SELECT MAX(score) AS max_score FROM grades WHERE user_id = ?');
         mysqli_stmt_bind_param($stmt, 'i', $userId);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
-        if ($res) { $row = mysqli_fetch_assoc($res); $highGrade = (float)($row['max_score'] ?? 0); }
+        if ($res) { $row = mysqli_fetch_assoc($res); $stats['max'] = (float)($row['max_score'] ?? 0); }
 
-        // This Week (last 7 days)
-        $thisWeekCount = 0;
         $stmt = mysqli_prepare($config, 'SELECT COUNT(*) AS cnt FROM grades WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)');
         mysqli_stmt_bind_param($stmt, 'i', $userId);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
-        if ($res) { $row = mysqli_fetch_assoc($res); $thisWeekCount = (int)($row['cnt'] ?? 0); }
+        if ($res) { $row = mysqli_fetch_assoc($res); $stats['week'] = (int)($row['cnt'] ?? 0); }
 
-        // Sidebar Subjects + average per subject for the user
+        return $stats;
+    }
+
+    private function fetchSubjectStats($userId) {
+        global $config;
         $subjects = [];
         $sql = 'SELECT s.id, s.name, COUNT(g.id) AS total, ROUND(AVG(g.score),1) AS avg_score
                 FROM subjects s
@@ -72,9 +181,10 @@ class GradeController
         if ($res) {
             while ($row = mysqli_fetch_assoc($res)) { $subjects[] = $row; }
         }
+        return $subjects;
+    }
 
-        // Recent Grades (limit 8) with subject name
-        $recent = [];
+    private function fetchRecentGrades($userId) {
         $stmt = mysqli_prepare($this->db, "
             SELECT 
                 g.id,
@@ -92,76 +202,68 @@ class GradeController
         mysqli_stmt_bind_param($stmt, "i", $userId);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
-        $recent = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-        // Pass to view
-        $data = [
-            'totalGrades' => $totalGrades,
-            'avgGrade' => $avgGrade,
-            'highGrade' => $highGrade,
-            'thisWeek' => $thisWeekCount,
-            'subjects' => $subjects,
-            'recent' => $recent,
-        ];
-
-        // Render
-    // Ambil semua grades untuk list utama (bukan hanya recent)
-    $grades = [];
-    $sql = 'SELECT g.*, u.username, s.name AS subject_name, t.title AS task_title, c.name AS class_name
-        FROM grades g
-        LEFT JOIN users u ON g.user_id = u.id
-        LEFT JOIN subjects s ON g.subject_id = s.id
-        LEFT JOIN tasks_completed t ON g.task_id = t.id
-        LEFT JOIN classes c ON g.class_id = c.id';
-    $result = $this->db->query($sql);
-    if ($result) while ($row = $result->fetch_assoc()) $grades[] = $row;
-
-    // Untuk filter dropdown (subjects/classes)
-    $subjectsList = $this->db->query('SELECT * FROM subjects ORDER BY name ASC');
-    $subjects = $subjectsList ? $subjectsList->fetch_all(MYSQLI_ASSOC) : [];
-    $classesList = $this->db->query('SELECT * FROM classes ORDER BY name ASC');
-    $classes = $classesList ? $classesList->fetch_all(MYSQLI_ASSOC) : [];
-
-    // Render view baru
-    $content = dirname(__DIR__) . '/views/pages/grades/index.php';
-    include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        $recent = $result ? mysqli_fetch_all($result, MYSQLI_ASSOC) : [];
+        mysqli_stmt_close($stmt);
+        return $recent;
     }
 
-    public function print()
-    {
-        // Reuse same data gathering as index but render print view
-        if (session_status() === PHP_SESSION_NONE) session_start();
-        if (!isset($_SESSION['user'])) {
-            header('Location: index.php?page=login');
-            exit;
-        }
-
-        global $config;
-        $userId = (int)($_SESSION['user']['id'] ?? 0);
-        if ($userId <= 0) {
-            $_SESSION['flash'] = 'User tidak valid';
-            header('Location: index.php?page=grades');
-            exit;
-        }
-
-        // Get full grades list (no pagination) — same as index
-        $grades = [];
+    private function fetchGradesList($level, $userId, $subjectId = null, $classId = null) {
         $sql = 'SELECT g.*, u.username, s.name AS subject_name, t.title AS task_title, c.name AS class_name
             FROM grades g
             LEFT JOIN users u ON g.user_id = u.id
             LEFT JOIN subjects s ON g.subject_id = s.id
             LEFT JOIN tasks_completed t ON g.task_id = t.id
             LEFT JOIN classes c ON g.class_id = c.id';
+
+        $conditions = [];
+        if ($level === 'user') {
+            $conditions[] = 'g.user_id = ' . intval($userId);
+        }
+        if ($subjectId) $conditions[] = 'g.subject_id = ' . intval($subjectId);
+        if ($classId) $conditions[] = 'g.class_id = ' . intval($classId);
+
+        if (!empty($conditions)) $sql .= ' WHERE ' . implode(' AND ', $conditions);
+        $sql .= ' ORDER BY g.created_at DESC';
+
         $result = $this->db->query($sql);
-        if ($result) while ($row = $result->fetch_assoc()) $grades[] = $row;
+        $rows = [];
+        if ($result) while ($row = $result->fetch_assoc()) $rows[] = $row;
+        return $rows;
+    }
 
-        // For filters in print, also include subject/class lists
-        $subjectsList = $this->db->query('SELECT * FROM subjects ORDER BY name ASC');
-        $subjects = $subjectsList ? $subjectsList->fetch_all(MYSQLI_ASSOC) : [];
-        $classesList = $this->db->query('SELECT * FROM classes ORDER BY name ASC');
-        $classes = $classesList ? $classesList->fetch_all(MYSQLI_ASSOC) : [];
+    private function validatePayload($data) {
+        $required = ['user_id','class_id','subject_id','task_id','score'];
+        foreach ($required as $field) {
+            if (!isset($data[$field]) || $data[$field] === '') {
+                return ['error' => 'Field ' . $field . ' wajib diisi'];
+            }
+        }
+        return [
+            'user_id' => intval($data['user_id']),
+            'class_id' => intval($data['class_id']),
+            'subject_id' => intval($data['subject_id']),
+            'task_id' => intval($data['task_id']),
+            'score' => floatval($data['score'])
+        ];
+    }
 
-        $content = dirname(__DIR__) . '/views/pages/grades/grades_print.php';
-        include dirname(__DIR__) . '/views/layouts/print.php';
+    private function requireUser() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['user'])) {
+            header('Location: index.php?page=login');
+            exit;
+        }
+        return $_SESSION['user'];
+    }
+
+    private function ensureCanManage() {
+        $user = $this->requireUser();
+        $level = $_SESSION['level'] ?? 'user';
+        if (!in_array($level, ['admin','guru'], true)) {
+            $_SESSION['error'] = 'Anda tidak memiliki akses untuk mengelola nilai.';
+            header('Location: index.php?page=grades');
+            exit;
+        }
+        return $user;
     }
 }

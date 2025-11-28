@@ -48,7 +48,7 @@
                             <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Users</span>
                         </div>
                         <h3 class="text-3xl font-bold text-white"><?= number_format($stats['total_users']) ?></h3>
-                        <p class="text-xs text-gray-500 mt-1">Registered accounts</p>
+                        <p class="text-xs text-gray-500 mt-1">Active Students</p>
                     </div>
 
                     <div class="bg-gray-900/30 backdrop-blur-sm border border-purple-500/20 rounded-xl p-5 hover:border-purple-500/40 transition-all">
@@ -61,7 +61,7 @@
                             <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Teachers</span>
                         </div>
                         <h3 class="text-3xl font-bold text-white"><?= number_format($stats['total_teachers']) ?></h3>
-                        <p class="text-xs text-gray-500 mt-1">Active learners</p>
+                        <p class="text-xs text-gray-500 mt-1">Active Teachers</p>
                     </div>
 
                     <div class="bg-gray-900/30 backdrop-blur-sm border border-emerald-500/20 rounded-xl p-5 hover:border-emerald-500/40 transition-all">
@@ -74,7 +74,7 @@
                             <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Certificates</span>
                         </div>
                         <h3 class="text-3xl font-bold text-white"><?= number_format($stats['total_certificates']) ?></h3>
-                        <p class="text-xs text-gray-500 mt-1">Educators</p>
+                        <p class="text-xs text-gray-500 mt-1">Total Certificates</p>
                     </div>
 
                     <div class="bg-gray-900/30 backdrop-blur-sm border border-amber-500/20 rounded-xl p-5 hover:border-amber-500/40 transition-all">
@@ -94,7 +94,6 @@
             </div>
         </div>
 
-        <!-- Announcements Section -->
         <?php
         $announcementsList = [];
         if (!empty($latestAnnouncements) && is_array($latestAnnouncements)) {

@@ -41,18 +41,108 @@
       $userLevel = $_SESSION['level'] ?? 'user';
       if ($userLevel === 'admin' || $userLevel === 'guru'): 
       ?>
-      <a href="index.php?page=tasks/create" 
-         class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Add Task
-      </a>
+      <div class="flex items-center gap-3">
+        <form method="post" action="index.php?page=tasks/send-reminders" onsubmit="return confirm('Kirim reminder ke siswa?')" class="hidden sm:block">
+          <button type="submit" class="px-4 py-2 text-sm bg-gray-800 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-700 transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-9.33-4.98"/>
+            </svg>
+            Kirim Reminder
+          </button>
+        </form>
+        <a href="index.php?page=tasks/create" 
+           class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Add Task
+        </a>
+      </div>
       <?php endif; ?>
     </div>
   </div>
 
   <!-- Tasks Table -->
+  <?php 
+  $statCards = [
+    ['label' => 'Total Tugas', 'value' => (int)($progressSummary['total'] ?? 0), 'caption' => 'Tersedia', 'accent' => 'from-indigo-600 to-indigo-500'],
+    ['label' => 'Sudah Dikirim', 'value' => (int)($progressSummary['submitted'] ?? 0), 'caption' => 'Submissions', 'accent' => 'from-emerald-600 to-emerald-500'],
+    ['label' => 'Perlu Review', 'value' => (int)($progressSummary['in_review'] ?? 0), 'caption' => 'In review', 'accent' => 'from-amber-600 to-amber-500'],
+    ['label' => 'Perlu Revisi', 'value' => (int)($progressSummary['needs_revision'] ?? 0), 'caption' => 'Needs revision', 'accent' => 'from-rose-600 to-rose-500'],
+    ['label' => 'Ternilai', 'value' => (int)($progressSummary['graded'] ?? 0), 'caption' => 'Graded', 'accent' => 'from-blue-600 to-blue-500'],
+  ];
+  ?>
+  <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+    <?php foreach ($statCards as $card): ?>
+    <div class="p-4 rounded-xl bg-gradient-to-br <?= $card['accent'] ?> shadow-lg">
+      <p class="text-sm text-white/70"><?= $card['label'] ?></p>
+      <p class="text-3xl font-bold text-white mt-1"><?= $card['value'] ?></p>
+      <p class="text-xs text-white/70 mt-1"><?= $card['caption'] ?></p>
+    </div>
+    <?php endforeach; ?>
+  </div>
+
+  <?php 
+    $pendingList = array_slice($pendingReviewTasks ?? [], 0, 4);
+    $dueSoonList = array_slice($dueSoonTasks ?? [], 0, 4);
+  ?>
+  <?php if ((!empty($pendingList) && $userLevel !== 'user') || !empty($dueSoonList)): ?>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <?php if ($userLevel !== 'user' && !empty($pendingList)): ?>
+    <div class="bg-gray-800 border border-gray-700 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-white font-semibold text-lg">Menunggu Review</h3>
+          <p class="text-gray-400 text-sm">Prioritaskan tugas dengan status pending/revisi.</p>
+        </div>
+        <span class="px-2.5 py-1 bg-red-500/20 text-red-300 text-xs rounded-lg border border-red-500/40"><?= count($pendingReviewTasks) ?> task</span>
+      </div>
+      <div class="space-y-3">
+        <?php foreach ($pendingList as $item): 
+          $task = $item['task'];
+          $stat = $item['stats'];
+        ?>
+        <div class="p-3 rounded-lg bg-gray-900/60 border border-gray-700 flex items-center justify-between">
+          <div>
+            <p class="text-white font-medium"><?= htmlspecialchars($task['title'] ?? '-') ?></p>
+            <p class="text-xs text-gray-400"><?= htmlspecialchars($task['class_name'] ?? '-') ?> • Deadline <?= htmlspecialchars($task['deadline'] ?? '-') ?></p>
+          </div>
+          <div class="text-right text-xs text-gray-300">
+            <div>Pending: <span class="text-white font-semibold"><?= intval($stat['pending'] ?? 0) ?></span></div>
+            <div>Revisi: <span class="text-white font-semibold"><?= intval($stat['needs_revision'] ?? 0) ?></span></div>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($dueSoonList)): ?>
+    <div class="bg-gray-800 border border-gray-700 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-white font-semibold text-lg">Deadline Terdekat</h3>
+          <p class="text-gray-400 text-sm">Fokus pada tugas yang akan jatuh tempo.</p>
+        </div>
+        <span class="px-2.5 py-1 bg-yellow-500/20 text-yellow-200 text-xs rounded-lg border border-yellow-500/40"><?= count($dueSoonTasks ?? []) ?> task</span>
+      </div>
+      <div class="space-y-3">
+        <?php foreach ($dueSoonList as $task): ?>
+        <div class="p-3 rounded-lg bg-gray-900/60 border border-gray-700">
+          <p class="text-white font-medium"><?= htmlspecialchars($task['title'] ?? '-') ?></p>
+          <div class="flex items-center justify-between text-xs text-gray-400 mt-1">
+            <span><?= htmlspecialchars($task['class_name'] ?? '-') ?></span>
+            <span>Deadline: <?= htmlspecialchars($task['deadline'] ?? '-') ?></span>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <?php endif; ?>
+  </div>
+  <?php endif; ?>
+
+  
   <?php if (!empty($tasks ?? [])): ?>
   <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
     <div class="overflow-x-auto">
@@ -65,6 +155,12 @@
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Schedule</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Teacher</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Deadline</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Workflow</th>
+            <?php if ($userLevel === 'user'): ?>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Progress</th>
+            <?php else: ?>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Queue</th>
+            <?php endif; ?>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
             <th class="px-6 py-4 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</th>
           </tr>
@@ -118,6 +214,68 @@
                 </svg>
                 <?= htmlspecialchars($t['deadline'] ?? '') ?>
               </div>
+            </td>
+            <td class="px-6 py-4">
+              <?php 
+                $workflowState = strtolower($t['workflow_state'] ?? 'published');
+                $stateLabels = [
+                  'draft' => ['Draft','bg-gray-600/30 text-gray-200 border border-gray-500/40'],
+                  'published' => ['Published','bg-indigo-600/20 text-indigo-200 border border-indigo-500/40'],
+                  'in_review' => ['In Review','bg-blue-600/20 text-blue-200 border border-blue-500/40'],
+                  'closed' => ['Closed','bg-gray-500/30 text-gray-100 border border-gray-400/30'],
+                ];
+                $stateMeta = $stateLabels[$workflowState] ?? $stateLabels['published'];
+              ?>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-2 py-0.5 rounded-full text-xs <?= $stateMeta[1] ?>"><?= $stateMeta[0] ?></span>
+                <?php if (!empty($t['approval_required'])): ?>
+                  <span class="px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-200 border border-amber-500/30">Perlu Approval</span>
+                <?php endif; ?>
+                <span class="px-2 py-0.5 rounded-full text-xs bg-gray-500/20 text-gray-100 border border-gray-500/30">Attempts: <?= intval($t['max_attempts'] ?? 1) ?></span>
+                <?php if (!empty($t['allow_late'])): ?>
+                  <span class="px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-100 border border-green-500/30">Late allowed</span>
+                <?php endif; ?>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <?php if ($userLevel === 'user'): ?>
+                <?php $sub = $t['student_submission'] ?? null; ?>
+                <?php if ($sub): 
+                  $reviewStatus = $sub['review_status'] ?? 'pending';
+                  $statusColors = [
+                    'pending' => 'bg-yellow-500/20 text-yellow-200 border border-yellow-500/30',
+                    'in_review' => 'bg-blue-500/20 text-blue-200 border border-blue-500/30',
+                    'needs_revision' => 'bg-red-500/20 text-red-200 border border-red-500/30',
+                    'approved' => 'bg-emerald-500/20 text-emerald-200 border border-emerald-500/30',
+                    'graded' => 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/30'
+                  ];
+                  $badge = $statusColors[$reviewStatus] ?? 'bg-gray-500/20 text-gray-100 border border-gray-500/30';
+                ?>
+                  <div class="space-y-1">
+                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold <?= $badge ?>">
+                      Status: <?= ucfirst(str_replace('_',' ', $reviewStatus)) ?>
+                    </span>
+                    <p class="text-xs text-gray-400">Percobaan #<?= intval($sub['attempt_no'] ?? 1) ?><?= !empty($sub['is_final']) ? ' • Final' : '' ?></p>
+                    <?php if (!empty($sub['grade'])): ?>
+                      <p class="text-xs text-emerald-300 font-semibold">Grade: <?= floatval($sub['grade']) ?></p>
+                    <?php endif; ?>
+                  </div>
+                <?php else: ?>
+                  <span class="text-sm text-gray-400">Belum ada submission</span>
+                <?php endif; ?>
+              <?php else: ?>
+                <?php $stat = $teacherSubmissionStats[$t['id']] ?? null; ?>
+                <?php if ($stat): ?>
+                  <div class="grid grid-cols-2 gap-2 text-xs text-gray-300">
+                    <span>Pending: <strong><?= intval($stat['pending'] ?? 0) ?></strong></span>
+                    <span>Review: <strong><?= intval($stat['in_review'] ?? 0) ?></strong></span>
+                    <span>Revision: <strong><?= intval($stat['needs_revision'] ?? 0) ?></strong></span>
+                    <span>Graded: <strong><?= intval($stat['graded'] ?? 0) ?></strong></span>
+                  </div>
+                <?php else: ?>
+                  <span class="text-sm text-gray-400">Belum ada submission</span>
+                <?php endif; ?>
+              <?php endif; ?>
             </td>
             <td class="px-6 py-4">
               <?php if (($t['status'] ?? '') === 'Completed'): ?>

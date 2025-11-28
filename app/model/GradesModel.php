@@ -35,4 +35,25 @@ class GradesModel {
         $id = intval($id);
         return $this->db->query("DELETE FROM grades WHERE id=$id");
     }
+
+    public function findByTaskAndUser($taskId, $userId) {
+        $taskId = intval($taskId);
+        $userId = intval($userId);
+        $stmt = $this->db->prepare("SELECT * FROM grades WHERE task_id = ? AND user_id = ? LIMIT 1");
+        if (!$stmt) return null;
+        $stmt->bind_param('ii', $taskId, $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res ? $res->fetch_assoc() : null;
+        $stmt->close();
+        return $row;
+    }
+
+    public function saveOrUpdate($data) {
+        $existing = $this->findByTaskAndUser($data['task_id'], $data['user_id']);
+        if ($existing) {
+            return $this->update($existing['id'], $data);
+        }
+        return $this->create($data);
+    }
 }

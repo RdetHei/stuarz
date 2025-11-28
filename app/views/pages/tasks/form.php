@@ -8,6 +8,13 @@ $status = $edit ? $task['status'] : '';
 $deadline = $edit ? $task['deadline'] : '';
 $class_id = $edit ? $task['class_id'] : '';
 $subject_id = $edit ? $task['subject_id'] : '';
+$workflow_state = $edit ? ($task['workflow_state'] ?? 'published') : 'published';
+$approval_required = $edit ? intval($task['approval_required'] ?? 0) : 0;
+$max_attempts = $edit ? intval($task['max_attempts'] ?? 1) : 1;
+$reminder_at = $edit && !empty($task['reminder_at']) ? date('Y-m-d\TH:i', strtotime($task['reminder_at'])) : '';
+$allow_late = $edit ? intval($task['allow_late'] ?? 0) : 0;
+$late_deadline = $edit && !empty($task['late_deadline']) ? date('Y-m-d', strtotime($task['late_deadline'])) : '';
+$rubricValue = $edit && !empty($task['grading_rubric']) ? json_encode($task['grading_rubric'], JSON_PRETTY_PRINT) : '';
 $classes = $classes ?? [];
 $subjects = $subjects ?? [];
 $schedules = $schedules ?? [];
@@ -178,6 +185,63 @@ $schedules = $schedules ?? [];
           </select>
         </div>
 
+        <!-- Workflow State -->
+        <div>
+          <label for="workflow_state" class="block text-sm font-medium text-gray-300 mb-2">
+            Workflow State
+          </label>
+          <select name="workflow_state" id="workflow_state" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
+            <?php $states = ['draft' => 'Draft', 'published' => 'Published', 'in_review' => 'In Review', 'closed' => 'Closed']; ?>
+            <?php foreach ($states as $value => $label): ?>
+              <option value="<?= $value ?>" <?= $workflow_state === $value ? 'selected' : '' ?>><?= $label ?></option>
+            <?php endforeach; ?>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">Draft tidak dapat diakses siswa, Closed menutup pengumpulan.</p>
+        </div>
+
+        <!-- Approval Toggle & Max Attempts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Pengumpulan wajib approval?</label>
+            <label class="inline-flex items-center gap-2 text-gray-300">
+              <input type="checkbox" name="approval_required" value="1" <?= $approval_required ? 'checked' : '' ?> class="rounded bg-gray-900 border-gray-600 text-indigo-600">
+              <span>Aktifkan jika guru ingin review sebelum dinilai.</span>
+            </label>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Maksimal Percobaan</label>
+            <input type="number" name="max_attempts" min="1" value="<?= htmlspecialchars($max_attempts) ?>" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-indigo-600">
+            <p class="text-xs text-gray-500 mt-1">Atur berapa kali siswa boleh mengumpulkan.</p>
+          </div>
+        </div>
+
+        <!-- Reminder & Late Policy -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Kirim Reminder Otomatis</label>
+            <input type="datetime-local" name="reminder_at" value="<?= $reminder_at ?>" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-indigo-600">
+            <p class="text-xs text-gray-500 mt-1">Sistem akan mengirim notifikasi ke siswa pada waktu ini.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Izinkan Pengumpulan Terlambat</label>
+            <label class="inline-flex items-center gap-2 text-gray-300">
+              <input type="checkbox" name="allow_late" value="1" <?= $allow_late ? 'checked' : '' ?> class="rounded bg-gray-900 border-gray-600 text-indigo-600">
+              <span>Aktifkan untuk memberi waktu tambahan.</span>
+            </label>
+            <input type="date" name="late_deadline" value="<?= $late_deadline ?>" class="mt-2 w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-indigo-600" placeholder="Tanggal grace period">
+          </div>
+        </div>
+
+        <!-- Rubric Builder -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-300 mb-2">Rubrik Penilaian</label>
+          <textarea name="grading_rubric" rows="4" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all resize-none placeholder:text-gray-500" placeholder='Contoh:
+Pemahaman Konsep:40
+Kerapihan:30
+Kreativitas:30'><?= htmlspecialchars($rubricValue) ?></textarea>
+          <p class="text-xs text-gray-500 mt-2">Masukkan JSON atau format "Kriteria:Skor" per baris. Digunakan saat memberi nilai.</p>
+        </div>
+
         <!-- Description -->
         <div class="md:col-span-2">
           <label for="description" class="block text-sm font-medium text-gray-300 mb-2">
@@ -270,6 +334,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('taskForm');
     const fileInput = document.getElementById('file');
     const label = fileInput?.closest('label');
+    const allowLateCheckbox = document.querySelector('input[name="allow_late"]');
+    const lateDeadlineInput = document.querySelector('input[name="late_deadline"]');
     
     // File input preview
     if (fileInput && label) {
@@ -296,6 +362,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             }
         });
+    }
+
+    if (allowLateCheckbox && lateDeadlineInput) {
+        const toggleLateDeadline = () => {
+            lateDeadlineInput.disabled = !allowLateCheckbox.checked;
+            if (!allowLateCheckbox.checked) lateDeadlineInput.value = '';
+        };
+        allowLateCheckbox.addEventListener('change', toggleLateDeadline);
+        toggleLateDeadline();
     }
     
     // Form validation
