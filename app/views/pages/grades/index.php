@@ -1,16 +1,30 @@
 <div class="max-w-7xl mx-auto p-6">
   <div class="mb-8">
     <div class="flex items-center justify-between flex-wrap gap-4">
-      <div class="flex items-center gap-4">
-        <div class="w-14 h-14 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg">
-          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">Grades</h1>
+            <p class="text-gray-400 text-sm mt-1">Kelola nilai dan penilaian siswa</p>
+          </div>
+        </div>
+        <?php 
+        $userLevel = $_SESSION['level'] ?? 'user';
+        if ($userLevel === 'admin' || $userLevel === 'guru'): 
+        ?>
+        <a href="index.php?page=grades/grading" 
+           class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
           </svg>
-        </div>
-        <div>
-          <h1 class="text-3xl font-bold text-white">Grades</h1>
-          <p class="text-gray-400 text-sm mt-1">Kelola nilai dan penilaian siswa</p>
-        </div>
+          Grading Tugas
+        </a>
+        <?php endif; ?>
       </div>
     </div>
     <div class="mt-6 bg-gray-800 border border-gray-700 rounded-lg p-4">

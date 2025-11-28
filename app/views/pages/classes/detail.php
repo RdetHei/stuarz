@@ -353,6 +353,99 @@ $avatarSrc = $prefix . basename($creatorAvatar);
       <!-- Tasks Tab -->
       <div data-tab-content="tugas" class="hidden">
         <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
+          <?php 
+          $classTasks = $tasks ?? [];
+          $userLevel = $_SESSION['level'] ?? 'user';
+          $userId = $_SESSION['user_id'] ?? 0;
+          ?>
+          
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="text-lg font-bold text-white">Daftar Tugas</h3>
+              <p class="text-sm text-gray-400">Tugas untuk kelas <?= htmlspecialchars($class['name'] ?? '') ?></p>
+            </div>
+            <?php if ($role === 'admin' || $role === 'teacher' || $role === 'guru'): ?>
+            <a href="index.php?page=tasks/create&class_id=<?= intval($class['id'] ?? 0) ?>" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Buat Tugas Baru
+            </a>
+            <?php endif; ?>
+          </div>
+
+          <?php if (!empty($classTasks)): ?>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-gray-900 border-b border-gray-700">
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Judul</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Mata Pelajaran</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Guru</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Deadline</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Status</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-gray-400 uppercase">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-700">
+                <?php foreach ($classTasks as $t): ?>
+                <tr class="hover:bg-gray-700/50 transition-colors">
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-2">
+                      <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                      <span class="text-white font-medium"><?= htmlspecialchars($t['title'] ?? '') ?></span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-gray-400 text-sm"><?= htmlspecialchars($t['subject_name'] ?? '-') ?></td>
+                  <td class="px-4 py-3 text-gray-400 text-sm"><?= htmlspecialchars($t['teacher_name'] ?? '-') ?></td>
+                  <td class="px-4 py-3 text-gray-400 text-sm">
+                    <?= htmlspecialchars($t['deadline'] ?? '-') ?>
+                  </td>
+                  <td class="px-4 py-3">
+                    <?php 
+                    $workflowState = strtolower($t['workflow_state'] ?? 'published');
+                    $stateLabels = [
+                      'draft' => ['Draft','bg-gray-600/30 text-gray-200 border border-gray-500/40'],
+                      'published' => ['Published','bg-indigo-600/20 text-indigo-200 border border-indigo-500/40'],
+                      'in_review' => ['In Review','bg-blue-600/20 text-blue-200 border border-blue-500/40'],
+                      'closed' => ['Closed','bg-gray-500/30 text-gray-100 border border-gray-400/30'],
+                    ];
+                    $stateMeta = $stateLabels[$workflowState] ?? $stateLabels['published'];
+                    ?>
+                    <span class="px-2 py-1 rounded-full text-xs <?= $stateMeta[1] ?>"><?= $stateMeta[0] ?></span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-end gap-2">
+                      <?php 
+                      $canEdit = ($userLevel === 'admin') || ($userLevel === 'guru' && ($t['user_id'] ?? 0) == $userId);
+                      ?>
+                      <?php if ($canEdit): ?>
+                      <a href="index.php?page=tasks/edit&id=<?= $t['id'] ?>" 
+                         class="p-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-600/30 text-indigo-400 rounded-lg transition-all" 
+                         title="Edit">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                      </a>
+                      <?php endif; ?>
+                      <a href="index.php?page=tasks" 
+                         class="p-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/30 text-blue-400 rounded-lg transition-all" 
+                         title="Lihat Detail">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+          <?php else: ?>
           <div class="text-center py-12">
             <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-700/50 flex items-center justify-center">
               <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,7 +455,7 @@ $avatarSrc = $prefix . basename($creatorAvatar);
             <h3 class="text-lg font-bold text-white mb-2">Belum Ada Tugas</h3>
             <p class="text-sm text-gray-400 mb-6">Tidak ada tugas yang tersedia untuk kelas ini.</p>
             <?php if ($role === 'admin' || $role === 'teacher' || $role === 'guru'): ?>
-            <a href="#" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors">
+            <a href="index.php?page=tasks/create&class_id=<?= intval($class['id'] ?? 0) ?>" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
               </svg>
@@ -370,6 +463,7 @@ $avatarSrc = $prefix . basename($creatorAvatar);
             </a>
             <?php endif; ?>
           </div>
+          <?php endif; ?>
         </div>
       </div>
 

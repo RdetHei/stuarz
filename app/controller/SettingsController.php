@@ -32,7 +32,6 @@ class SettingsController
     public function update()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        if (function_exists('csrf_require')) csrf_require();
 
         $userId = $_SESSION['user_id'] ?? null;
         if (!$userId) {

@@ -37,10 +37,9 @@
         <!-- Form -->
         <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700">
             <form method="post" 
-                action="index.php?page=<?= $isEdit ? 'announcement_update' : 'announcement_store' ?>" 
-                enctype="multipart/form-data"
-                class="p-6 space-y-6">
-                <?php if (function_exists('csrf_field')) csrf_field(); ?>
+                  action="index.php?page=<?= $isEdit ? 'announcement_update' : 'announcement_store' ?>" 
+                  enctype="multipart/form-data"
+                  class="p-6 space-y-6">
 
                 <?php if ($isEdit): ?>
                     <input type="hidden" name="id" value="<?= (int)$announcement['id'] ?>">

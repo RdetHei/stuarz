@@ -493,3 +493,4 @@ function initTasksPage() {
 </script>
 </div>
 
+</script>

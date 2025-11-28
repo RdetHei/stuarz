@@ -135,6 +135,210 @@ class GradeController
         exit;
     }
 
+    /**
+     * Halaman grading untuk melihat dan memberikan nilai pada task submissions
+     */
+    public function grading() {
+        $this->ensureCanManage();
+        $user = $this->requireUser();
+        $level = $_SESSION['level'] ?? 'user';
+        $userId = intval($user['id'] ?? 0);
+
+        // Load models
+        require_once dirname(__DIR__) . '/model/TaskSubmissionsModel.php';
+        require_once dirname(__DIR__) . '/model/TasksCompletedModel.php';
+        require_once dirname(__DIR__) . '/model/ClassModel.php';
+        require_once dirname(__DIR__) . '/model/SubjectsModel.php';
+        
+        $submissionModel = new TaskSubmissionsModel($this->db);
+        $taskModel = new TasksCompletedModel($this->db);
+        $classModel = new ClassModel($this->db);
+        $subjectModel = new SubjectsModel($this->db);
+
+        // Get filter parameters
+        $filterTask = isset($_GET['task_id']) ? intval($_GET['task_id']) : null;
+        $filterStatus = isset($_GET['status']) ? $_GET['status'] : 'pending';
+        $filterClass = isset($_GET['class_id']) ? intval($_GET['class_id']) : null;
+
+        // Fetch submissions that need grading
+        $submissions = $this->fetchSubmissionsForGrading($userId, $level, $filterTask, $filterStatus, $filterClass);
+
+        // Get related data for filters
+        $tasks = [];
+        $classes = $classModel->getAll();
+        $subjects = $subjectModel->getAll();
+
+        if ($level === 'guru') {
+            // Guru hanya melihat tugas mereka sendiri
+            $tasks = $taskModel->getByTeacherId($userId);
+        } else {
+            // Admin melihat semua
+            $tasks = $taskModel->getAll();
+        }
+
+        $content = dirname(__DIR__) . '/views/pages/grades/grading.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    /**
+     * Simpan nilai dari grading submission
+     */
+    public function gradeSubmission() {
+        $this->ensureCanManage();
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        $submissionId = intval($_POST['submission_id'] ?? 0);
+        $score = isset($_POST['score']) && $_POST['score'] !== '' ? floatval($_POST['score']) : null;
+        $feedback = trim($_POST['feedback'] ?? '');
+        $reviewStatus = $_POST['review_status'] ?? 'graded';
+
+        if (!$submissionId) {
+            $_SESSION['error'] = 'Submission tidak valid.';
+            header('Location: index.php?page=grades/grading');
+            exit;
+        }
+
+        require_once dirname(__DIR__) . '/model/TaskSubmissionsModel.php';
+        $submissionModel = new TaskSubmissionsModel($this->db);
+        
+        $submission = $submissionModel->getById($submissionId);
+        if (!$submission) {
+            $_SESSION['error'] = 'Submission tidak ditemukan.';
+            header('Location: index.php?page=grades/grading');
+            exit;
+        }
+
+        // Update submission with grade
+        $updateData = [
+            'review_status' => $reviewStatus,
+            'feedback' => $feedback !== '' ? $feedback : null,
+            'reviewed_by' => $_SESSION['user_id'],
+            'reviewed_at' => date('Y-m-d H:i:s')
+        ];
+
+        if ($score !== null) {
+            $updateData['grade'] = $score;
+            $updateData['status'] = 'graded';
+        }
+
+        // Update review
+        $ok = $submissionModel->updateReview($submissionId, $updateData);
+
+        // If graded, also save to grades table
+        if ($ok && $score !== null) {
+            require_once dirname(__DIR__) . '/model/TasksCompletedModel.php';
+            $taskModel = new TasksCompletedModel($this->db);
+            $task = $taskModel->getById($submission['task_id']);
+
+            if ($task) {
+                $gradeData = [
+                    'user_id' => intval($submission['user_id']),
+                    'class_id' => intval($submission['class_id']),
+                    'subject_id' => intval($task['subject_id'] ?? 0),
+                    'task_id' => intval($submission['task_id']),
+                    'score' => $score
+                ];
+                $this->model->saveOrUpdate($gradeData);
+            }
+
+            // Send notification
+            require_once dirname(__DIR__) . '/helpers/notifier.php';
+            notify_event(
+                $this->db,
+                'grade',
+                'task',
+                intval($submission['task_id']),
+                intval($submission['user_id']),
+                'Nilai untuk tugas Anda sudah tersedia.',
+                'index.php?page=grades'
+            );
+        }
+
+        $_SESSION['success'] = $ok ? 'Nilai berhasil disimpan.' : 'Gagal menyimpan nilai.';
+        header('Location: index.php?page=grades/grading');
+        exit;
+    }
+
+    private function fetchSubmissionsForGrading($userId, $level, $taskId = null, $status = 'pending', $classId = null) {
+        require_once dirname(__DIR__) . '/model/TaskSubmissionsModel.php';
+        require_once dirname(__DIR__) . '/model/TasksCompletedModel.php';
+        $submissionModel = new TaskSubmissionsModel($this->db);
+        $taskModel = new TasksCompletedModel($this->db);
+
+        // Build query to get submissions with task info
+        $sql = "SELECT ts.*, 
+                u.username, u.name AS student_name, 
+                t.title AS task_title, t.class_id AS task_class_id, t.subject_id, t.user_id AS task_teacher_id,
+                c.name AS class_name,
+                s.name AS subject_name
+                FROM task_submissions ts
+                LEFT JOIN users u ON ts.user_id = u.id
+                LEFT JOIN tasks_completed t ON ts.task_id = t.id
+                LEFT JOIN classes c ON ts.class_id = c.id
+                LEFT JOIN subjects s ON t.subject_id = s.id
+                WHERE 1=1";
+
+        $conditions = [];
+        $params = [];
+        $paramTypes = '';
+
+        if ($level === 'guru') {
+            $conditions[] = "t.user_id = ?";
+            $params[] = $userId;
+            $paramTypes .= 'i';
+        }
+
+        if ($taskId) {
+            $conditions[] = "ts.task_id = ?";
+            $params[] = $taskId;
+            $paramTypes .= 'i';
+        }
+
+        if ($status && $status !== 'all') {
+            $conditions[] = "ts.review_status = ?";
+            $params[] = $status;
+            $paramTypes .= 's';
+        }
+
+        if ($classId) {
+            $conditions[] = "ts.class_id = ?";
+            $params[] = $classId;
+            $paramTypes .= 'i';
+        }
+
+        if (!empty($conditions)) {
+            $sql .= " AND " . implode(" AND ", $conditions);
+        }
+
+        $sql .= " ORDER BY ts.submitted_at DESC";
+
+        if (!empty($params)) {
+            $stmt = $this->db->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param($paramTypes, ...$params);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $stmt->close();
+            } else {
+                $result = null;
+            }
+        } else {
+            $result = $this->db->query($sql);
+        }
+
+        $submissions = [];
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $submissions[] = $row;
+            }
+            if (method_exists($result, 'free')) {
+                $result->free();
+            }
+        }
+
+        return $submissions;
+    }
+
     private function buildStats($userId) {
         global $config;
         $stats = ['total' => 0, 'avg' => 0, 'max' => 0, 'week' => 0];

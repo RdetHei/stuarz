@@ -57,7 +57,6 @@ $schedules = $schedules ?? [];
 
   <div class="bg-gray-800 border border-gray-700 rounded-xl p-6">
     <form method="post" action="<?= $action ?>" enctype="multipart/form-data" class="space-y-6" id="taskForm">
-      <?php if (function_exists('csrf_field')) csrf_field(); ?>
       <?php if ($edit): ?>
         <input type="hidden" name="id" value="<?= $id ?>">
       <?php endif; ?>

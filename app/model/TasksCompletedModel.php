@@ -138,29 +138,76 @@ class TasksCompletedModel {
     }
     
     public function getByStudentClass($studentId) {
-        // Get student's class first
-        $stmt = $this->db->prepare("SELECT class FROM users WHERE id = ?");
+        // Get all classes the student is a member of from class_members table
+        $stmt = $this->db->prepare("SELECT class_id FROM class_members WHERE user_id = ? AND role = 'student'");
         $stmt->bind_param('i', $studentId);
         $stmt->execute();
         $result = $stmt->get_result();
-        $student = $result->fetch_assoc();
         
-        if (!$student || !$student['class']) {
-            return [];
+        $classIds = [];
+        while ($row = $result->fetch_assoc()) {
+            $classIds[] = intval($row['class_id']);
+        }
+        $stmt->close();
+        
+        // If student is not a member of any class, try fallback method for backward compatibility
+        if (empty($classIds)) {
+            // Fallback: try old method (users.class column) for backward compatibility
+            $stmt = $this->db->prepare("SELECT class FROM users WHERE id = ?");
+            $stmt->bind_param('i', $studentId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $student = $result->fetch_assoc();
+            $stmt->close();
+            
+            if ($student && !empty($student['class'])) {
+                $stmt = $this->db->prepare("SELECT id FROM classes WHERE name = ?");
+                $stmt->bind_param('s', $student['class']);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $class = $result->fetch_assoc();
+                $stmt->close();
+                
+                if ($class) {
+                    $classIds = [intval($class['id'])];
+                }
+            }
+            
+            if (empty($classIds)) {
+                return [];
+            }
         }
         
-        // Get class ID from class name
-        $stmt = $this->db->prepare("SELECT id FROM classes WHERE name = ?");
-        $stmt->bind_param('s', $student['class']);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $class = $result->fetch_assoc();
-        
-        if (!$class) {
-            return [];
+        // Use getAll method with multiple class_ids filter
+        // Build filter with multiple class_ids
+        $allTasks = [];
+        foreach ($classIds as $classId) {
+            $tasks = $this->getAll(['class_id' => $classId]);
+            $allTasks = array_merge($allTasks, $tasks);
         }
         
-        return $this->getAll(['class_id' => $class['id']]);
+        // Remove duplicates (in case there are any)
+        $uniqueTasks = [];
+        $seenIds = [];
+        foreach ($allTasks as $task) {
+            $taskId = intval($task['id'] ?? 0);
+            if (!isset($seenIds[$taskId])) {
+                $seenIds[$taskId] = true;
+                $uniqueTasks[] = $task;
+            }
+        }
+        
+        // Sort by deadline DESC
+        usort($uniqueTasks, function($a, $b) {
+            $deadlineA = $a['deadline'] ?? '';
+            $deadlineB = $b['deadline'] ?? '';
+            if ($deadlineA === $deadlineB) return 0;
+            if ($deadlineA === '') return 1;
+            if ($deadlineB === '') return -1;
+            return strcmp($deadlineB, $deadlineA);
+        });
+        
+        return $uniqueTasks;
     }
     
     public function getById($id) {

@@ -129,6 +129,8 @@ $router->post('/tasks/update', 'TaskController@update');
 $router->post('/tasks/delete', 'TaskController@delete');
 $router->post('/tasks/submit', 'TaskController@storeSubmission');
 $router->post('/tasks/review', 'TaskController@reviewSubmission');
+$router->get('/grades/grading', 'GradeController@grading');
+$router->post('/grades/grade-submission', 'GradeController@gradeSubmission');
 $router->post('/tasks/send-reminders', 'TaskController@sendReminders');
 $router->get('/tasks/submissions', 'TaskController@submissions');
 $router->get('/announcement', 'AnnouncementController@index');
