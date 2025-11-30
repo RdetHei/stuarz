@@ -186,6 +186,17 @@ $router->post('/attendance_checkout', 'AttendanceController@checkOut');
 $router->post('/attendance_edit', 'AttendanceController@edit');
 $router->post('/attendance_delete', 'AttendanceController@delete');
 
+// Student-only UI routes
+$router->get('/student/tasks', 'TaskController@studentTasks');
+$router->get('/student/task/{id}', 'TaskController@studentTaskDetail');
+$router->get('/student/submit', 'TaskController@studentSubmit');
+$router->post('/student/submit_action', 'TaskController@storeSubmission');
+$router->get('/student/attendance', 'AttendanceController@my');
+$router->get('/student/profile', 'ProfileController@studentProfile');
+$router->post('/student/profile_update', 'ProfileController@updateStudentProfile');
+$router->get('/student/notifications', 'NotificationController@index');
+
+
 
 // Backward-compat: map ?page=... into a path for dispatching
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';

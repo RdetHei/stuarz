@@ -60,10 +60,10 @@
             if (!badge) return;
             const count = res && res.count ? Number(res.count) : 0;
             if (count > 0) {
-                badge.style.display = 'inline-block';
+                badge.classList.remove('hidden');
                 badge.textContent = count > 99 ? '99+' : String(count);
             } else {
-                badge.style.display = 'none';
+                badge.classList.add('hidden');
             }
         } catch (e) { console.error('Notif badge update failed', e); }
     }

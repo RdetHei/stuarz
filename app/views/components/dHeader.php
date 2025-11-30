@@ -96,7 +96,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
         
         <button id="notifBtn" class="p-2 hover:bg-slate-700 rounded relative" aria-label="Notifications" title="Notifications">
             <span class="material-symbols-outlined">notifications</span>
-            <span id="notifBadge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-[10px] rounded-full px-1 leading-4" style="display:none">0</span>
+            <span id="notifBadge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-[10px] rounded-full px-1 leading-4 hidden">0</span>
         </button>
 
         <?php

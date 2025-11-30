@@ -15,7 +15,8 @@ class NotificationController
 
         global $config;
         $nm = new NotificationsModel($config);
-        $notifications = $nm->getRecent(100);
+        // Only retrieve notifications belonging to the current user
+        $notifications = $nm->getForUser($userId, 200);
 
         $content = dirname(__DIR__) . '/views/pages/notifications/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';

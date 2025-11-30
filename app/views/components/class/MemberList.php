@@ -35,28 +35,81 @@ $roleColors = [
   <div class="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
     <?php
       $totalMembers = count($members);
-      $teachers = count(array_filter($members, fn($m) => in_array($m['role'] ?? '', ['teacher', 'guru', 'admin'])));
-      $students = count(array_filter($members, fn($m) => ($m['role'] ?? '') === 'student'));
+
+      // Hitung jumlah berdasarkan level; prefer 'level' dari tabel users.
+      $levelCounts = [ 'admin' => 0, 'guru' => 0, 'user' => 0, 'other' => 0 ];
+
+      // Kumpulkan user IDs yang tidak memiliki 'level' pada entry members
+      $missingIds = [];
+      foreach ($members as $mm) {
+        $uid = intval($mm['user_id'] ?? $mm['id'] ?? 0);
+        $hasLevel = isset($mm['level']) && $mm['level'] !== '';
+        if (!$hasLevel && $uid) $missingIds[$uid] = $uid;
+      }
+
+      // Jika ada missing, query tabel users untuk mengambil level mereka (batch)
+      $levelsMap = [];
+      if (!empty($missingIds)) {
+        try {
+          global $config;
+          if ($config instanceof mysqli) {
+            $ids = array_map('intval', array_values($missingIds));
+            $in = implode(',', $ids);
+            $sql = "SELECT id, level FROM users WHERE id IN ($in)";
+            $res = $config->query($sql);
+            if ($res) {
+              while ($r = $res->fetch_assoc()) {
+                $levelsMap[intval($r['id'])] = $r['level'] ?? '';
+              }
+              $res->free();
+            }
+          }
+        } catch (Throwable $e) {
+          // ignore DB errors and fallback to existing member data
+        }
+      }
+
+      foreach ($members as $mm) {
+        $uid = intval($mm['user_id'] ?? $mm['id'] ?? 0);
+        $raw = '';
+        if (isset($mm['level']) && $mm['level'] !== '') {
+          $raw = (string)$mm['level'];
+        } elseif ($uid && isset($levelsMap[$uid])) {
+          $raw = (string)$levelsMap[$uid];
+        } else {
+          $raw = (string)($mm['role'] ?? '');
+        }
+        $raw = strtolower(trim($raw));
+        if ($raw === 'teacher') $raw = 'guru';
+        if ($raw === 'student') $raw = 'user';
+        if ($raw === '') $raw = 'other';
+        if (!isset($levelCounts[$raw])) $levelCounts[$raw] = 0;
+        $levelCounts[$raw]++;
+      }
+
+      $teachers = ($levelCounts['guru'] ?? 0);
+      $students = ($levelCounts['user'] ?? 0);
+      $admins = ($levelCounts['admin'] ?? 0);
     ?>
-    
+
     <div class="bg-gray-750 border border-gray-700 rounded-lg p-4">
       <div class="text-sm text-gray-400 mb-1">Total</div>
       <div class="text-2xl font-bold text-white"><?= $totalMembers ?></div>
     </div>
-    
+
     <div class="bg-gray-750 border border-gray-700 rounded-lg p-4">
       <div class="text-sm text-gray-400 mb-1">Pengajar</div>
       <div class="text-2xl font-bold text-purple-400"><?= $teachers ?></div>
     </div>
-    
+
     <div class="bg-gray-750 border border-gray-700 rounded-lg p-4">
       <div class="text-sm text-gray-400 mb-1">Siswa</div>
       <div class="text-2xl font-bold text-blue-400"><?= $students ?></div>
     </div>
-    
+
     <div class="bg-gray-750 border border-gray-700 rounded-lg p-4">
-      <div class="text-sm text-gray-400 mb-1">Aktif</div>
-      <div class="text-2xl font-bold text-emerald-400"><?= $totalMembers ?></div>
+      <div class="text-sm text-gray-400 mb-1">Admin</div>
+      <div class="text-2xl font-bold text-amber-400"><?= $admins ?></div>
     </div>
   </div>
 

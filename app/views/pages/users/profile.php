@@ -36,6 +36,28 @@ $avatarSrc = $prefix . ltrim($avatarVal ?: '/assets/default-avatar.png', '/');
 
 $bannerVal = $user['banner'] ?? '';
 $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
+
+// Determine if the user is a member of any class; if so, build a link to the first class detail
+$profileClassLink = null;
+$profileClassText = $user['class'] ?? $defaultUser['class'];
+if (!empty($user['id'])) {
+  $classModelPath = dirname(__DIR__, 3) . '/model/ClassModel.php';
+  if (is_file($classModelPath)) {
+    require_once $classModelPath;
+    try {
+      global $config;
+      $cm = new ClassModel($config);
+      $userClasses = $cm->getAll((int)$user['id']);
+      if (!empty($userClasses) && isset($userClasses[0]['id'])) {
+        $firstClass = $userClasses[0];
+        $profileClassLink = 'index.php?page=class/detail/' . intval($firstClass['id']);
+        $profileClassText = $firstClass['name'] ?? $profileClassText;
+      }
+    } catch (Throwable $e) {
+      
+    }
+  }
+}
 ?>
 
 <div class="bg-gray-900 min-h-screen py-8 px-4 lg:px-8">
@@ -62,7 +84,13 @@ $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
           
           <div class="hidden sm:block ml-6 pb-4 text-white">
             <h1 class="text-3xl lg:text-4xl font-bold mb-1"><?= htmlspecialchars($user['name']) ?></h1>
-            <p class="text-gray-300 text-lg">@<?= htmlspecialchars(strtolower(str_replace(' ', '', $user['class'] ?? 'user'))) ?></p>
+            <p class="text-gray-300 text-lg">@
+              <?php if ($profileClassLink): ?>
+                <a href="<?= htmlspecialchars($profileClassLink, ENT_QUOTES, 'UTF-8') ?>" class="text-indigo-300 hover:underline"><?= htmlspecialchars(strtolower(str_replace(' ', '', $profileClassText))) ?></a>
+              <?php else: ?>
+                <?= htmlspecialchars(strtolower(str_replace(' ', '', $profileClassText))) ?>
+              <?php endif; ?>
+            </p>
           </div>
         </div>
       </div>
@@ -72,7 +100,13 @@ $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
         
         <div class="sm:hidden mb-6">
           <h1 class="text-2xl font-bold text-white mb-1"><?= htmlspecialchars($user['name']) ?></h1>
-          <p class="text-gray-300 mb-3">@<?= htmlspecialchars(strtolower(str_replace(' ', '', $user['class'] ?? 'user'))) ?></p>
+          <p class="text-gray-300 mb-3">@
+            <?php if ($profileClassLink): ?>
+              <a href="<?= htmlspecialchars($profileClassLink, ENT_QUOTES, 'UTF-8') ?>" class="text-indigo-300 hover:underline"><?= htmlspecialchars(strtolower(str_replace(' ', '', $profileClassText))) ?></a>
+            <?php else: ?>
+              <?= htmlspecialchars(strtolower(str_replace(' ', '', $profileClassText))) ?>
+            <?php endif; ?>
+          </p>
           <p class="text-gray-400"><?= htmlspecialchars($user['bio'] ?? '') ?></p>
         </div>
 

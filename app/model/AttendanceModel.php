@@ -101,4 +101,16 @@ class AttendanceModel {
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
+
+    /**
+     * Get attendance rows for a specific user (recent first)
+     */
+    public function getByUser(int $userId, $limit = 200)
+    {
+        $sql = "SELECT * FROM attendance WHERE user_id = ? ORDER BY date DESC LIMIT ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param('ii', $userId, $limit);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
 }

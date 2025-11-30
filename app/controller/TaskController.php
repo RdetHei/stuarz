@@ -161,6 +161,66 @@ class TaskController {
 
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
+    /**
+     * Student-facing task list (simplified)
+     */
+    public function studentTasks()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user_id'] ?? null;
+        if (!$userId) { header('Location: index.php?page=login'); exit; }
+
+        // Fetch tasks relevant to this student
+        $tasks = $this->model->getByStudentClass($userId);
+        // Enrich tasks with subject name if available
+        foreach ($tasks as &$t) {
+            if (empty($t['subject_name']) && !empty($t['subject_id'])) {
+                $res = mysqli_query($this->db, "SELECT name FROM subjects WHERE id = " . intval($t['subject_id']) . " LIMIT 1");
+                if ($res && $r = mysqli_fetch_assoc($res)) $t['subject_name'] = $r['name'];
+            }
+            $t['task_id'] = $t['id'];
+        }
+        unset($t);
+
+        $content = dirname(__DIR__) . '/views/pages/student/tasks.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    public function studentTaskDetail($id = 0)
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user_id'] ?? null;
+        if (!$userId) { header('Location: index.php?page=login'); exit; }
+        $taskId = intval($id ?: ($_GET['id'] ?? 0));
+        if (!$taskId) { $_SESSION['error'] = 'Task ID invalid'; header('Location: index.php?page=student/tasks'); exit; }
+
+        $task = $this->model->getById($taskId);
+        if (!$task) { $_SESSION['error'] = 'Task not found'; header('Location: index.php?page=student/tasks'); exit; }
+
+        // Ensure task belongs to student's class (simple check)
+        $studentTasks = $this->model->getByStudentClass($userId);
+        $allowed = false;
+        foreach ($studentTasks as $st) if (intval($st['id']) === $taskId) { $allowed = true; break; }
+        if (!$allowed) { $_SESSION['error'] = 'Anda tidak dapat melihat tugas ini.'; header('Location: index.php?page=student/tasks'); exit; }
+
+        // Get latest submission by this user for this task
+        $submission = $this->submissionModel->getLatestByTaskIds([$taskId], $userId)[$taskId] ?? null;
+
+        $content = dirname(__DIR__) . '/views/pages/student/task_detail.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    public function studentSubmit()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user_id'] ?? null;
+        if (!$userId) { header('Location: index.php?page=login'); exit; }
+        $taskId = intval($_GET['task_id'] ?? 0);
+        $task = $this->model->getById($taskId);
+        if (!$task) { $_SESSION['error'] = 'Task not found.'; header('Location: index.php?page=student/tasks'); exit; }
+        $content = dirname(__DIR__) . '/views/pages/student/submit.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
     public function create() {
         // Check if user can create tasks (admin or guru only)
         $userLevel = $_SESSION['level'] ?? 'user';
@@ -336,9 +396,26 @@ class TaskController {
             header('Location: index.php?page=tasks'); exit;
         }
 
+        // Server-side file validation
+        $allowedExt = ['pdf','doc','docx','txt','jpg','jpeg','png'];
+        $maxSize = 5 * 1024 * 1024; // 5MB
+        $originalName = $_FILES['file']['name'];
+        $size = $_FILES['file']['size'];
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExt, true)) {
+            $_SESSION['error'] = 'Tipe file tidak didukung.';
+            header('Location: index.php?page=tasks'); exit;
+        }
+        if ($size > $maxSize) {
+            $_SESSION['error'] = 'Ukuran file melebihi batas 5MB.';
+            header('Location: index.php?page=tasks'); exit;
+        }
+
         $uploadDir = 'public/uploads/task_submissions/';
         if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
-        $fileName = time() . '_' . basename($_FILES['file']['name']);
+        // generate safe filename
+        $safeBase = preg_replace('/[^A-Za-z0-9_\-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
+        $fileName = time() . '_' . $safeBase . '.' . $ext;
         $filePath = $uploadDir . $fileName;
 
         if (!move_uploaded_file($_FILES['file']['tmp_name'], $filePath)) {

@@ -10,8 +10,6 @@ if (!isset($_SESSION['user'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -31,26 +29,66 @@ if (!isset($_SESSION['user'])) {
         </style>
     
 </head>
-<body class="bg-gray-900 flex flex-col min-h-screen">
-    <?php include __DIR__ . '/../components/sidebar.php'; ?>
-    <?php include __DIR__ . '/../components/dHeader.php'; ?>
+<body class="bg-gray-900">
 
-    <main id="content" class="flex-1 transition-all duration-300 p-6">
+    <?php
+    // Determine active page for highlighting student sidebar items
+    $page = $_GET['page'] ?? '';
+    $active = '';
+    if (strpos($page, 'student/') === 0) {
+            $parts = explode('/', $page);
+            $active = $parts[1] ?? '';
+    } elseif ($page === 'dashboard' || $page === '/dashboard') {
+            $active = 'dashboard';
+    }
+    ?>
+
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
         <?php
+            // Use the main sidebar implementation but render it in student mode
+            $student_mode = true;
+            include __DIR__ . '/../components/sidebar.php';
+        ?>
+
+        <!-- Right column: header + content -->
+        <div class="flex-1 flex flex-col">
+            <?php include __DIR__ . '/../components/dHeader.php'; ?>
+
+            <main id="content" class="flex-1 p-6">
+        <?php
+        
         $viewToInclude = $content ?? '';
         if ($viewToInclude && file_exists($viewToInclude)) {
             include $viewToInclude;
         } else {
+            
             include __DIR__ . '/../pages/errors/notFound.php';
         }
         ?>
     </main>
 
-    <?php include __DIR__ . '/../components/footer.php'; ?>
-
     <?php 
-    define('BASEPATH', true);
-    include __DIR__ . '/../components/ai-helper/chat-modal.php'; 
+        define('BASEPATH', true);
+        include __DIR__ . '/../components/ai-helper/chat-modal.php'; 
+        ?>
+        </div>
+    </div>
+
+    <script>
+    // Toggle mobile sidebar visibility (button placed in header)
+    (function(){
+        var btn = document.getElementById('mobileSidebarToggle');
+        var sidebar = document.getElementById('sidebar');
+        if (!btn || !sidebar) return;
+        btn.addEventListener('click', function(){
+            sidebar.classList.toggle('hidden');
+        });
+    })();
+    </script>
+    </body>
+    </html>
     ?>
+        <script src="js/notifications.js"></script>
 </body>
 </html>

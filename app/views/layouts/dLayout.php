@@ -14,6 +14,13 @@ if (strpos($current_page, 'attendance_manage') === 0) {
         exit;
     }
 }
+
+// If the logged-in user is a student, use the user layout which is tailored for students
+$level = $_SESSION['level'] ?? '';
+if ($level === 'user' && file_exists(__DIR__ . '/uLayout.php')) {
+    include __DIR__ . '/uLayout.php';
+    return;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

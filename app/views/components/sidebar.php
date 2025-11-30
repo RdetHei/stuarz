@@ -171,13 +171,35 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : '';
           <span class="material-symbols-outlined mr-3">groups_3</span>
           <span class="menu-text">Kelas Saya</span>
         </a>
+            <?php
+            // Kondisi tampilan link 'Gabung Kelas' atau daftar kelas user.
+            // Cek apakah user tergabung di minimal satu kelas; jika ya, sembunyikan
+            // tautan 'Gabung Kelas'. Jika belum tergabung, tampilkan tautan 'Gabung Kelas'.
+            $hasClasses = false;
+            if (!empty($sessionUser) && isset($sessionUser['id'])) {
+                // Muat model ClassModel jika tersedia
+                $classModelPath = dirname(__DIR__, 2) . '/model/ClassModel.php';
+                if (is_file($classModelPath)) {
+                    require_once $classModelPath;
+                    try {
+                        // Use global $config (mysqli) as other controllers do
+                        global $config;
+                        $cm = new ClassModel($config);
+                        $userClasses = $cm->getAll((int)$sessionUser['id']);
+                        $hasClasses = !empty($userClasses);
+                    } catch (Throwable $e) {
+                        // Jika ada error, fallback ke false
+                        $hasClasses = false;
+                    }
+                }
+            }
 
-        <?php if (!empty($sessionUser)): ?>
-        <a href="index.php?page=join_form" title="Gabung Kelas" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('join_form', $page, $sub) ?>">
-          <span class="material-symbols-outlined mr-3">add_circle</span>
-          <span class="menu-text">Gabung Kelas</span>
-        </a>
-        <?php endif; ?>
+            if (!$hasClasses): ?>
+            <a href="index.php?page=join_form" title="Gabung Kelas" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('join_form', $page, $sub) ?>">
+              <span class="material-symbols-outlined mr-3">add_circle</span>
+              <span class="menu-text">Gabung Kelas</span>
+            </a>
+            <?php endif; ?>
 
         <a href="index.php?page=subjects" title="Mata Pelajaran" class="flex items-center px-3 py-2 text-sm rounded-lg <?= navActive('subjects', $page, $sub) ?>">
           <span class="material-symbols-outlined mr-3">menu_book</span>

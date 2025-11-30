@@ -18,6 +18,7 @@ $rubricValue = $edit && !empty($task['grading_rubric']) ? json_encode($task['gra
 $classes = $classes ?? [];
 $subjects = $subjects ?? [];
 $schedules = $schedules ?? [];
+$existing_file_name = $edit && !empty($task['file_path']) ? pathinfo($task['file_path'], PATHINFO_BASENAME) : '';
 ?>
 
 <div class="max-w-4xl mx-auto p-6">
@@ -60,6 +61,9 @@ $schedules = $schedules ?? [];
       <?php if ($edit): ?>
         <input type="hidden" name="id" value="<?= $id ?>">
       <?php endif; ?>
+
+      <!-- Inline error container -->
+      <div id="formErrors" class="hidden mb-4 bg-red-500/10 border border-red-500/20 text-red-300 px-4 py-3 rounded-lg"></div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="md:col-span-2">
@@ -234,11 +238,15 @@ $schedules = $schedules ?? [];
         <!-- Rubric Builder -->
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-300 mb-2">Rubrik Penilaian</label>
-          <textarea name="grading_rubric" rows="4" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all resize-none placeholder:text-gray-500" placeholder='Contoh:
+          <textarea name="grading_rubric" id="gradingRubric" rows="4" class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all resize-none placeholder:text-gray-500" placeholder='Contoh:
 Pemahaman Konsep:40
 Kerapihan:30
 Kreativitas:30'><?= htmlspecialchars($rubricValue) ?></textarea>
-          <p class="text-xs text-gray-500 mt-2">Masukkan JSON atau format "Kriteria:Skor" per baris. Digunakan saat memberi nilai.</p>
+          <p id="gradingRubricHelp" class="text-xs text-gray-500 mt-2">Masukkan JSON atau format "Kriteria:Skor" per baris. Digunakan saat memberi nilai.</p>
+          <div id="rubricPreview" class="mt-3 bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm text-gray-200">
+            <strong class="block text-white mb-2">Pratinjau Rubrik</strong>
+            <div id="rubricItems" class="space-y-1 text-gray-300">Tidak ada rubrik terdeteksi.</div>
+          </div>
         </div>
 
         <!-- Description -->
@@ -260,12 +268,15 @@ Kreativitas:30'><?= htmlspecialchars($rubricValue) ?></textarea>
             File Lampiran
           </label>
           <div class="flex items-center gap-4">
-            <label class="flex-1 flex items-center justify-center px-4 py-3 bg-gray-900 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-indigo-600 transition-all">
-              <div class="flex items-center gap-2 text-gray-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                </svg>
-                <span class="text-sm">Choose file or drag here</span>
+            <label class="flex-1 block px-4 py-3 bg-gray-900 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-indigo-600 transition-all">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-gray-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                  </svg>
+                  <span id="fileLabelText" class="text-sm"><?= $existing_file_name ? htmlspecialchars($existing_file_name) : 'Choose file or drag here' ?></span>
+                </div>
+                <button type="button" id="removeFileBtn" class="hidden text-xs text-red-400 bg-red-600/10 px-2 py-1 rounded">Hapus</button>
               </div>
               <input type="file" 
                      id="file"
@@ -274,6 +285,16 @@ Kreativitas:30'><?= htmlspecialchars($rubricValue) ?></textarea>
                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" />
             </label>
           </div>
+          <!-- Existing attachment (edit mode) -->
+          <?php if ($edit && !empty($task['file_path'])): ?>
+            <div class="mt-2 text-sm text-gray-300 flex items-center gap-3">
+              <a href="<?= htmlspecialchars($task['file_path']) ?>" target="_blank" class="text-indigo-400 hover:underline">Lihat lampiran saat ini</a>
+              <label class="inline-flex items-center gap-2 text-gray-300">
+                <input type="checkbox" name="remove_file" value="1" class="rounded bg-gray-900 border-gray-600 text-indigo-600">
+                <span class="text-xs">Hapus file saat ini saat menyimpan</span>
+              </label>
+            </div>
+          <?php endif; ?>
           <p class="text-xs text-gray-500 mt-2">Supported: PDF, DOC, DOCX, TXT, JPG, PNG (Max 5MB)</p>
         </div>
       </div>
@@ -330,94 +351,196 @@ Kreativitas:30'><?= htmlspecialchars($rubricValue) ?></textarea>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('taskForm');
-    const fileInput = document.getElementById('file');
-    const label = fileInput?.closest('label');
-    const allowLateCheckbox = document.querySelector('input[name="allow_late"]');
-    const lateDeadlineInput = document.querySelector('input[name="late_deadline"]');
-    
-    // File input preview
-    if (fileInput && label) {
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const fileName = file.name;
-                const fileSize = (file.size / 1024 / 1024).toFixed(2);
-                
-                // Check file size (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('File terlalu besar. Maksimal 5MB.');
-                    fileInput.value = '';
-                    return;
-                }
-                
-                label.innerHTML = `
-                    <div class="flex items-center gap-2 text-indigo-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span class="text-sm">${fileName} (${fileSize}MB)</span>
-                    </div>
-                `;
-            }
-        });
-    }
+  const form = document.getElementById('taskForm');
+  const fileInput = document.getElementById('file');
+  const fileLabelText = document.getElementById('fileLabelText');
+  const removeFileBtn = document.getElementById('removeFileBtn');
+  const allowLateCheckbox = document.querySelector('input[name="allow_late"]');
+  const lateDeadlineInput = document.querySelector('input[name="late_deadline"]');
+  const formErrors = document.getElementById('formErrors');
+  const deadlineInput = document.getElementById('deadline');
 
-    if (allowLateCheckbox && lateDeadlineInput) {
-        const toggleLateDeadline = () => {
-            lateDeadlineInput.disabled = !allowLateCheckbox.checked;
-            if (!allowLateCheckbox.checked) lateDeadlineInput.value = '';
-        };
-        allowLateCheckbox.addEventListener('change', toggleLateDeadline);
-        toggleLateDeadline();
+  // File input preview (preserve input element)
+  if (fileInput && fileLabelText) {
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const fileName = file.name;
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          showErrors(['File terlalu besar. Maksimal 5MB.']);
+          fileInput.value = '';
+          fileLabelText.textContent = 'Choose file or drag here';
+          if (removeFileBtn) removeFileBtn.classList.add('hidden');
+          return;
+        }
+
+        fileLabelText.textContent = `${fileName} (${fileSize}MB)`;
+        if (removeFileBtn) removeFileBtn.classList.remove('hidden');
+      }
+    });
+
+    if (removeFileBtn) {
+      removeFileBtn.addEventListener('click', function() {
+        fileInput.value = '';
+        fileLabelText.textContent = 'Choose file or drag here';
+        removeFileBtn.classList.add('hidden');
+      });
     }
-    
-    // Form validation
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const title = document.getElementById('title').value.trim();
-            const description = document.getElementById('description').value.trim();
-            const classId = document.getElementById('class_id').value;
-            const subjectId = document.getElementById('subject_id').value;
-            const deadline = document.getElementById('deadline').value;
-            
-            let errors = [];
-            
-            if (!title) {
-                errors.push('Judul task wajib diisi');
-            }
-            
-            if (!description) {
-                errors.push('Deskripsi task wajib diisi');
-            }
-            
-            if (!classId) {
-                errors.push('Kelas wajib dipilih');
-            }
-            
-            if (!subjectId) {
-                errors.push('Mata pelajaran wajib dipilih');
-            }
-            
-            if (!deadline) {
-                errors.push('Deadline wajib diisi');
-            } else if (deadline < new Date().toISOString().split('T')[0]) {
-                errors.push('Deadline tidak boleh lebih awal dari hari ini');
-            }
-            
-            if (errors.length > 0) {
-                e.preventDefault();
-                alert('Error:\n' + errors.join('\n'));
-                return false;
-            }
-        });
-    }
-    
+  }
+
+  // Allow late toggle and late_deadline min
+  if (allowLateCheckbox && lateDeadlineInput) {
+    const toggleLateDeadline = () => {
+      lateDeadlineInput.disabled = !allowLateCheckbox.checked;
+      if (!allowLateCheckbox.checked) lateDeadlineInput.value = '';
+      // set min to deadline if available
+      if (deadlineInput && deadlineInput.value) {
+        lateDeadlineInput.min = deadlineInput.value;
+      } else {
+        lateDeadlineInput.min = new Date().toISOString().split('T')[0];
+      }
+    };
+    allowLateCheckbox.addEventListener('change', toggleLateDeadline);
+    toggleLateDeadline();
+  }
+
+  if (deadlineInput) {
     // Set minimum date to today
-    const deadlineInput = document.getElementById('deadline');
-    if (deadlineInput) {
-        deadlineInput.min = new Date().toISOString().split('T')[0];
+    deadlineInput.min = new Date().toISOString().split('T')[0];
+    // update late_deadline min when deadline changes
+    deadlineInput.addEventListener('change', function() {
+      if (lateDeadlineInput) {
+        lateDeadlineInput.min = deadlineInput.value || new Date().toISOString().split('T')[0];
+      }
+    });
+  }
+
+  function showErrors(errors) {
+    if (!formErrors) return alert(errors.join('\n'));
+    formErrors.classList.remove('hidden');
+    formErrors.innerHTML = '<ul class="list-disc pl-5">' + errors.map(e => `<li>${e}</li>`).join('') + '</ul>';
+    formErrors.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function clearErrors() {
+    if (!formErrors) return;
+    formErrors.classList.add('hidden');
+    formErrors.innerHTML = '';
+  }
+
+  // Form validation
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      clearErrors();
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const classId = document.getElementById('class_id').value;
+      const subjectId = document.getElementById('subject_id').value;
+      const deadline = document.getElementById('deadline').value;
+
+      let errors = [];
+
+      if (!title) {
+        errors.push('Judul task wajib diisi');
+      }
+
+      if (!description) {
+        errors.push('Deskripsi task wajib diisi');
+      }
+
+      if (!classId) {
+        errors.push('Kelas wajib dipilih');
+      }
+
+      if (!subjectId) {
+        errors.push('Mata pelajaran wajib dipilih');
+      }
+
+      if (!deadline) {
+        errors.push('Deadline wajib diisi');
+      } else {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const deadlineDate = new Date(deadline);
+        deadlineDate.setHours(0,0,0,0);
+        if (deadlineDate < today) {
+          errors.push('Deadline tidak boleh lebih awal dari hari ini');
+        }
+        // if late deadline present, ensure it's >= deadline
+        if (allowLateCheckbox && allowLateCheckbox.checked && lateDeadlineInput && lateDeadlineInput.value) {
+          const lateDate = new Date(lateDeadlineInput.value);
+          lateDate.setHours(0,0,0,0);
+          if (lateDate < deadlineDate) {
+            errors.push('Tanggal pengumpulan terlambat harus setelah atau sama dengan deadline utama');
+          }
+        }
+      }
+
+      if (errors.length > 0) {
+        e.preventDefault();
+        showErrors(errors);
+        return false;
+      }
+    });
+  }
+
+  // Rubric preview parsing
+  const rubricTextarea = document.getElementById('gradingRubric');
+  const rubricItems = document.getElementById('rubricItems');
+
+  function parseRubric(text) {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const parsed = [];
+    // Try JSON first
+    try {
+      const j = JSON.parse(text);
+      if (Array.isArray(j)) {
+        j.forEach(item => parsed.push(item));
+      } else if (typeof j === 'object') {
+        Object.keys(j).forEach(k => parsed.push({ criteria: k, score: j[k] }));
+      }
+    } catch (err) {
+      // not JSON, try Kriteria:Skor lines
+      lines.forEach(line => {
+        const parts = line.split(':');
+        if (parts.length >= 2) {
+          const score = parts.pop().trim();
+          const criteria = parts.join(':').trim();
+          parsed.push({ criteria, score });
+        }
+      });
     }
+    return parsed;
+  }
+
+  function renderRubricPreview() {
+    if (!rubricItems || !rubricTextarea) return;
+    const text = rubricTextarea.value || '';
+    const items = parseRubric(text);
+    if (items.length === 0) {
+      rubricItems.innerHTML = 'Tidak ada rubrik terdeteksi.';
+      return;
+    }
+    rubricItems.innerHTML = items.map(it => `
+      <div class="flex items-center justify-between">
+        <div class="text-gray-200">${escapeHtml(it.criteria ?? it)}</div>
+        <div class="text-xs text-indigo-300">${escapeHtml(String(it.score ?? ''))}</div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>\"']/g, function(c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; });
+  }
+
+  if (rubricTextarea) {
+    rubricTextarea.addEventListener('input', renderRubricPreview);
+    // initial render
+    renderRubricPreview();
+  }
 });
 </script>
 

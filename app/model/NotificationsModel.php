@@ -118,6 +118,30 @@ class NotificationsModel
         return $rows;
     }
 
+    /**
+     * Get notifications for a specific user (most recent first).
+     */
+    public function getForUser(int $userId, int $limit = 50)
+    {
+        $this->detectSchema();
+        $rows = [];
+        $limit = (int)$limit;
+        $sql = "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        if (!$stmt) return $rows;
+        mysqli_stmt_bind_param($stmt, "ii", $userId, $limit);
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
+        if ($res) {
+            while ($r = mysqli_fetch_assoc($res)) {
+                $rows[] = $this->normalizeRow($r);
+            }
+            mysqli_free_result($res);
+        }
+        mysqli_stmt_close($stmt);
+        return $rows;
+    }
+
     public function getAll($limit = 100)
     {
         return $this->getRecent($limit);

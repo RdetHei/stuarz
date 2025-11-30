@@ -2,109 +2,11 @@
   <div class="relative isolate overflow-hidden">
     <!-- Background Pattern -->
     <div class="absolute inset-0 -z-10">
-      <div class="absolute inset-0 bg-gradient-to-b from-[#5865F2]/5 via-transparent to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-[#11862]/5 via-transparent to-transparent"></div>
       <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(88, 101, 242, 0.05) 1px, transparent 0); background-size: 40px 40px;"></div>
     </div>
 
     <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8">
-      <!-- Hero Section -->
-      <div class="text-center mb-16">
-        <div class="mb-6">
-          <span class="inline-block px-4 py-2 bg-[#5865F2]/10 text-[#5865F2] border border-[#5865F2]/20 rounded-full text-sm font-semibold uppercase tracking-wider">
-            Stuarz Platform
-          </span>
-        </div>
-        <h1 class="text-5xl sm:text-6xl font-bold text-gray-100 mb-6 leading-tight">
-          Alur kerja yang lebih mudah<br/>dan terintegrasi
-        </h1>
-        <p class="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-          Stuarz dirancang untuk mempermudah manajemen pembelajaran, kolaborasi, dan pengelolaan proyek. Semua fitur yang kamu butuhkan tersedia dalam satu tempat.
-        </p>
-      </div>
-
-      <!-- App Screenshot -->
-      <div class="max-w-5xl mx-auto mb-24">
-        <div class="relative group">
-          <div class="absolute -inset-4 bg-gradient-to-r from-[#5865F2]/20 to-[#4752C4]/20 rounded-2xl blur-2xl group-hover:blur-3xl transition-all duration-500 opacity-50"></div>
-          <div class="relative overflow-hidden rounded-xl border border-gray-700 bg-[#1f2937] shadow-2xl">
-            <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES, 'UTF-8') ?>" 
-                 alt="Stuarz App Screenshot" 
-                 class="w-full h-auto transition-transform duration-700 group-hover:scale-[1.02]" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Features Section -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24">
-        <div class="bg-[#1f2937] border border-gray-700 rounded-xl p-8 hover:border-gray-600 transition-colors">
-          <h2 class="text-3xl font-bold text-gray-100 mb-6">Kenapa Stuarz?</h2>
-          <p class="text-gray-400 leading-relaxed mb-8">
-            Dengan Stuarz, aktivitas belajar, penyimpanan dokumen, hingga monitoring progress dapat dilakukan dengan cepat dan efisien. Dibuat untuk mendukung gaya kerja modern dan kebutuhan pendidikan maupun organisasi.
-          </p>
-
-          <div class="space-y-6">
-            <div class="flex gap-4">
-              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-[#5865F2]/10 flex items-center justify-center border border-[#5865F2]/20">
-                <svg class="w-6 h-6 text-[#5865F2]" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M5.5 17a4.5 4.5 0 0 1-1.44-8.765 4.5 4.5 0 0 1 8.302-3.046 3.5 3.5 0 0 1 4.504 4.272A4 4 0 0 1 15 17H5.5Zm3.75-2.75a.75.75 0 0 0 1.5 0V9.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0l-3.25 3.5a.75.75 0 1 0 1.1 1.02l1.95-2.1v4.59Z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-gray-100 mb-2">Mudah digunakan</h3>
-                <p class="text-sm text-gray-400">Antarmuka yang sederhana, sehingga pengguna baru pun bisa langsung beradaptasi.</p>
-              </div>
-            </div>
-
-            <div class="flex gap-4">
-              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                <svg class="w-6 h-6 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-gray-100 mb-2">Keamanan terjamin</h3>
-                <p class="text-sm text-gray-400">Data tersimpan aman dengan sistem enkripsi dan backup reguler.</p>
-              </div>
-            </div>
-
-            <div class="flex gap-4">
-              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-                <svg class="w-6 h-6 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M4.632 3.533A2 2 0 0 1 6.577 2h6.846a2 2 0 0 1 1.945 1.533l1.976 8.234A3.489 3.489 0 0 0 16 11.5H4c-.476 0-.93.095-1.344.267l1.976-8.234Z" />
-                  <path d="M4 13a2 2 0 1 0 0 4h12a2 2 0 1 0 0-4H4Zm11.24 2a.75.75 0 0 1 .75-.75H16a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75h-.01a.75.75 0 0 1-.75-.75V15Zm-2.25-.75a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75H13a.75.75 0 0 0 .75-.75V15a.75.75 0 0 0-.75-.75h-.01Z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-gray-100 mb-2">Kolaborasi lebih baik</h3>
-                <p class="text-sm text-gray-400">Saling terhubung dengan tim, siswa, atau rekan kerja tanpa hambatan.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="space-y-8">
-          <div class="bg-[#1f2937] border border-gray-700 rounded-xl p-8 hover:border-gray-600 transition-colors">
-            <h2 class="text-3xl font-bold text-gray-100 mb-4">Belajar & bekerja tanpa ribet</h2>
-            <p class="text-gray-400 leading-relaxed mb-6">
-              Dengan Stuarz, tidak perlu server rumit atau setup berlebihan. Cukup login, atur, dan mulai bekerja. Semua fitur sudah siap mendukung kebutuhanmu setiap hari.
-            </p>
-            <p class="text-gray-400 leading-relaxed">
-              Stuarz bukan hanya alat, tapi solusi lengkap untuk mendukung perkembangan belajar, produktivitas tim, dan pengelolaan proyek.
-            </p>
-          </div>
-
-            <div class="bg-[#1f2937] border border-gray-700 rounded-xl p-8 hover:border-gray-600 transition-colors">
-            <h2 class="text-3xl font-bold text-gray-100 mb-4">Efisiensi kerja tanpa batas</h2>
-            <p class="text-gray-400 leading-relaxed mb-6">
-              Dengan Stuarz, semua proses kerja menjadi lebih cepat dan efisien. Fitur otomatisasi dan integrasi yang canggih membantu mengurangi waktu yang dihabiskan untuk tugas-tugas rutin.
-            </p>
-            <p class="text-gray-400 leading-relaxed">
-              Ini merupakan langkah besar menuju produktivitas yang lebih baik.
-            </p>
-          </div>
-      
-        </div>
-      </div>
 
       <!-- Owner Card Section -->
       <div class="max-w-3xl mx-auto">

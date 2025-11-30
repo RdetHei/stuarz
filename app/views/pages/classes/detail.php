@@ -66,13 +66,12 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
 
           <div class="flex gap-3">
             <?php if ($role === 'admin' || $role === 'teacher' || $role === 'guru'): ?>
-            <a href="index.php?page=class/manage/<?= intval($class['id'] ?? 0) ?>" class="px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20">
+            <button id="addStudentBtn" class="px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
               </svg>
-              Kelola Kelas
-            </a>
+              Tambah Siswa
+            </button>
             <?php endif; ?>
             
             <a href="index.php?page=class" class="px-5 py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium transition-colors flex items-center gap-2">
@@ -86,6 +85,31 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
         </div>
       </div>
     </header>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div class="max-w-md w-full bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <h3 class="text-lg font-bold text-white mb-3">Tambah Siswa ke Kelas</h3>
+        <form id="addStudentForm" action="index.php?page=class_add_member" method="post">
+          <input type="hidden" name="class_id" value="<?= intval($class['id'] ?? 0) ?>" />
+          <div class="mb-3">
+            <label class="block text-sm text-gray-300 mb-1">User ID</label>
+            <input name="user_id" type="number" required class="w-full px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white" placeholder="Masukkan ID siswa" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm text-gray-300 mb-1">Role</label>
+            <select name="role" class="w-full px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white">
+              <option value="student" selected>Student</option>
+              <option value="teacher">Teacher</option>
+            </select>
+          </div>
+          <div class="flex justify-end gap-2">
+            <button type="button" id="cancelAddStudent" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white">Batal</button>
+            <button type="submit" class="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white">Tambah</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- Tabs Navigation -->
     <div class="mb-6 bg-gray-800 border border-gray-700 rounded-xl p-2 shadow-lg">
@@ -555,6 +579,24 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   if (classCheckOutBtn) {
     classCheckOutBtn.addEventListener('click', function(){ handleClassAttendance('checkout'); });
+  }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var addBtn = document.getElementById('addStudentBtn');
+  var modal = document.getElementById('addStudentModal');
+  var cancel = document.getElementById('cancelAddStudent');
+  if (addBtn && modal) {
+    addBtn.addEventListener('click', function(){ modal.classList.remove('hidden'); });
+  }
+  if (cancel && modal) {
+    cancel.addEventListener('click', function(){ modal.classList.add('hidden'); });
+  }
+  // Close modal when clicking outside the dialog
+  if (modal) {
+    modal.addEventListener('click', function(e){ if (e.target === modal) modal.classList.add('hidden'); });
   }
 });
 </script>

@@ -45,6 +45,35 @@ class AttendanceController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
+    /**
+     * Student-facing attendance view: shows only the logged-in user's records and summary.
+     */
+    public function my()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user_id'] ?? null;
+        if (!$userId) {
+            header('Location: index.php?page=login'); exit;
+        }
+
+        $records = $this->model->getByUser(intval($userId));
+
+        // Simple summary counts
+        $present = $late = $leave = $sick = 0;
+        foreach ($records as $r) {
+            $s = strtolower($r['status'] ?? '');
+            if (in_array($s, ['present','hadir'], true)) $present++;
+            if ($s === 'late' || $s === 'terlambat') $late++;
+            if ($s === 'excused' || $s === 'izin') $leave++;
+            if ($s === 'sick' || $s === 'sakit') $sick++;
+        }
+
+        $attendances = $records;
+        $presentCount = $present; $lateCount = $late; $leaveCount = $leave; $sickCount = $sick;
+        $content = dirname(__DIR__) . '/views/pages/student/attendance.php';
+        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
     public function manage() {
         if (!$this->isAdmin()) {
             header('Location: index.php?page=attendance');
