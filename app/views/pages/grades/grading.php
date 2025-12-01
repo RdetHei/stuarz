@@ -23,6 +23,7 @@ $filterClass = $_GET['class_id'] ?? null;
           <p class="text-gray-400 text-sm mt-1">Berikan nilai pada tugas yang sudah dikumpulkan siswa</p>
         </div>
       </div>
+        <script src="public/js/grades.js"></script>
     </div>
 
     <!-- Filters -->
@@ -150,7 +151,7 @@ $filterClass = $_GET['class_id'] ?? null;
       <?php endif; ?>
 
       <!-- Grading Form -->
-      <form method="post" action="index.php?page=grades/grade-submission" class="mt-4 pt-4 border-t border-gray-700">
+      <form method="post" action="index.php?page=grades/grade-submission" class="mt-4 pt-4 border-t border-gray-700 grade-form" data-submission-id="<?= intval($sub['id']) ?>">
         <input type="hidden" name="submission_id" value="<?= intval($sub['id']) ?>">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -180,6 +181,12 @@ $filterClass = $_GET['class_id'] ?? null;
         </div>
 
         <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <button type="button" data-score="100" class="quick-grade px-3 py-1 bg-emerald-600 text-white rounded-md text-sm">100</button>
+            <button type="button" data-score="90" class="quick-grade px-3 py-1 bg-blue-600 text-white rounded-md text-sm">90</button>
+            <button type="button" data-score="75" class="quick-grade px-3 py-1 bg-amber-600 text-white rounded-md text-sm">75</button>
+            <button type="button" data-score="50" class="quick-grade px-3 py-1 bg-red-600 text-white rounded-md text-sm">50</button>
+          </div>
           <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>

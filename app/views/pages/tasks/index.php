@@ -63,6 +63,25 @@
   </div>
 
   <!-- Tasks Table -->
+  <!-- Search & Filters -->
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex items-center gap-3 w-full sm:w-auto">
+      <div class="relative w-full max-w-md">
+        <input id="taskSearch" type="search" placeholder="Cari tugas, kelas, guru..." class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600" />
+        <svg class="w-4 h-4 text-gray-500 absolute right-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35"/></svg>
+      </div>
+      <select id="filterStatus" class="px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white">
+        <option value="all">All Status</option>
+        <option value="published">Published</option>
+        <option value="draft">Draft</option>
+        <option value="in_review">In Review</option>
+        <option value="closed">Closed</option>
+      </select>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="clearFilters" class="px-3 py-2 bg-gray-700 text-white rounded-lg">Clear</button>
+    </div>
+  </div>
   <?php 
   $statCards = [
     ['label' => 'Total Tugas', 'value' => (int)($progressSummary['total'] ?? 0), 'caption' => 'Tersedia', 'accent' => 'from-indigo-600 to-indigo-500'],
@@ -144,227 +163,141 @@
 
   
   <?php if (!empty($tasks ?? [])): ?>
-  <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead>
-          <tr class="bg-gray-900 border-b border-gray-700">
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Title</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Subject</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Class</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Schedule</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Teacher</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Deadline</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Workflow</th>
-            <?php if ($userLevel === 'user'): ?>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Progress</th>
-            <?php else: ?>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Queue</th>
-            <?php endif; ?>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-4 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-700">
-          <?php foreach (($tasks ?? []) as $t): ?>
-          <tr class="hover:bg-gray-700/50 transition-colors">
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span class="text-white font-medium"><?= htmlspecialchars($t['title'] ?? '') ?></span>
-              </div>
-            </td>
-            <td class="px-6 py-4 text-gray-400"><?= htmlspecialchars($t['subject_name'] ?? '') ?></td>
-            <td class="px-6 py-4 text-gray-400"><?= htmlspecialchars($t['class_name'] ?? '') ?></td>
-            <td class="px-6 py-4 text-gray-400">
-              <?php if (!empty($t['schedule_subject'])): ?>
-                <div class="text-sm text-white font-medium"><?= htmlspecialchars($t['schedule_subject']) ?></div>
-                <div class="text-xs text-gray-400"><?= htmlspecialchars(($t['schedule_day'] ?? '') . ' ' . ($t['schedule_start'] ?? '') . '-' . ($t['schedule_end'] ?? '')) ?></div>
-              <?php else: ?>
-                <div class="text-xs text-gray-400">-</div>
-              <?php endif; ?>
-            </td>
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
-                  <span class="text-white text-xs font-bold">
-                    <?= strtoupper(substr($t['teacher_name'] ?? 'N/A', 0, 1)) ?>
-                  </span>
-                </div>
-                <div>
-                  <div class="text-white text-sm font-medium"><?= htmlspecialchars($t['teacher_name'] ?? 'N/A') ?></div>
-                  <div class="text-gray-400 text-xs">
-                    <?php if (($t['teacher_level'] ?? '') === 'guru'): ?>
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Guru</span>
-                    <?php elseif (($t['teacher_level'] ?? '') === 'admin'): ?>
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Admin</span>
-                    <?php else: ?>
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">User</span>
-                    <?php endif; ?>
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-2 text-gray-400">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <?= htmlspecialchars($t['deadline'] ?? '') ?>
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <?php 
-                $workflowState = strtolower($t['workflow_state'] ?? 'published');
-                $stateLabels = [
-                  'draft' => ['Draft','bg-gray-600/30 text-gray-200 border border-gray-500/40'],
-                  'published' => ['Published','bg-indigo-600/20 text-indigo-200 border border-indigo-500/40'],
-                  'in_review' => ['In Review','bg-blue-600/20 text-blue-200 border border-blue-500/40'],
-                  'closed' => ['Closed','bg-gray-500/30 text-gray-100 border border-gray-400/30'],
-                ];
-                $stateMeta = $stateLabels[$workflowState] ?? $stateLabels['published'];
-              ?>
-              <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-0.5 rounded-full text-xs <?= $stateMeta[1] ?>"><?= $stateMeta[0] ?></span>
-                <?php if (!empty($t['approval_required'])): ?>
-                  <span class="px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-200 border border-amber-500/30">Perlu Approval</span>
-                <?php endif; ?>
-                <span class="px-2 py-0.5 rounded-full text-xs bg-gray-500/20 text-gray-100 border border-gray-500/30">Attempts: <?= intval($t['max_attempts'] ?? 1) ?></span>
-                <?php if (!empty($t['allow_late'])): ?>
-                  <span class="px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-100 border border-green-500/30">Late allowed</span>
-                <?php endif; ?>
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <?php if ($userLevel === 'user'): ?>
-                <?php $sub = $t['student_submission'] ?? null; ?>
-                <?php if ($sub): 
-                  $reviewStatus = $sub['review_status'] ?? 'pending';
-                  $statusColors = [
-                    'pending' => 'bg-yellow-500/20 text-yellow-200 border border-yellow-500/30',
-                    'in_review' => 'bg-blue-500/20 text-blue-200 border border-blue-500/30',
-                    'needs_revision' => 'bg-red-500/20 text-red-200 border border-red-500/30',
-                    'approved' => 'bg-emerald-500/20 text-emerald-200 border border-emerald-500/30',
-                    'graded' => 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/30'
-                  ];
-                  $badge = $statusColors[$reviewStatus] ?? 'bg-gray-500/20 text-gray-100 border border-gray-500/30';
-                ?>
-                  <div class="space-y-1">
-                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold <?= $badge ?>">
-                      Status: <?= ucfirst(str_replace('_',' ', $reviewStatus)) ?>
-                    </span>
-                    <p class="text-xs text-gray-400">Percobaan #<?= intval($sub['attempt_no'] ?? 1) ?><?= !empty($sub['is_final']) ? ' • Final' : '' ?></p>
-                    <?php if (!empty($sub['grade'])): ?>
-                      <p class="text-xs text-emerald-300 font-semibold">Grade: <?= floatval($sub['grade']) ?></p>
-                    <?php endif; ?>
-                  </div>
-                <?php else: ?>
-                  <span class="text-sm text-gray-400">Belum ada submission</span>
-                <?php endif; ?>
-              <?php else: ?>
-                <?php $stat = $teacherSubmissionStats[$t['id']] ?? null; ?>
-                <?php if ($stat): ?>
-                  <div class="grid grid-cols-2 gap-2 text-xs text-gray-300">
-                    <span>Pending: <strong><?= intval($stat['pending'] ?? 0) ?></strong></span>
-                    <span>Review: <strong><?= intval($stat['in_review'] ?? 0) ?></strong></span>
-                    <span>Revision: <strong><?= intval($stat['needs_revision'] ?? 0) ?></strong></span>
-                    <span>Graded: <strong><?= intval($stat['graded'] ?? 0) ?></strong></span>
-                  </div>
-                <?php else: ?>
-                  <span class="text-sm text-gray-400">Belum ada submission</span>
-                <?php endif; ?>
-              <?php endif; ?>
-            </td>
-            <td class="px-6 py-4">
-              <?php if (($t['status'] ?? '') === 'Completed'): ?>
-                <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                  </svg>
-                  Completed
-                </span>
-              <?php else: ?>
-                <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
-                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  Pending
-                </span>
-              <?php endif; ?>
-            </td>
-            <td class="px-6 py-4">
-              <div class="flex items-center justify-end gap-2">
-                <?php 
-                $userLevel = $_SESSION['level'] ?? 'user';
-                $userId = $_SESSION['user_id'] ?? 0;
-                $canEdit = ($userLevel === 'admin') || ($userLevel === 'guru' && $t['user_id'] == $userId);
-                ?>
-                
-                <?php if ($canEdit): ?>
-                <a href="index.php?page=tasks/edit&id=<?= $t['id'] ?>" 
-                   class="p-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-600/30 text-indigo-400 rounded-lg transition-all duration-200" 
-                   title="Edit">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                </a>
-                <form method="post" action="index.php?page=tasks/delete" class="inline" onsubmit="return confirm('Delete this task?')">
-                  <input type="hidden" name="id" value="<?= $t['id'] ?>">
-                  <button type="submit" 
-                          class="p-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 rounded-lg transition-all duration-200" 
-                          title="Delete">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                  </button>
-                </form>
-                <?php endif; ?>
-                
-                <?php if ($userLevel === 'user' && !empty($_SESSION['user_id'])): ?>
-                <!-- Submission form for students -->
-                <form method="post" action="index.php?page=tasks/submit" enctype="multipart/form-data" class="inline" onsubmit="return confirm('Submit your file for this task?')">
-                  <input type="hidden" name="task_id" value="<?= $t['id'] ?>">
-                  <input type="hidden" name="class_id" value="<?= $t['class_id'] ?? '' ?>">
-                  <label class="p-2 bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 text-green-400 rounded-lg transition-all duration-200 cursor-pointer">
-                    <input type="file" name="file" class="hidden file-input" required>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                    </svg>
-                  </label>
-                </form>
-                <?php endif; ?>
-                
-                <?php if (($userLevel === 'admin' || $userLevel === 'guru') && $canEdit): ?>
-                <!-- View submissions button for teachers -->
-                <button onclick="viewSubmissions(<?= $t['id'] ?>)" 
-                        class="p-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/30 text-blue-400 rounded-lg transition-all duration-200" 
-                        title="View Submissions">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                  </svg>
-                </button>
-                <?php endif; ?>
-              </div>
-            </td>
-          </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    </div>
+  <div id="tasksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    <?php foreach (($tasks ?? []) as $t): ?>
+    <?php 
+      $workflowState = strtolower($t['workflow_state'] ?? 'published');
+      $stateLabels = [
+        'draft' => ['Draft','bg-gray-600/30 text-gray-200 border border-gray-500/40'],
+        'published' => ['Published','bg-indigo-600/20 text-indigo-200 border border-indigo-500/40'],
+        'in_review' => ['In Review','bg-blue-600/20 text-blue-200 border border-blue-500/40'],
+        'closed' => ['Closed','bg-gray-500/30 text-gray-100 border border-gray-400/30'],
+      ];
+      $stateMeta = $stateLabels[$workflowState] ?? $stateLabels['published'];
+      $userLevel = $_SESSION['level'] ?? 'user';
+      $userId = $_SESSION['user_id'] ?? 0;
+      $canEdit = ($userLevel === 'admin') || ($userLevel === 'guru' && $t['user_id'] == $userId);
+    ?>
+    <?php 
+      $cardTitleAttr = htmlspecialchars(strtolower($t['title'] ?? ''));
+      $cardClassAttr = htmlspecialchars(strtolower($t['class_name'] ?? ''));
+      $cardSubjectAttr = htmlspecialchars(strtolower($t['subject_name'] ?? ''));
+      $cardStatusAttr = htmlspecialchars(strtolower($workflowState));
+    ?>
+    <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col justify-between" data-title="<?= $cardTitleAttr ?>" data-class="<?= $cardClassAttr ?>" data-subject="<?= $cardSubjectAttr ?>" data-status="<?= $cardStatusAttr ?>">
+      <div>
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h4 class="text-white font-semibold text-lg mb-1"><?= htmlspecialchars($t['title'] ?? '-') ?></h4>
+            <div class="text-xs text-gray-400"><?= htmlspecialchars($t['subject_name'] ?? '-') ?> • <?= htmlspecialchars($t['class_name'] ?? '-') ?></div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-gray-400">Deadline</div>
+            <div class="text-sm text-white font-medium"><?= htmlspecialchars($t['deadline'] ?? '-') ?></div>
+          </div>
+        </div>
 
-    <!-- Table Footer -->
-    <div class="px-6 py-4 bg-gray-900 border-t border-gray-700">
-      <div class="flex items-center justify-between text-sm text-gray-400">
-        <span>Total: <?= count($tasks ?? []) ?> tasks</span>
-        <div class="flex items-center gap-2">
-          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span>Last updated: <?= date('d M Y, H:i') ?></span>
+        <div class="mt-3 flex items-center gap-2 flex-wrap">
+          <span class="px-2 py-0.5 rounded-full text-xs <?= $stateMeta[1] ?>"><?= $stateMeta[0] ?></span>
+          <?php if (!empty($t['approval_required'])): ?>
+            <span class="px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-200 border border-amber-500/30">Perlu Approval</span>
+          <?php endif; ?>
+          <span class="px-2 py-0.5 rounded-full text-xs bg-gray-500/20 text-gray-100 border border-gray-500/30">Attempts: <?= intval($t['max_attempts'] ?? 1) ?></span>
+          <?php if (!empty($t['allow_late'])): ?>
+            <span class="px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-100 border border-green-500/30">Late allowed</span>
+          <?php endif; ?>
+        </div>
+
+        <div class="mt-3 flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
+              <span class="text-white text-xs font-bold"><?= strtoupper(substr($t['teacher_name'] ?? 'N/A', 0, 1)) ?></span>
+            </div>
+            <div>
+              <div class="text-white text-sm font-medium"><?= htmlspecialchars($t['teacher_name'] ?? 'N/A') ?></div>
+              <div class="text-xs text-gray-400">
+                <?php if (($t['teacher_level'] ?? '') === 'guru'): ?>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Guru</span>
+                <?php elseif (($t['teacher_level'] ?? '') === 'admin'): ?>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Admin</span>
+                <?php else: ?>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">User</span>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+
+          <div class="ml-auto text-xs text-gray-400">
+            <div><?php if (($t['status'] ?? '') === 'Completed'): ?>
+                <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Completed</span>
+              <?php else: ?>
+                <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">Pending</span>
+              <?php endif; ?></div>
+          </div>
+        </div>
+
+        <div class="mt-3 text-sm text-gray-300">
+          <?php if ($userLevel === 'user'): ?>
+            <?php $sub = $t['student_submission'] ?? null; ?>
+            <?php if ($sub): 
+              $reviewStatus = $sub['review_status'] ?? 'pending';
+              $statusColors = [
+                'pending' => 'bg-yellow-500/20 text-yellow-200 border border-yellow-500/30',
+                'in_review' => 'bg-blue-500/20 text-blue-200 border border-blue-500/30',
+                'needs_revision' => 'bg-red-500/20 text-red-200 border border-red-500/30',
+                'approved' => 'bg-emerald-500/20 text-emerald-200 border border-emerald-500/30',
+                'graded' => 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/30'
+              ];
+              $badge = $statusColors[$reviewStatus] ?? 'bg-gray-500/20 text-gray-100 border border-gray-500/30';
+            ?>
+              <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold <?= $badge ?>">Status: <?= ucfirst(str_replace('_',' ', $reviewStatus)) ?></span>
+                <span class="text-xs text-gray-400">Attempt #<?= intval($sub['attempt_no'] ?? 1) ?><?= !empty($sub['is_final']) ? ' • Final' : '' ?></span>
+                <?php if (!empty($sub['grade'])): ?><span class="text-xs text-emerald-300 font-semibold">Grade: <?= floatval($sub['grade']) ?></span><?php endif; ?>
+              </div>
+            <?php else: ?>
+              <div class="text-sm text-gray-400">Belum ada submission</div>
+            <?php endif; ?>
+          <?php else: ?>
+            <?php $stat = $teacherSubmissionStats[$t['id']] ?? null; ?>
+            <?php if ($stat): ?>
+              <div class="grid grid-cols-2 gap-2 text-xs text-gray-300">
+                <div>Pending: <strong><?= intval($stat['pending'] ?? 0) ?></strong></div>
+                <div>Review: <strong><?= intval($stat['in_review'] ?? 0) ?></strong></div>
+                <div>Revision: <strong><?= intval($stat['needs_revision'] ?? 0) ?></strong></div>
+                <div>Graded: <strong><?= intval($stat['graded'] ?? 0) ?></strong></div>
+              </div>
+            <?php else: ?>
+              <div class="text-sm text-gray-400">Belum ada submission</div>
+            <?php endif; ?>
+          <?php endif; ?>
         </div>
       </div>
+
+      <div class="mt-4 flex items-center gap-2 justify-end">
+        <?php if ($canEdit): ?>
+        <a href="index.php?page=tasks/edit&id=<?= $t['id'] ?>" class="px-3 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-600/30 text-indigo-400 rounded-md text-sm">Edit</a>
+        <form method="post" action="index.php?page=tasks/delete" class="inline" onsubmit="return confirm('Delete this task?')">
+          <input type="hidden" name="id" value="<?= $t['id'] ?>">
+          <button type="submit" class="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 rounded-md text-sm">Delete</button>
+        </form>
+        <?php endif; ?>
+
+        <?php if ($userLevel === 'user' && !empty($_SESSION['user_id'])): ?>
+        <button onclick="openSubmitModal({ taskId: <?= $t['id'] ?>, classId: <?= intval($t['class_id'] ?? 0) ?> })" class="px-3 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 text-green-400 rounded-md text-sm">Submit</button>
+        <?php endif; ?>
+
+        <?php if (($userLevel === 'admin' || $userLevel === 'guru') && $canEdit): ?>
+        <button onclick="viewSubmissions(<?= $t['id'] ?>)" class="px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/30 text-blue-400 rounded-md text-sm">View Submissions</button>
+        <?php endif; ?>
+      </div>
     </div>
+    <?php endforeach; ?>
+  </div>
+
+  <div class="mb-6 text-sm text-gray-400 flex items-center justify-between">
+    <div>Total: <?= count($tasks ?? []) ?> tasks</div>
+    <div>Last updated: <?= date('d M Y, H:i') ?></div>
   </div>
 
   <?php else: ?>
@@ -421,7 +354,43 @@
   </div>
 </div>
 
+<!-- Submit Upload Modal -->
+<div id="submitModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-gray-800 rounded-xl max-w-2xl w-full overflow-hidden">
+    <div class="flex items-center justify-between p-4 border-b border-gray-700">
+      <h3 class="text-lg font-bold text-white">Submit Task</h3>
+      <button onclick="closeSubmitModal()" class="text-gray-400 hover:text-white">✕</button>
+    </div>
+    <div class="p-4">
+      <form id="submitForm" action="index.php?page=tasks/submit" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="task_id" id="submit_task_id" value="">
+        <input type="hidden" name="class_id" id="submit_class_id" value="">
+        <div class="mb-3">
+          <label class="block text-sm text-gray-300 mb-2">File</label>
+          <input id="submit_file" type="file" name="file" class="w-full text-sm text-gray-200" required />
+        </div>
+        <div id="filePreview" class="mb-3 text-sm text-gray-400"></div>
+        <div class="mb-3">
+          <label class="block text-sm text-gray-300 mb-2">Catatan (opsional)</label>
+          <textarea id="submit_note" name="note" rows="3" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white"></textarea>
+        </div>
+        <div class="mb-3">
+          <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div id="uploadProgress" class="h-2 bg-green-500 w-0"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2">
+          <button type="button" onclick="closeSubmitModal()" class="px-4 py-2 bg-gray-700 text-white rounded-lg">Batal</button>
+          <button id="submitBtn" type="button" class="px-4 py-2 bg-green-600 text-white rounded-lg">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Submissions Modal -->
+  <script src="public/js/tasks.js"></script>
+
 <div id="submissionsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
   <div class="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
     <div class="flex items-center justify-between p-6 border-b border-gray-700">

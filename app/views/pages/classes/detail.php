@@ -5,7 +5,7 @@ $sessionUser = $_SESSION['user'] ?? [];
 $class = $class ?? [];
 $members = $members ?? [];
 $schedules = $schedules ?? [];
-$role = $role ?? ($class['my_role'] ?? ($sessionUser['level'] ?? 'student'));
+$role = $role ?? ($class['member_role'] ?? ($sessionUser['level'] ?? 'student'));
 
 // Role colors
 $roleColors = [

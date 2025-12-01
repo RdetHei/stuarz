@@ -28,33 +28,23 @@ class ClassModel {
 
     public function getAll($userId = null) {
         $result = [];
-        // Base query with member count
-        $sql = 'SELECT c.*, u.username as creator, 
-                (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count
-                FROM classes c 
-                LEFT JOIN users u ON c.created_by = u.id';
-        
-        // If userId provided, filter to only classes user is a member of
+        // Returns only classes user has joined (INNER JOIN)
+        $sql = 'SELECT c.*, u.username as creator, (SELECT COUNT(*) FROM class_members cm2 WHERE cm2.class_id = c.id) as members_count, cm.role as member_role FROM classes c LEFT JOIN users u ON c.created_by = u.id INNER JOIN class_members cm ON c.id = cm.class_id';
+
         if ($userId !== null) {
-            $sql .= ' INNER JOIN class_members cm ON c.id = cm.class_id WHERE cm.user_id = ?';
+            $sql .= ' AND cm.user_id = ?';
         }
-        
+
         $sql .= ' ORDER BY c.id DESC';
-        
+
         if ($userId !== null) {
             $stmt = $this->db->prepare($sql);
             $stmt->bind_param('i', $userId);
             $stmt->execute();
             $res = $stmt->get_result();
             while ($row = $res->fetch_assoc()) {
-                // Get user's role in this class
-                $roleStmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ?');
-                $roleStmt->bind_param('ii', $row['id'], $userId);
-                $roleStmt->execute();
-                $roleRes = $roleStmt->get_result();
-                $roleRow = $roleRes->fetch_assoc();
-                $row['my_role'] = $roleRow['role'] ?? null;
-                $roleStmt->close();
+                $row['is_joined'] = 1; // INNER JOIN ensures membership
+                $row['my_role'] = $row['member_role'];
                 $result[] = $row;
             }
             $stmt->close();
@@ -70,28 +60,65 @@ class ClassModel {
         return $result;
     }
 
-    public function getById($id, $userId = null) {
-        $sql = 'SELECT c.*, 
-                (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count
-                FROM classes c WHERE c.id = ?';
+    /**
+     * Get all classes with user's membership status (all classes + is_joined flag)
+     * CRITICAL: Uses LEFT JOIN with AND cm.user_id = :userId to avoid false positives
+     * 
+     * @param int $userId User ID
+     * @return array All classes with is_joined (0/1) and member_role (or null)
+     */
+    public function getAllClassesWithUserStatus($userId) {
+        $result = [];
+        $sql = "SELECT c.id, c.name, c.code, c.description, c.created_by, c.created_at, u.username as creator, (SELECT COUNT(*) FROM class_members cm2 WHERE cm2.class_id = c.id) as members_count, CASE WHEN cm.user_id IS NOT NULL THEN 1 ELSE 0 END AS is_joined, cm.role AS member_role, cm.joined_at FROM classes c LEFT JOIN users u ON c.created_by = u.id LEFT JOIN class_members cm ON cm.class_id = c.id AND cm.user_id = ? ORDER BY c.id DESC";
+        
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param('i', $id);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        
+        while ($row = $res->fetch_assoc()) {
+            // Ensure proper types
+            $row['is_joined'] = (int)$row['is_joined'];
+            $row['member_role'] = $row['member_role'] ?? null;
+            $row['my_role'] = $row['member_role']; // For backwards compatibility
+            $result[] = $row;
+        }
+        $stmt->close();
+        return $result;
+    }
+
+    public function getById($id, $userId = null) {
+        $sql = 'SELECT c.*, (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count';
+
+        if ($userId !== null) {
+            $sql .= ', cm.role as member_role, CASE WHEN cm.user_id IS NOT NULL THEN 1 ELSE 0 END as is_joined';
+        }
+
+        $sql .= ' FROM classes c';
+
+        if ($userId !== null) {
+            $sql .= ' LEFT JOIN class_members cm ON cm.class_id = c.id AND cm.user_id = ?';
+            $sql .= ' WHERE c.id = ? LIMIT 1';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param('ii', $userId, $id);
+        } else {
+            $sql .= ' WHERE c.id = ? LIMIT 1';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param('i', $id);
+        }
+
         $stmt->execute();
         $res = $stmt->get_result();
         $row = $res->fetch_assoc();
         $stmt->close();
-        
-        // If userId provided, get user's role in this class
+
         if ($row && $userId !== null) {
-            $roleStmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ?');
-            $roleStmt->bind_param('ii', $id, $userId);
-            $roleStmt->execute();
-            $roleRes = $roleStmt->get_result();
-            $roleRow = $roleRes->fetch_assoc();
-            $row['my_role'] = $roleRow['role'] ?? null;
-            $roleStmt->close();
+            // Provide both keys for compatibility
+            $row['member_role'] = $row['member_role'] ?? null;
+            $row['is_joined'] = (int)($row['is_joined'] ?? 0);
+            $row['my_role'] = $row['member_role'];
         }
-        
+
         return $row;
     }
 
@@ -135,35 +162,35 @@ class ClassModel {
     // Get classes managed by user (admin/guru)
     public function getManagedClasses($userId) {
         $result = [];
-        $sql = 'SELECT c.*, u.username as creator,
-                (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count
-                FROM classes c 
-                LEFT JOIN users u ON c.created_by = u.id
-                WHERE c.created_by = ? OR EXISTS (
-                    SELECT 1 FROM class_members cm 
-                    WHERE cm.class_id = c.id 
-                    AND cm.user_id = ? 
-                    AND cm.role IN ("teacher", "admin")
-                )
-                ORDER BY c.id DESC';
+        $sql = 'SELECT c.*, u.username as creator, (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count FROM classes c LEFT JOIN users u ON c.created_by = u.id WHERE c.created_by = ? OR EXISTS (SELECT 1 FROM class_members cm WHERE cm.class_id = c.id AND cm.user_id = ? AND cm.role IN ("teacher", "admin")) ORDER BY c.id DESC';
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param('ii', $userId, $userId);
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
-            // Get user's role in this class
-            $roleStmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ?');
-            $roleStmt->bind_param('ii', $row['id'], $userId);
-            $roleStmt->execute();
-            $roleRes = $roleStmt->get_result();
-            $roleRow = $roleRes->fetch_assoc();
-            // If user is creator but not in class_members, set role as teacher
-            if (!$roleRow && intval($row['created_by']) === intval($userId)) {
+            // To avoid an extra per-row query, obtain membership via a quick
+            // lookup using class_members where possible. Preserve backward
+            // compatible key `my_role` while preferring `member_role`.
+            $memberRole = null;
+            $checkStmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ?');
+            $checkStmt->bind_param('ii', $row['id'], $userId);
+            $checkStmt->execute();
+            $checkRes = $checkStmt->get_result();
+            $rRow = $checkRes->fetch_assoc();
+            if ($rRow) {
+                $memberRole = $rRow['role'];
+            }
+            $checkStmt->close();
+
+            if (!$memberRole && intval($row['created_by']) === intval($userId)) {
+                $row['member_role'] = 'teacher';
+                $row['is_joined'] = 1;
                 $row['my_role'] = 'teacher';
             } else {
-                $row['my_role'] = $roleRow['role'] ?? null;
+                $row['member_role'] = $memberRole;
+                $row['is_joined'] = $memberRole ? 1 : 0;
+                $row['my_role'] = $memberRole ?? null;
             }
-            $roleStmt->close();
             $result[] = $row;
         }
         $stmt->close();
