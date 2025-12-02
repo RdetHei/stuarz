@@ -86,23 +86,15 @@ $displayStats = [
                             <p class="text-sm text-gray-400">Kode: <span class="font-mono text-gray-200"><?= htmlspecialchars($activeClass['code'] ?? '-') ?></span></p>
                         </div>
                         <a href="index.php?page=class/detail/<?= intval($activeClassId) ?>" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
-                            Ganti kelas →
+                            Masuk kelas →
                         </a>
                     </div>
                     <p class="text-xs text-gray-500 mt-3">Absensi akan dicatat otomatis untuk kelas ini berdasarkan kelas terakhir yang Anda masuki.</p>
                 </div>
                 <?php else: ?>
-                <div class="w-full max-w-2xl mx-auto bg-gray-900 border border-dashed border-red-500/40 rounded-xl p-5 text-left">
-                    <p class="text-sm font-semibold text-red-300 mb-2">Belum memilih kelas aktif</p>
-                    <p class="text-sm text-gray-300">Masuk ke salah satu kelas dari halaman <a href="index.php?page=class" class="underline text-indigo-400 hover:text-indigo-300">Kelas Saya</a> untuk mengatur konteks absensi.</p>
-                    <div class="mt-4">
-                        <a href="index.php?page=class" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-all">
-                            Pergi ke Kelas
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </a>
-                    </div>
+                <div class="w-full max-w-2xl mx-auto bg-gray-900 border border-gray-700 rounded-xl p-5 text-left">
+                    <p class="text-sm font-semibold text-gray-300 mb-2">Belum ada kelas aktif</p>
+                    <p class="text-sm text-gray-400">Anda belum bergabung di kelas apapun. Kunjungi <a href="index.php?page=class" class="underline text-indigo-400">Kelas Saya</a> untuk bergabung.</p>
                 </div>
                 <?php endif; ?>
             </div>

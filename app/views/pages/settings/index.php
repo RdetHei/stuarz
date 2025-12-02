@@ -7,6 +7,16 @@ if (!$user) {
 }
 $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 if ($baseUrl === '/') $baseUrl = '';
+
+// Determine dashboard URL based on user level
+$userLevel = $user['level'] ?? '';
+if ($userLevel === 'admin') {
+    $dashHref = 'index.php?page=dashboard-admin';
+} elseif ($userLevel === 'guru') {
+    $dashHref = 'index.php?page=dashboard-guru';
+} else {
+    $dashHref = 'index.php?page=dashboard';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
@@ -25,8 +35,8 @@ if ($baseUrl === '/') $baseUrl = '';
         <div class="max-w-5xl mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <a href="index.php?page=dashboard-admin" 
-                       class="p-2 text-gray-400 dark:text-gray-400 text-gray-600 hover:text-gray-200 dark:hover:text-gray-200 hover:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-800 hover:bg-gray-100 rounded-md transition-colors">
+                          <a href="<?= htmlspecialchars($dashHref) ?>" 
+                              class="p-2 text-gray-400 dark:text-gray-400 text-gray-600 hover:text-gray-200 dark:hover:text-gray-200 hover:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-800 hover:bg-gray-100 rounded-md transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>

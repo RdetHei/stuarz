@@ -30,13 +30,49 @@ class AttendanceController {
         $startDate = $_GET['start'] ?? date('Y-m-d');
         $endDate = $_GET['end'] ?? date('Y-m-d');
         $filterClass = isset($_GET['class_id']) && $_GET['class_id'] !== '' ? intval($_GET['class_id']) : null;
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = intval($_SESSION['user_id'] ?? $_SESSION['user']['id'] ?? 0);
+
+        // If user is admin show all classes, otherwise show only classes user has joined
+        if ($this->isAdmin()) {
+            $classes = $this->model->getClasses();
+        } else {
+            $classes = $this->classModel->getAll($userId);
+            // If a class filter is provided but user is not member, ignore it
+            if ($filterClass) {
+                $c = $this->classModel->getById($filterClass, $userId);
+                if (empty($c) || empty($c['is_joined'])) {
+                    $filterClass = null;
+                }
+            }
+        }
 
         $records = $this->model->getFilteredAttendance($startDate, $endDate, $filterClass);
-        $classes = $this->model->getClasses();
         $activeClass = null;
         $activeClassId = intval($_SESSION['active_class_id'] ?? 0);
+
+        // Auto-select an active class when none is set and classes are available
+        if (!$activeClassId && !empty($classes)) {
+            // Prefer the first class in the list (for non-admin this is a joined class)
+            $first = $classes[0];
+            $activeClassId = intval($first['id'] ?? 0);
+            $_SESSION['active_class_id'] = $activeClassId;
+        }
+
         if ($activeClassId) {
             $activeClass = $this->classModel->getById($activeClassId, $_SESSION['user']['id'] ?? null);
+
+            // If non-admin and the active class is not actually joined, try to find a joined class
+            if (!$this->isAdmin() && (empty($activeClass) || empty($activeClass['is_joined']))) {
+                foreach ($classes as $c) {
+                    if (!empty($c['is_joined'])) {
+                        $activeClassId = intval($c['id']);
+                        $_SESSION['active_class_id'] = $activeClassId;
+                        $activeClass = $this->classModel->getById($activeClassId, $_SESSION['user']['id'] ?? null);
+                        break;
+                    }
+                }
+            }
         }
         // Get aggregated stats from DB (respect current filters)
         $stats = $this->getStats($startDate, $endDate, $filterClass);
@@ -95,12 +131,21 @@ class AttendanceController {
 
     public function checkIn() {
         try {
-            $userId = $_SESSION['user_id'] ?? 0;
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            $userId = intval($_SESSION['user_id'] ?? $_SESSION['user']['id'] ?? 0);
             $classId = intval($_POST['class_id'] ?? 0);
             if (!$classId) {
                 $classId = intval($_SESSION['active_class_id'] ?? 0);
             }
             if (!$classId) throw new Exception('Pilih kelas terlebih dahulu.');
+
+            // Non-admin users must be member of the class
+            if (!$this->isAdmin()) {
+                $classInfo = $this->classModel->getById($classId, $userId);
+                if (empty($classInfo) || empty($classInfo['is_joined'])) {
+                    throw new Exception('Anda tidak tergabung di kelas ini.');
+                }
+            }
             $date = date('Y-m-d');
             $time = date('H:i:s');
 
@@ -118,12 +163,21 @@ class AttendanceController {
 
     public function checkOut() {
         try {
-            $userId = $_SESSION['user_id'] ?? 0;
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            $userId = intval($_SESSION['user_id'] ?? $_SESSION['user']['id'] ?? 0);
             $classId = intval($_POST['class_id'] ?? 0);
             if (!$classId) {
                 $classId = intval($_SESSION['active_class_id'] ?? 0);
             }
             if (!$classId) throw new Exception('Pilih kelas terlebih dahulu.');
+
+            // Non-admin users must be member of the class
+            if (!$this->isAdmin()) {
+                $classInfo = $this->classModel->getById($classId, $userId);
+                if (empty($classInfo) || empty($classInfo['is_joined'])) {
+                    throw new Exception('Anda tidak tergabung di kelas ini.');
+                }
+            }
             $date = date('Y-m-d');
             $time = date('H:i:s');
 
