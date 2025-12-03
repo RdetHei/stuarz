@@ -7,7 +7,9 @@ class ProfileController
         global $config;
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-        $userId = $_SESSION['user_id'] ?? null;
+        // Allow viewing other user's profile via ?user_id=ID
+        $targetId = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+        $userId = $targetId ?: ($_SESSION['user_id'] ?? null);
         if (!$userId) {
             header("Location: index.php?page=login");
             exit;
@@ -20,7 +22,121 @@ class ProfileController
         $user = mysqli_fetch_assoc($result);
         mysqli_stmt_close($stmt);
 
-        if ($user) {
+        $level = $user['level'] ?? 'user';
+        $tasksCompleted = 0;
+        $attendanceCount = 0;
+        $certCount = 0;
+        $avgGradeStr = '-';
+
+        if ($level === 'guru') {
+            require_once dirname(__DIR__) . '/model/ClassModel.php';
+            require_once dirname(__DIR__) . '/model/TasksCompletedModel.php';
+            require_once dirname(__DIR__) . '/model/TaskSubmissionsModel.php';
+            require_once dirname(__DIR__) . '/model/certificates.php';
+
+            $cm = new ClassModel($config);
+            $managed = $cm->getManagedClasses((int)$userId);
+            $classIds = [];
+            foreach ($managed as $row) { if (isset($row['id'])) $classIds[] = (int)$row['id']; }
+
+            $stmt2 = mysqli_prepare($config, "SELECT COUNT(*) AS cnt FROM task_submissions ts JOIN tasks_completed t ON ts.task_id = t.id WHERE t.user_id = ? AND ts.grade IS NOT NULL");
+            mysqli_stmt_bind_param($stmt2, 'i', $userId);
+            mysqli_stmt_execute($stmt2);
+            $res2 = mysqli_stmt_get_result($stmt2);
+            if ($res2 && ($r = mysqli_fetch_assoc($res2))) { $tasksCompleted = (int)($r['cnt'] ?? 0); }
+            mysqli_stmt_close($stmt2);
+
+            if (!empty($classIds)) {
+                $in = implode(',', array_map('intval', $classIds));
+                $sqlAtt = "SELECT COUNT(*) AS cnt FROM attendance WHERE class_id IN (" . $in . ")";
+                $resAtt = mysqli_query($config, $sqlAtt);
+                if ($resAtt && ($ra = mysqli_fetch_assoc($resAtt))) { $attendanceCount = (int)($ra['cnt'] ?? 0); }
+            }
+
+            $certModel = new certificates($config);
+            $certCount = $certModel->getCountByUserId((int)$userId);
+
+            $avgGradeStr = '-';
+        } elseif ($level === 'admin') {
+            require_once dirname(__DIR__) . '/model/certificates.php';
+
+            $stmtT = mysqli_prepare($config, "SELECT COUNT(*) AS cnt FROM task_submissions WHERE user_id = ? AND grade IS NOT NULL AND (status = 'graded' OR review_status = 'graded')");
+            mysqli_stmt_bind_param($stmtT, 'i', $userId);
+            mysqli_stmt_execute($stmtT);
+            $resT = mysqli_stmt_get_result($stmtT);
+            if ($resT && ($rt = mysqli_fetch_assoc($resT))) { $tasksCompleted = (int)($rt['cnt'] ?? 0); }
+            mysqli_stmt_close($stmtT);
+
+            $stmtA = mysqli_prepare($config, "SELECT COUNT(*) AS cnt FROM attendance WHERE user_id = ?");
+            mysqli_stmt_bind_param($stmtA, 'i', $userId);
+            mysqli_stmt_execute($stmtA);
+            $resA = mysqli_stmt_get_result($stmtA);
+            if ($resA && ($ra = mysqli_fetch_assoc($resA))) { $attendanceCount = (int)($ra['cnt'] ?? 0); }
+            mysqli_stmt_close($stmtA);
+
+            $certModel = new certificates($config);
+            $certCount = $certModel->getCountByUserId((int)$userId);
+
+            $stmtG = mysqli_prepare($config, "SELECT ROUND(AVG(score),1) AS avg_score FROM grades WHERE user_id = ?");
+            mysqli_stmt_bind_param($stmtG, 'i', $userId);
+            mysqli_stmt_execute($stmtG);
+            $resG = mysqli_stmt_get_result($stmtG);
+            if ($resG && ($rg = mysqli_fetch_assoc($resG))) {
+                $avg = $rg['avg_score'];
+                if ($avg !== null && $avg !== '') $avgGradeStr = (string)$avg;
+            }
+            mysqli_stmt_close($stmtG);
+        } else {
+            $stmtT = mysqli_prepare($config, "SELECT COUNT(*) AS cnt FROM task_submissions WHERE user_id = ? AND grade IS NOT NULL AND (status = 'graded' OR review_status = 'graded')");
+            mysqli_stmt_bind_param($stmtT, 'i', $userId);
+            mysqli_stmt_execute($stmtT);
+            $resT = mysqli_stmt_get_result($stmtT);
+            if ($resT && ($rt = mysqli_fetch_assoc($resT))) { $tasksCompleted = (int)($rt['cnt'] ?? 0); }
+            mysqli_stmt_close($stmtT);
+
+            $stmtA = mysqli_prepare($config, "SELECT COUNT(*) AS cnt FROM attendance WHERE user_id = ?");
+            mysqli_stmt_bind_param($stmtA, 'i', $userId);
+            mysqli_stmt_execute($stmtA);
+            $resA = mysqli_stmt_get_result($stmtA);
+            if ($resA && ($ra = mysqli_fetch_assoc($resA))) { $attendanceCount = (int)($ra['cnt'] ?? 0); }
+            mysqli_stmt_close($stmtA);
+
+            require_once dirname(__DIR__) . '/model/certificates.php';
+            $certModel = new certificates($config);
+            $certCount = $certModel->getCountByUserId((int)$userId);
+
+            $stmtG = mysqli_prepare($config, "SELECT ROUND(AVG(score),1) AS avg_score FROM grades WHERE user_id = ?");
+            mysqli_stmt_bind_param($stmtG, 'i', $userId);
+            mysqli_stmt_execute($stmtG);
+            $resG = mysqli_stmt_get_result($stmtG);
+            if ($resG && ($rg = mysqli_fetch_assoc($resG))) {
+                $avg = $rg['avg_score'];
+                if ($avg !== null && $avg !== '') $avgGradeStr = (string)$avg;
+            }
+            mysqli_stmt_close($stmtG);
+
+            if ($avgGradeStr === '-') {
+                $stmtTS = mysqli_prepare($config, "SELECT ROUND(AVG(grade),1) AS avg_score FROM task_submissions WHERE user_id = ? AND grade IS NOT NULL AND (status = 'graded' OR review_status = 'graded')");
+                mysqli_stmt_bind_param($stmtTS, 'i', $userId);
+                mysqli_stmt_execute($stmtTS);
+                $resTS = mysqli_stmt_get_result($stmtTS);
+                if ($resTS && ($rts = mysqli_fetch_assoc($resTS))) {
+                    $avgts = $rts['avg_score'];
+                    if ($avgts !== null && $avgts !== '') $avgGradeStr = (string)$avgts;
+                }
+                mysqli_stmt_close($stmtTS);
+            }
+        }
+
+        if (is_array($user)) {
+            $user['tasks_completed'] = $tasksCompleted;
+            $user['attendance'] = $attendanceCount;
+            $user['certificates'] = $certCount;
+            $user['average_grade'] = $avgGradeStr;
+        }
+
+        if ($user && empty($targetId)) {
+            // Only override session when viewing own profile
             $_SESSION['user'] = $user;
         }
 

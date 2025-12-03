@@ -233,7 +233,7 @@ $performance = $performance ?? [
         </div>
         <div class="space-y-3">
           <?php foreach ($classes as $c): ?>
-          <div class="bg-gray-750 hover:bg-gray-700 rounded-lg p-4 transition-colors border border-gray-700 cursor-pointer">
+          <a href="index.php?page=class/detail/<?= (int)($c['id'] ?? 0) ?>" class="block bg-gray-750 hover:bg-gray-700 rounded-lg p-4 transition-colors border border-gray-700">
             <div class="flex items-center justify-between">
               <div>
                 <div class="text-sm font-medium text-white"><?= htmlspecialchars($c['name']) ?></div>
@@ -243,12 +243,50 @@ $performance = $performance ?? [
                 <?= (int)$c['students'] ?> students
               </div>
             </div>
+          </a>
+          <?php endforeach; ?>
+        </div>
+      </div>
+
+      <?php
+        $days = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+        $weekdayMap = [1=>'Senin',2=>'Selasa',3=>'Rabu',4=>'Kamis',5=>'Jumat',6=>'Sabtu',7=>'Minggu'];
+        $activeDay = $weekdayMap[(int)date('N')] ?? 'Senin';
+      ?>
+      <div class="bg-gray-800 rounded-lg p-6">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-lg font-semibold text-white">Jadwal Mengajar</h2>
+          <a href="index.php?page=schedule" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">Lihat semua →</a>
+        </div>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <?php foreach ($days as $d): ?>
+            <button type="button" data-day="<?= $d ?>" class="t-day-tab px-3 py-1.5 rounded-md text-xs font-medium border <?= $d === $activeDay ? 'bg-purple-500/10 border-purple-500/30 text-purple-300' : 'bg-gray-700/50 border-gray-600 text-gray-300' ?>"><?= $d ?></button>
+          <?php endforeach; ?>
+        </div>
+        <div>
+          <?php foreach ($days as $d): $items = $scheduleByDay[$d] ?? []; ?>
+          <div class="t-day-panel" data-day-panel="<?= $d ?>" style="display: <?= $d === $activeDay ? 'block' : 'none' ?>;">
+            <?php if (empty($items)): ?>
+              <div class="text-sm text-gray-500">Tidak ada jadwal.</div>
+            <?php else: ?>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <?php foreach ($items as $s): ?>
+              <div class="bg-gray-750 border border-gray-700 hover:border-purple-500/40 rounded-lg p-4 transition-all">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span class="text-xs font-medium text-purple-400"><?= htmlspecialchars($s['time']) ?></span>
+                </div>
+                <div class="text-sm font-semibold text-white mb-1"><?= htmlspecialchars($s['subject']) ?></div>
+                <div class="text-xs text-gray-400"><?= htmlspecialchars($s['teacher']) ?> • <?= htmlspecialchars($s['room']) ?></div>
+              </div>
+              <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
           </div>
           <?php endforeach; ?>
         </div>
       </div>
 
-      
       <div class="bg-gray-800 rounded-lg p-6">
         <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
         <div class="space-y-2">
@@ -322,6 +360,17 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     }
   }catch(e){console.error(e)}
+  var tTabs = document.querySelectorAll('.t-day-tab');
+  var tPanels = document.querySelectorAll('.t-day-panel');
+  tTabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var day = btn.getAttribute('data-day');
+      tTabs.forEach(function(b){ b.classList.remove('bg-purple-500/10','border-purple-500/30','text-purple-300'); b.classList.add('bg-gray-700/50','border-gray-600','text-gray-300'); });
+      btn.classList.remove('bg-gray-700/50','border-gray-600','text-gray-300');
+      btn.classList.add('bg-purple-500/10','border-purple-500/30','text-purple-300');
+      tPanels.forEach(function(p){ p.style.display = (p.getAttribute('data-day-panel') === day) ? 'block' : 'none'; });
+    });
+  });
 });
 </script>
 

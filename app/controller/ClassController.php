@@ -2,6 +2,7 @@
 require_once dirname(__DIR__) . '/model/ClassModel.php';
 require_once dirname(__DIR__) . '/config/config.php';
 require_once dirname(__DIR__) . '/helpers/class_helper.php';
+require_once dirname(__DIR__) . '/helpers/level_helper.php';
 require_once dirname(__DIR__) . '/services/ClassService.php';
 
 class ClassController {
@@ -101,9 +102,21 @@ class ClassController {
             $newClassId = $this->db->insert_id;
             $creatorId = intval($data['created_by']);
             
-            // Add creator to class_members with role 'guru' (normalized)
+            // Add creator to class_members with role determined from user's level
             try {
-                $this->model->addMember($newClassId, $creatorId, 'guru');
+                // Fetch creator level from users table and map to role
+                $stmt = $this->db->prepare('SELECT level FROM users WHERE id = ? LIMIT 1');
+                $roleToAdd = 'user';
+                if ($stmt) {
+                    $stmt->bind_param('i', $creatorId);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+                    $r = $res ? $res->fetch_assoc() : null;
+                    $levelVal = $r['level'] ?? '';
+                    $roleToAdd = (is_teacher_level($levelVal) || strtolower($levelVal) === 'admin') ? 'teacher' : 'user';
+                    $stmt->close();
+                }
+                $this->model->addMember($newClassId, $creatorId, $roleToAdd);
             } catch (\Exception $e) {
                 error_log('Warning: Could not add creator as member: ' . $e->getMessage());
                 // Non-fatal; continue to schedule creation
@@ -209,9 +222,8 @@ class ClassController {
                 throw new \Exception('Kode kelas tidak valid atau kelas tidak ditemukan.');
             }
 
-            // Determine role
-            // Normalize: 'guru' for teacher-level users, 'user' for students
-            $role = (is_teacher_level($level) || $level === 'admin') ? 'guru' : 'user';
+            // Determine role from user's level: 'teacher' for teacher-level, 'user' for students
+            $role = (is_teacher_level($level) || $level === 'admin') ? 'teacher' : 'user';
 
             // Attempt to add member via ClassService if available, fallback to model
             if ($this->classService) {
@@ -281,6 +293,29 @@ class ClassController {
         }
         // members and schedules
         $members = $this->model->getMembers($id);
+
+        // Determine whether current user can manage roles/members (creator, class guru, or admin)
+        $currentUserId = intval($_SESSION['user']['id'] ?? 0);
+        $canManage = false;
+        if (!empty($currentUserId)) {
+            // class creator
+            if (intval($class['created_by'] ?? 0) === $currentUserId) $canManage = true;
+            // site admin level
+            $currLevel = $_SESSION['user']['level'] ?? '';
+            if (!$canManage && ($currLevel === 'admin' || $currLevel === 'Guru' || $currLevel === 'guru')) $canManage = true;
+            // check membership role for current user
+            if (!$canManage) {
+                $stmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ? LIMIT 1');
+                if ($stmt) {
+                    $stmt->bind_param('ii', $id, $currentUserId);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+                    $r = $res ? $res->fetch_assoc() : null;
+                    if ($r && in_array(strtolower($r['role'] ?? ''), ['guru','admin','teacher'])) $canManage = true;
+                    $stmt->close();
+                }
+            }
+        }
         // use ScheduleModel to fetch schedules with relations if available
         $schedules = [];
         if (is_file(dirname(__DIR__) . '/model/ScheduleModel.php')) {
@@ -289,8 +324,93 @@ class ClassController {
             $schedules = $schedModel->getAllWithRelations(['class_id' => $id]);
         }
 
+        // fetch tasks for this class only
+        $tasks = [];
+        if (is_file(dirname(__DIR__) . '/model/TasksCompletedModel.php')) {
+            require_once dirname(__DIR__) . '/model/TasksCompletedModel.php';
+            $tkModel = new TasksCompletedModel($this->db);
+            $tasks = $tkModel->getAll(['class_id' => $id]);
+        }
+
         $content = dirname(__DIR__) . '/views/pages/classes/detail.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
+    }
+
+    // Update a member's role (only for class managers: creator, guru, or admin)
+    public function updateMemberRole() {
+        try {
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            if (empty($_SESSION['user'])) throw new \Exception('Silakan login terlebih dahulu.');
+
+            $currentUserId = intval($_SESSION['user']['id'] ?? 0);
+            $classId = intval($_POST['class_id'] ?? 0);
+            $userId = intval($_POST['user_id'] ?? 0);
+            // determine role from the target user's level (ignore arbitrary POST role)
+            if (!$classId || !$userId) throw new \Exception('Parameter tidak lengkap.');
+
+            // Fetch target user's level
+            $stmt = $this->db->prepare('SELECT level FROM users WHERE id = ? LIMIT 1');
+            $newRole = 'user';
+            if ($stmt) {
+                $stmt->bind_param('i', $userId);
+                $stmt->execute();
+                $res = $stmt->get_result();
+                $r = $res ? $res->fetch_assoc() : null;
+                $levelVal = $r['level'] ?? '';
+                $newRole = (is_teacher_level($levelVal) || strtolower($levelVal) === 'admin') ? 'teacher' : 'user';
+                $stmt->close();
+            }
+
+            // Permission check: must be class creator, class guru/admin, or site admin
+            $allowed = false;
+            // site admin
+            $currLevel = $_SESSION['user']['level'] ?? '';
+            if ($currLevel === 'admin' || $currLevel === 'Guru' || $currLevel === 'guru') $allowed = true;
+
+            // class creator
+            $class = $this->model->getById($classId);
+            if (!$allowed && $class && intval($class['created_by'] ?? 0) === $currentUserId) $allowed = true;
+
+            // membership role
+            if (!$allowed) {
+                $stmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ? LIMIT 1');
+                if ($stmt) {
+                    $stmt->bind_param('ii', $classId, $currentUserId);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+                    $r = $res ? $res->fetch_assoc() : null;
+                    if ($r && in_array(strtolower($r['role'] ?? ''), ['guru','admin','teacher'])) $allowed = true;
+                    $stmt->close();
+                }
+            }
+
+            if (!$allowed) throw new \Exception('Tidak memiliki izin untuk mengubah role.');
+
+            // Perform update via service if available, else fallback to model/db
+            $ok = false;
+            if ($this->classService) {
+                try {
+                    $ok = $this->classService->updateMemberRole($userId, $classId, $newRole);
+                } catch (\Exception $e) {
+                    $ok = false;
+                }
+            } else {
+                $stmt2 = $this->db->prepare('UPDATE class_members SET role = ? WHERE class_id = ? AND user_id = ?');
+                if ($stmt2) {
+                    $stmt2->bind_param('sii', $newRole, $classId, $userId);
+                    $stmt2->execute();
+                    $ok = $stmt2->affected_rows > 0;
+                    $stmt2->close();
+                }
+            }
+
+            $_SESSION['flash'] = $ok ? 'Role anggota diperbarui.' : 'Gagal memperbarui role anggota.';
+        } catch (\Exception $e) {
+            $_SESSION['flash'] = 'Error: ' . $e->getMessage();
+        }
+        $back = $_SERVER['HTTP_REFERER'] ?? ('index.php?page=class_members&id=' . intval($classId));
+        header('Location: ' . $back);
+        exit;
     }
 
     public function update() {
@@ -325,6 +445,25 @@ class ClassController {
         $class_id = intval($_GET['id'] ?? 0);
         $class = $this->model->getById($class_id);
         $members = $this->model->getMembers($class_id);
+        // Determine whether current user can manage roles (creator, guru, or admin)
+        $currentUserId = intval($_SESSION['user']['id'] ?? 0);
+        $canManage = false;
+        if (!empty($currentUserId)) {
+            if (intval($class['created_by'] ?? 0) === $currentUserId) $canManage = true;
+            $currLevel = $_SESSION['user']['level'] ?? '';
+            if (!$canManage && ($currLevel === 'admin' || $currLevel === 'Guru' || $currLevel === 'guru')) $canManage = true;
+            if (!$canManage) {
+                $stmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ? LIMIT 1');
+                if ($stmt) {
+                    $stmt->bind_param('ii', $class_id, $currentUserId);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+                    $r = $res ? $res->fetch_assoc() : null;
+                    if ($r && in_array(strtolower($r['role'] ?? ''), ['guru','admin','teacher'])) $canManage = true;
+                    $stmt->close();
+                }
+            }
+        }
         $content = dirname(__DIR__) . '/views/pages/classes/class_members.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -332,7 +471,18 @@ class ClassController {
         try {
             $classId = intval($_POST['class_id'] ?? 0);
             $userId = intval($_POST['user_id'] ?? 0);
-            $role = $_POST['role'] ?? 'member';
+            // Determine role from the user's level to avoid mismatches
+            $role = 'user';
+            $stmt = $this->db->prepare('SELECT level FROM users WHERE id = ? LIMIT 1');
+            if ($stmt) {
+                $stmt->bind_param('i', $userId);
+                $stmt->execute();
+                $res = $stmt->get_result();
+                $r = $res ? $res->fetch_assoc() : null;
+                $levelVal = $r['level'] ?? '';
+                $role = (is_teacher_level($levelVal) || strtolower($levelVal) === 'admin') ? 'teacher' : 'user';
+                $stmt->close();
+            }
 
             if (!$classId || !$userId) {
                 throw new \Exception("Invalid class or user ID");

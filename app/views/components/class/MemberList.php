@@ -188,7 +188,7 @@ $roleColors = [
           </div>
 
           <!-- Info -->
-          <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1">
               <h4 class="text-sm font-semibold text-white truncate"><?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?></h4>
               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <?= $colors['bg'] ?> <?= $colors['border'] ?> <?= $colors['text'] ?> border flex-shrink-0">
@@ -228,6 +228,17 @@ $roleColors = [
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                   </svg>
                 </button>
+              </form>
+            <?php endif; ?>
+            <?php if (!empty($canManage) && intval($sessionUser['id'] ?? 0) !== intval($userId)): ?>
+              <form method="POST" action="index.php?page=class_update_role" class="inline-flex items-center gap-2">
+                <input type="hidden" name="class_id" value="<?= intval($class_id ?? $_GET['id'] ?? 0) ?>" />
+                <input type="hidden" name="user_id" value="<?= intval($userId) ?>" />
+                <select name="new_role" class="px-2 py-1 rounded bg-gray-900 border border-gray-700 text-gray-100 text-sm">
+                  <option value="user" <?= strtolower($role) === 'user' ? 'selected' : '' ?>>Student</option>
+                  <option value="guru" <?= in_array(strtolower($role), ['guru','teacher']) ? 'selected' : '' ?>>Teacher</option>
+                </select>
+                <button type="submit" class="p-2 text-white bg-blue-600 rounded hover:bg-blue-500 text-xs">Ubah</button>
               </form>
             <?php endif; ?>
           </div>

@@ -11,12 +11,27 @@ if (!isset($_GET['page'])) {
 
 if (
     empty($_SESSION['user_id']) &&
-    isset($_COOKIE['user_id'], $_COOKIE['username'], $_COOKIE['level'])
+    isset($_COOKIE['user_id'], $_COOKIE['username'])
 ) {
-    $_SESSION['user_id'] = $_COOKIE['user_id'];
-    $_SESSION['username'] = $_COOKIE['username'];
-    $_SESSION['level'] = $_COOKIE['level'];
-    // Tambahkan validasi ke database jika perlu
+    try {
+        $uid = intval($_COOKIE['user_id']);
+        $uname = $_COOKIE['username'];
+        if ($uid > 0 && isset($config) && $config instanceof mysqli) {
+            $stmt = mysqli_prepare($config, 'SELECT * FROM users WHERE id = ? LIMIT 1');
+            mysqli_stmt_bind_param($stmt, 'i', $uid);
+            mysqli_stmt_execute($stmt);
+            $res = mysqli_stmt_get_result($stmt);
+            $row = $res ? mysqli_fetch_assoc($res) : null;
+            mysqli_stmt_close($stmt);
+            if ($row && ($row['username'] ?? '') === $uname) {
+                $_SESSION['user'] = $row;
+                $_SESSION['user_id'] = $row['id'];
+                $_SESSION['username'] = $row['username'];
+                $_SESSION['level'] = $row['level'];
+            }
+        }
+    } catch (Throwable $e) {
+    }
 }
 
 
@@ -102,6 +117,7 @@ $router->post('/class_update', 'ClassController@update');
 $router->post('/class_delete', 'ClassController@delete');
 $router->get('/class_members', 'ClassController@members');
 $router->post('/class_add_member', 'ClassController@addMember');
+$router->post('/class_update_role', 'ClassController@updateMemberRole');
 $router->get('/class/detail/{id}', 'ClassController@detail');
 // Join class routes
 $router->get('/join_class', 'ClassController@joinForm');

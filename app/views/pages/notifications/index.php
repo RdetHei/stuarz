@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $user = $_SESSION['user'] ?? null;
 ?>
 
-<div class="bg-gray-900 min-h-screen">
+<div id="notificationsPage" class="bg-gray-900 min-h-screen notifications-page">
     <div class="max-w-5xl mx-auto px-6 py-8">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
@@ -21,13 +21,13 @@ $user = $_SESSION['user'] ?? null;
             
 <?php if (!empty($notifications)): ?>
 <div class="flex items-center gap-3">
-    <button onclick="markAllAsRead()" 
+    <button id="markAllBtn" data-action="mark-all" 
             class="px-4 py-2 bg-[#1f2937] hover:bg-gray-700 border border-gray-700 text-sm text-gray-300 rounded-md transition-colors">
         Tandai Semua Dibaca
     </button>
 
 
-    <button onclick="clearAllNotifications()" 
+    <button id="clearAllBtn" data-action="clear-all" 
             class="px-4 py-2 bg-red-700 hover:bg-red-600 border border-red-800 text-sm text-white rounded-md transition-colors">
         Hapus Semua
     </button>
@@ -50,7 +50,20 @@ $user = $_SESSION['user'] ?? null;
                     <p class="text-gray-400 text-sm">Notifikasi akan muncul di sini ketika ada aktivitas baru</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($notifications as $n): ?>
+                <?php
+                // Separate notifications that reference localhost so we can show them as popups
+                $localNotifications = [];
+                $normalNotifications = [];
+                foreach ($notifications as $n) {
+                    $url = $n['url'] ?? '';
+                    $msg = $n['message'] ?? '';
+                    if ((is_string($url) && stripos($url, 'localhost') !== false) || (is_string($msg) && stripos($msg, 'localhost') !== false)) {
+                        $localNotifications[] = $n;
+                    } else {
+                        $normalNotifications[] = $n;
+                    }
+                }
+                foreach ($normalNotifications as $n): ?>
                     <?php 
                     $entity = $n['entity'] ?? ($n['type'] ?? 'general');
                     $entityId = $n['entity_id'] ?? ($n['reference_id'] ?? null);
@@ -188,7 +201,8 @@ $user = $_SESSION['user'] ?? null;
                                         <?php if (!empty($n['url'])): ?>
                                         <div class="mt-3">
                                             <a href="<?= htmlspecialchars($n['url']) ?>" 
-                                               class="inline-flex items-center gap-1.5 text-sm <?= $linkColor ?> transition-colors">
+                                               data-notif-url="<?= htmlspecialchars($n['url']) ?>" data-notif-id="<?= (int)$n['id'] ?>"
+                                               class="inline-flex items-center gap-1.5 text-sm <?= $linkColor ?> transition-colors notif-link">
                                                 Buka Halaman
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -198,14 +212,14 @@ $user = $_SESSION['user'] ?? null;
                                         <?php endif; ?>
                                         <div class="mt-3 flex items-center gap-2">
                                             <?php if ($isUnread): ?>
-                                            <button onclick="NotificationsUI.markReadUI(<?= (int)$n['id'] ?>)"
+                                            <button data-action="mark-read" data-id="<?= (int)$n['id'] ?>"
                                                 class="px-3 py-1 bg-[#111827] text-sm text-gray-300 rounded">Tandai Dibaca</button>
                                             <?php else: ?>
-                                            <button onclick="NotificationsUI.markUnreadUI(<?= (int)$n['id'] ?>)"
+                                            <button data-action="mark-unread" data-id="<?= (int)$n['id'] ?>"
                                                 class="px-3 py-1 bg-[#111827] text-sm text-gray-300 rounded">Tandai Belum Dibaca</button>
                                             <?php endif; ?>
 
-                                            <button onclick="(function(id){ if(!confirm('Hapus notifikasi ini?')) return; NotificationsUI.deleteUI(id); })(<?= (int)$n['id'] ?>)"
+                                            <button data-action="delete" data-id="<?= (int)$n['id'] ?>"
                                                 class="px-3 py-1 bg-red-700 text-sm text-white rounded">Hapus</button>
                                         </div>
                                     </div>
@@ -214,6 +228,62 @@ $user = $_SESSION['user'] ?? null;
                         </div>
                     <?php endif; ?>
                 <?php endforeach; ?>
+                <?php if (!empty($localNotifications)): ?>
+                    <!-- Localhost popups: render toasts via JS -->
+                    <div id="local-notif-container" aria-live="polite" class="fixed top-4 right-4 z-50 space-y-3"></div>
+                    <script>
+                        (function(){
+                            const local = <?= json_encode(array_values($localNotifications)) ?>;
+                            function createToast(n) {
+                                const id = Number(n.id || 0);
+                                const el = document.createElement('div');
+                                el.className = 'w-80 bg-yellow-900/95 text-white p-4 rounded shadow-lg border ring-2 ring-yellow-500/30';
+                                el.id = 'local-notif-toast-' + id;
+                                el.innerHTML = `
+                                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                                        <div style="flex:1">
+                                            <div style="font-weight:700;margin-bottom:6px">Notification</div>
+                                            <div style="font-size:13px;margin-bottom:8px">${escapeHtml(n.message || '')}</div>
+                                            ${n.url ? `<a href="${escapeHtml(n.url)}" style="color:#fde68a;text-decoration:underline;font-size:13px;">Open link</a>` : ''}
+                                        </div>
+                                        <div style="margin-left:8px">
+                                            <button data-id="${id}" class="local-notif-close" style="background:#111827;border-radius:6px;padding:6px 8px;color:#fff;border:none;cursor:pointer">Close</button>
+                                        </div>
+                                    </div>`;
+                                return el;
+                            }
+
+                            function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+                            document.addEventListener('DOMContentLoaded', function(){
+                                const container = document.getElementById('local-notif-container');
+                                if (!container) return;
+                                local.forEach(function(n, idx){
+                                    try{
+                                        const toast = createToast(n);
+                                        container.appendChild(toast);
+                                        // Auto-mark read after 10s if unread
+                                        if (n.is_read === 0 || n.is_read === '0' || n.is_read === false) {
+                                            setTimeout(function(){
+                                                try { window.NotificationsUI.markReadUI(Number(n.id)); } catch(e){}
+                                            }, 10000 + idx*2000);
+                                        }
+                                    }catch(e){console.error(e)}
+                                });
+
+                                // Delegate close buttons
+                                container.addEventListener('click', function(e){
+                                    const btn = e.target.closest && e.target.closest('.local-notif-close');
+                                    if (!btn) return;
+                                    const nid = Number(btn.getAttribute('data-id') || 0);
+                                    const toast = document.getElementById('local-notif-toast-' + nid);
+                                    if (toast) toast.remove();
+                                    try { window.NotificationsUI.markReadUI(nid); } catch(e) {}
+                                });
+                            });
+                        })();
+                    </script>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>

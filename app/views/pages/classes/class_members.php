@@ -41,7 +41,21 @@
                                 <td class="px-6 py-3 text-gray-300"><?= (int)$m['user_id'] ?></td>
                                 <td class="px-6 py-3 text-gray-100 font-medium"><?= htmlspecialchars($m['username']) ?></td>
                                 <td class="px-6 py-3 text-gray-300"><?= htmlspecialchars($m['email']) ?></td>
-                                <td class="px-6 py-3 text-gray-400 text-sm"> <?= htmlspecialchars($m['role']) ?> </td>
+                                <td class="px-6 py-3 text-gray-400 text-sm">
+                                    <?php if (!empty($canManage) && !empty($_SESSION['user']) && intval($_SESSION['user']['id'] ?? 0) !== intval($m['user_id'])): ?>
+                                        <form method="post" action="index.php?page=class_update_role" class="inline-block">
+                                            <input type="hidden" name="class_id" value="<?= (int)$class['id'] ?>">
+                                            <input type="hidden" name="user_id" value="<?= (int)$m['user_id'] ?>">
+                                            <select name="new_role" class="px-2 py-1 rounded bg-gray-900 border border-gray-700 text-gray-100 text-sm">
+                                                <option value="user" <?= strtolower($m['role'] ?? '') === 'user' ? 'selected' : '' ?>>Student</option>
+                                                <option value="guru" <?= in_array(strtolower($m['role'] ?? ''), ['guru','teacher']) ? 'selected' : '' ?>>Teacher</option>
+                                            </select>
+                                            <button type="submit" class="px-2 py-1 ml-2 bg-blue-600 rounded text-xs text-white hover:bg-blue-500">Ubah</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <?= htmlspecialchars($m['role']) ?>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="px-6 py-3">
                                     <form method="post" action="index.php?page=class_remove_member" style="display:inline" onsubmit="return confirm('Hapus anggota ini?')">
                                         <input type="hidden" name="class_id" value="<?= (int)$class['id'] ?>">

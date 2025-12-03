@@ -28,7 +28,7 @@ $hasClasses = $hasClasses ?? !empty($classes);
         </div>
 
         <div class="flex items-center gap-3">
-          <?php if (($sessionUser['level'] ?? '') === 'admin'): ?>
+          <?php if (($sessionUser['level'] ?? '') === 'admin' || ($sessionUser['level'] ?? '') === 'guru'): ?>
           <div>
             <?php if ($showAll): ?>
               <a href="index.php?page=class" class="px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 border border-gray-700 transition-colors">
@@ -143,12 +143,47 @@ $hasClasses = $hasClasses ?? !empty($classes);
                 <div class="flex items-start justify-between gap-3 mb-3">
                   <div class="flex-1 min-w-0">
                     <h3 class="text-base font-semibold text-gray-100 truncate mb-1"><?= htmlspecialchars($name) ?></h3>
-                    <div class="flex items-center gap-2 text-xs text-gray-500">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
-                      </svg>
-                      <span class="font-mono"><?= htmlspecialchars($code) ?></span>
-                    </div>
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                </svg>
+                <span class="font-mono"><?= htmlspecialchars($code) ?></span>
+                <?php 
+                  $waliName = $c['creator'] ?? '';
+                  $waliAvatar = $c['creator_avatar'] ?? '';
+                  $creatorId = intval($c['created_by'] ?? 0);
+                  $waliInitial = strtoupper(mb_substr($waliName !== '' ? $waliName : 'W', 0, 1, 'UTF-8'));
+                  $waliAvatarUrl = '';
+                  if (!empty($waliAvatar)) {
+                    if (preg_match('#^https?://#i', $waliAvatar)) {
+                      $waliAvatarUrl = $waliAvatar;
+                    } else {
+                      $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/'); if ($baseUrl === '/') $baseUrl = '';
+                      $prefix = ($baseUrl ? $baseUrl . '/' : '');
+                      $candidate = $prefix . ltrim($waliAvatar, '/\\');
+                      $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\');
+                      $candidateFs = $docRoot ? $docRoot . '/' . ltrim($candidate, '/\\') : '';
+                      if ($candidateFs && is_file($candidateFs)) {
+                        $waliAvatarUrl = $candidate;
+                      } else {
+                        $altFs = $docRoot ? $docRoot . '/' . ltrim($waliAvatar, '/\\') : '';
+                        if ($altFs && is_file($altFs)) { $waliAvatarUrl = ltrim($waliAvatar, '/\\'); }
+                        else { $waliAvatarUrl = $waliAvatar; }
+                      }
+                    }
+                  }
+                ?>
+                <?php if ($waliName !== ''): ?>
+                <a href="index.php?page=profile&user_id=<?= $creatorId ?>" class="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-gray-700/40 text-gray-300 border border-gray-600 hover:bg-gray-700 transition-colors" title="Wali Kelas">
+                  <?php if (!empty($waliAvatarUrl)): ?>
+                    <img src="<?= htmlspecialchars($waliAvatarUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($waliName, ENT_QUOTES, 'UTF-8') ?>" class="w-4 h-4 rounded-full object-cover border border-gray-600" />
+                  <?php else: ?>
+                    <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-white flex items-center justify-center text-[10px] font-bold border border-gray-600"><?= htmlspecialchars($waliInitial, ENT_QUOTES, 'UTF-8') ?></span>
+                  <?php endif; ?>
+                  <span class="text-[11px] truncate max-w-[8rem]"><?= htmlspecialchars($waliName, ENT_QUOTES, 'UTF-8') ?></span>
+                </a>
+                <?php endif; ?>
+              </div>
                   </div>
                   <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium <?= $config['bg'] ?> <?= $config['text'] ?> border <?= $config['border'] ?> whitespace-nowrap">
                     <?= $config['label'] ?>

@@ -2,7 +2,12 @@
 <?php
 class ScheduleModel {
     private $db;
-    public function __construct($db) { $this->db = $db; }
+    public function __construct($db) {
+        $this->db = $db;
+        if (!is_object($this->db) || !method_exists($this->db, 'prepare')) {
+            error_log("ScheduleModel::__construct - invalid DB object passed; prepare() missing or db is not an object");
+        }
+    }
 
     public function getAll($filters = []) {
         $sql = "SELECT * FROM schedule";

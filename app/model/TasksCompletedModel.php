@@ -259,6 +259,12 @@ class TasksCompletedModel {
         try {
             $hasSubject = $this->hasColumn('tasks_completed', 'subject_id');
             $hasSchedule = $this->hasColumn('tasks_completed', 'schedule_id');
+            $hasApproval = $this->hasColumn('tasks_completed', 'approval_required');
+            $hasRubric = $this->hasColumn('tasks_completed', 'grading_rubric');
+            $hasMaxAttempts = $this->hasColumn('tasks_completed', 'max_attempts');
+            $hasReminder = $this->hasColumn('tasks_completed', 'reminder_at');
+            $hasLatePolicy = $this->hasColumn('tasks_completed', 'allow_late');
+            $hasWorkflow = $this->hasColumn('tasks_completed', 'workflow_state');
             // Build insert with optional subject_id and schedule_id
             $cols = ['user_id','title','description','status','deadline','class_id'];
             $placeholders = ['?','?','?','?','?','?'];

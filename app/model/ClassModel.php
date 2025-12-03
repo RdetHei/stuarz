@@ -69,7 +69,7 @@ class ClassModel {
      */
     public function getAllClassesWithUserStatus($userId) {
         $result = [];
-        $sql = "SELECT c.id, c.name, c.code, c.description, c.created_by, c.created_at, u.username as creator, (SELECT COUNT(*) FROM class_members cm2 WHERE cm2.class_id = c.id) as members_count, CASE WHEN cm.user_id IS NOT NULL THEN 1 ELSE 0 END AS is_joined, cm.role AS member_role, cm.joined_at FROM classes c LEFT JOIN users u ON c.created_by = u.id LEFT JOIN class_members cm ON cm.class_id = c.id AND cm.user_id = ? ORDER BY c.id DESC";
+        $sql = "SELECT c.id, c.name, c.code, c.description, c.created_by, c.created_at, u.username as creator, u.avatar AS creator_avatar, (SELECT COUNT(*) FROM class_members cm2 WHERE cm2.class_id = c.id) as members_count, CASE WHEN cm.user_id IS NOT NULL THEN 1 ELSE 0 END AS is_joined, cm.role AS member_role, cm.joined_at FROM classes c LEFT JOIN users u ON c.created_by = u.id LEFT JOIN class_members cm ON cm.class_id = c.id AND cm.user_id = ? ORDER BY c.id DESC";
         
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param('i', $userId);
@@ -89,12 +89,11 @@ class ClassModel {
 
     public function getById($id, $userId = null) {
         $sql = 'SELECT c.*, (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count';
-
         if ($userId !== null) {
             $sql .= ', cm.role as member_role, CASE WHEN cm.user_id IS NOT NULL THEN 1 ELSE 0 END as is_joined';
         }
-
-        $sql .= ' FROM classes c';
+        $sql .= ', u.username AS creator, u.avatar AS creator_avatar, u.id AS creator_id, u.level AS creator_level';
+        $sql .= ' FROM classes c LEFT JOIN users u ON u.id = c.created_by';
 
         if ($userId !== null) {
             $sql .= ' LEFT JOIN class_members cm ON cm.class_id = c.id AND cm.user_id = ?';
@@ -113,7 +112,6 @@ class ClassModel {
         $stmt->close();
 
         if ($row && $userId !== null) {
-            // Provide both keys for compatibility
             $row['member_role'] = $row['member_role'] ?? null;
             $row['is_joined'] = (int)($row['is_joined'] ?? 0);
             $row['my_role'] = $row['member_role'];
@@ -162,7 +160,7 @@ class ClassModel {
     // Get classes managed by user (admin/guru)
     public function getManagedClasses($userId) {
         $result = [];
-        $sql = 'SELECT c.*, u.username as creator, (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count FROM classes c LEFT JOIN users u ON c.created_by = u.id WHERE c.created_by = ? OR EXISTS (SELECT 1 FROM class_members cm WHERE cm.class_id = c.id AND cm.user_id = ? AND cm.role IN ("guru", "admin")) ORDER BY c.id DESC';
+        $sql = 'SELECT c.*, u.username as creator, (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count FROM classes c LEFT JOIN users u ON c.created_by = u.id WHERE c.created_by = ? OR EXISTS (SELECT 1 FROM class_members cm WHERE cm.class_id = c.id AND cm.user_id = ? AND cm.role IN ("guru","teacher", "admin")) ORDER BY c.id DESC';
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param('ii', $userId, $userId);
         $stmt->execute();
@@ -183,9 +181,9 @@ class ClassModel {
             $checkStmt->close();
 
             if (!$memberRole && intval($row['created_by']) === intval($userId)) {
-                $row['member_role'] = 'guru';
+                $row['member_role'] = 'teacher';
                 $row['is_joined'] = 1;
-                $row['my_role'] = 'guru';
+                $row['my_role'] = 'teacher';
             } else {
                 $row['member_role'] = $memberRole;
                 $row['is_joined'] = $memberRole ? 1 : 0;
@@ -200,7 +198,7 @@ class ClassModel {
     // Anggota kelas
     public function getMembers($class_id) {
         $result = [];
-        $sql = 'SELECT m.*, u.username, u.email FROM class_members m LEFT JOIN users u ON m.user_id = u.id WHERE m.class_id = ?';
+        $sql = 'SELECT m.*, u.username, u.email, u.avatar, u.level AS level FROM class_members m LEFT JOIN users u ON m.user_id = u.id WHERE m.class_id = ?';
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param('i', $class_id);
         $stmt->execute();
