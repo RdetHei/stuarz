@@ -12,36 +12,43 @@ $hasClasses = $hasClasses ?? !empty($classes);
     
     <!-- Header -->
     <header class="mb-8">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <div class="p-2 rounded-lg bg-blue-500/10">
-              <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
               </svg>
             </div>
-            Kelas Saya
-          </h1>
-          <p class="text-sm text-gray-400">Kelola kelas dan kegiatan belajar Anda</p>
+            <div>
+              <h1 class="text-2xl font-semibold text-gray-100">Kelas Saya</h1>
+              <p class="text-sm text-gray-400 mt-0.5">Kelola kelas dan kegiatan belajar Anda</p>
+            </div>
+          </div>
         </div>
 
-        <?php if (($sessionUser['level'] ?? '') === 'admin' || ($sessionUser['level'] ?? '') === 'guru'): ?>
         <div class="flex items-center gap-3">
-          <button id="openCreateClassBtn" class="px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-          Create Class
-          </button>
+          <?php if (($sessionUser['level'] ?? '') === 'admin'): ?>
+          <div>
+            <?php if ($showAll): ?>
+              <a href="index.php?page=class" class="px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 border border-gray-700 transition-colors">
+                Kelas Saya Saja
+              </a>
+            <?php else: ?>
+              <a href="index.php?page=class&show=all" class="px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 border border-gray-700 transition-colors">
+                Tampilkan Semua
+              </a>
+            <?php endif; ?>
           </div>
-        <?php endif; ?>
-        
-        <!-- Toggle: show all classes or only joined -->
-        <div class="ml-4">
-          <?php if ($showAll): ?>
-            <a href="index.php?page=class" class="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-sm text-white">Tampilkan Kelas Saya</a>
-          <?php else: ?>
-            <a href="index.php?page=class&show=all" class="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-sm text-white">Tampilkan Semua</a>
+          <?php endif; ?>
+
+          <?php if (($sessionUser['level'] ?? '') === 'admin' || ($sessionUser['level'] ?? '') === 'guru'): ?>
+          <button id="openCreateClassBtn" class="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Buat Kelas
+          </button>
           <?php endif; ?>
         </div>
       </div>
@@ -49,109 +56,125 @@ $hasClasses = $hasClasses ?? !empty($classes);
 
     <?php if (!$hasClasses): ?>
       <!-- Empty State with Join Form -->
-      <div class="max-w-4xl mx-auto">
-        <div class="bg-gray-800 border border-gray-700 rounded-xl p-8 shadow-lg mb-6">
-          <div class="text-center mb-8">
-            <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-700/50 flex items-center justify-center">
-              <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="max-w-2xl mx-auto">
+        <div class="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+          <div class="p-8 text-center border-b border-gray-700">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-white mb-2">Belum Ada Kelas</h3>
-            <p class="text-sm text-gray-400 mb-6">Bergabunglah dengan kelas untuk memulai pembelajaran</p>
+            <h3 class="text-xl font-semibold text-gray-100 mb-2">Belum Ada Kelas</h3>
+            <p class="text-sm text-gray-400">Bergabunglah dengan kelas untuk memulai pembelajaran</p>
           </div>
 
           <!-- Join Class Form -->
-          <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-6">
+          <div class="p-6 bg-gray-900">
             <div class="flex items-center gap-3 mb-4">
-              <div class="p-2 rounded-lg bg-purple-500/10">
+              <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                 </svg>
               </div>
-              <h2 class="text-lg font-bold text-white">Gabung Kelas</h2>
+              <h2 class="text-base font-semibold text-gray-100">Gabung Kelas</h2>
             </div>
             
             <?php $action = 'index.php?page=join_class'; include __DIR__ . '/../../components/class/JoinClassForm.php'; ?>
           </div>
 
           <?php if (($sessionUser['level'] ?? '') === 'admin' || ($sessionUser['level'] ?? '') === 'guru'): ?>
-          <div class="mt-6 text-center">
-            <p class="text-sm text-gray-400 mb-3">atau</p>
-            <button onclick="document.getElementById('openCreateClassBtn')?.click()" class="px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors">
-              Buat Kelas Baru
-            </button>
+          <div class="p-6 pt-4 bg-gray-900 border-t border-gray-700">
+            <div class="text-center">
+              <p class="text-sm text-gray-500 mb-3">atau</p>
+              <button onclick="document.getElementById('openCreateClassBtn')?.click()" class="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors">
+                Buat Kelas Baru
+              </button>
+            </div>
           </div>
           <?php endif; ?>
         </div>
       </div>
     <?php else: ?>
-      <!-- Main Content with Classes Table -->
-      <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-lg overflow-hidden">
-        <!-- Table Header with Stats -->
-        <div class="px-6 py-4 border-b border-gray-700 bg-[#111827]">
+      <!-- Main Content with Classes Cards -->
+      <div>
+        <!-- Stats Bar -->
+        <div class="bg-gray-800 border border-gray-700 rounded-lg px-5 py-3 mb-6">
           <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-lg font-semibold text-white">Daftar Kelas</h2>
-              <p class="text-sm text-gray-400 mt-1">Total: <?= count($classes) ?> kelas</p>
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+              <span class="text-sm text-gray-400">Total Kelas</span>
             </div>
-            <!-- Removed teacher/student quick stats per request; showing only total count above -->
+            <span class="text-lg font-semibold text-gray-100"><?= count($classes) ?></span>
           </div>
         </div>
 
         <!-- Cards Grid -->
-        <div class="p-6">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <?php foreach ($classes as $c): ?>
-              <?php
-                $name = $c['name'] ?? 'Kelas';
-                $code = $c['code'] ?? '';
-                $description = $c['description'] ?? '-';
-                $members_count = isset($c['members_count']) ? intval($c['members_count']) : 0;
-                $is_joined = intval($c['is_joined'] ?? 0);
-                $role = $c['member_role'] ?? null;
-                if ($role === null && isset($c['created_by']) && isset($sessionUser['id']) && intval($c['created_by']) === intval($sessionUser['id'])) {
-                  $role = 'creator';
-                }
-                if ($role === null) { $role = 'not_joined'; }
-                $link = 'index.php?page=class/detail/' . ($c['id'] ?? '');
-                $roleColors = [
-                  'admin' => ['bg' => 'bg-red-500/10', 'border' => 'border-red-500/20', 'text' => 'text-red-400'],
-                  'creator' => ['bg' => 'bg-orange-500/10', 'border' => 'border-orange-500/20', 'text' => 'text-orange-400'],
-                  'teacher' => ['bg' => 'bg-purple-500/10', 'border' => 'border-purple-500/20', 'text' => 'text-purple-400'],
-                  'student' => ['bg' => 'bg-blue-500/10', 'border' => 'border-blue-500/20', 'text' => 'text-blue-400'],
-                  'not_joined' => ['bg' => 'bg-gray-500/10', 'border' => 'border-gray-500/20', 'text' => 'text-gray-400']
-                ];
-                $colors = $roleColors[$role] ?? $roleColors['student'];
-              ?>
-              <div class="bg-gray-800 border border-gray-700 rounded-xl p-5 flex flex-col justify-between h-full">
-                <div>
-                  <div class="flex items-start justify-between gap-4 mb-3">
-                    <div class="min-w-0">
-                      <h3 class="text-lg font-semibold text-white truncate"><?= htmlspecialchars($name) ?></h3>
-                      <div class="text-xs text-gray-400 mt-1">Kode: <span class="font-mono text-gray-300"><?= htmlspecialchars($code) ?></span></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <?php foreach ($classes as $c): ?>
+            <?php
+              $name = $c['name'] ?? 'Kelas';
+              $code = $c['code'] ?? '';
+              $description = $c['description'] ?? '-';
+              $members_count = isset($c['members_count']) ? intval($c['members_count']) : 0;
+              $is_joined = intval($c['is_joined'] ?? 0);
+              $role = $c['member_role'] ?? null;
+              if ($role === null && isset($c['created_by']) && isset($sessionUser['id']) && intval($c['created_by']) === intval($sessionUser['id'])) {
+                $role = 'creator';
+              }
+              if ($role === null) { $role = 'not_joined'; }
+              $link = 'index.php?page=class/detail/' . ($c['id'] ?? '');
+              
+              $roleConfig = [
+                'admin' => ['bg' => 'bg-red-500/10', 'border' => 'border-red-500/30', 'text' => 'text-red-400', 'label' => 'Admin'],
+                'creator' => ['bg' => 'bg-orange-500/10', 'border' => 'border-orange-500/30', 'text' => 'text-orange-400', 'label' => 'Creator'],
+                'teacher' => ['bg' => 'bg-purple-500/10', 'border' => 'border-purple-500/30', 'text' => 'text-purple-400', 'label' => 'Teacher'],
+                'student' => ['bg' => 'bg-blue-500/10', 'border' => 'border-blue-500/30', 'text' => 'text-blue-400', 'label' => 'Student'],
+                'not_joined' => ['bg' => 'bg-gray-700', 'border' => 'border-gray-600', 'text' => 'text-gray-400', 'label' => 'Not Joined']
+              ];
+              $config = $roleConfig[$role] ?? $roleConfig['student'];
+            ?>
+            
+            <!-- Class Card -->
+            <div class="bg-gray-900 border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors group">
+              <!-- Card Header -->
+              <div class="p-5 border-b border-gray-700">
+                <div class="flex items-start justify-between gap-3 mb-3">
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-base font-semibold text-gray-100 truncate mb-1"><?= htmlspecialchars($name) ?></h3>
+                    <div class="flex items-center gap-2 text-xs text-gray-500">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                      </svg>
+                      <span class="font-mono"><?= htmlspecialchars($code) ?></span>
                     </div>
-                    <div class="text-sm text-gray-300 ml-2"><?= $members_count ?> anggota</div>
                   </div>
-                  <p class="text-sm text-gray-400 mb-4 line-clamp-3"><?= htmlspecialchars($description) ?></p>
+                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium <?= $config['bg'] ?> <?= $config['text'] ?> border <?= $config['border'] ?> whitespace-nowrap">
+                    <?= $config['label'] ?>
+                  </span>
                 </div>
-                <div class="flex items-center justify-between mt-4">
-                  <div>
-                    <?php if ($is_joined === 1 && $c['member_role']): ?>
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium <?= $colors['bg'] ?> <?= $colors['border'] ?> <?= $colors['text'] ?> border">
-                        <span class="capitalize"><?= htmlspecialchars($c['member_role'] ?? 'member') ?></span>
-                      </span>
-                    <?php elseif ($role === 'creator'): ?>
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-orange-500/10 border-orange-500/20 text-orange-400 border">Creator</span>
-                    <?php else: ?>
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-gray-500/10 border-gray-500/20 text-gray-400 border">Not Joined</span>
-                    <?php endif; ?>
-                  </div>
-                  <a href="<?= htmlspecialchars($link) ?>" class="px-3 py-1.5 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 transition-colors">Masuk</a>
-                </div>
+                
+                <p class="text-sm text-gray-400 line-clamp-2 min-h-[2.5rem]"><?= htmlspecialchars($description) ?></p>
               </div>
-            <?php endforeach; ?>
-          </div>
+
+              <!-- Card Footer -->
+              <div class="p-5 bg-gray-800 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-sm text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                  </svg>
+                  <span><?= $members_count ?> anggota</span>
+                </div>
+                <a href="<?= htmlspecialchars($link) ?>" class="px-3 py-1.5 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  <span>Buka</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          <?php endforeach; ?>
         </div>
       </div>
     <?php endif; ?>
