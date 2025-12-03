@@ -67,7 +67,6 @@ $router->get('/news_print', 'NewsController@print');
 $router->get('/docs_print', 'DocsController@print');
 $router->get('/print', 'PrintController@index');
 $router->get('/print_table', 'PrintController@printTable');
-$router->get('/print_all', 'PrintController@printAll');
 $router->get('/chat', 'ChatController@chat');
 $router->get('/company', 'CompanyController@company');
 $router->get('/profile', 'ProfileController@profile');

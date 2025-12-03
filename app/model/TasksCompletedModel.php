@@ -139,7 +139,7 @@ class TasksCompletedModel {
     
     public function getByStudentClass($studentId) {
         // Get all classes the student is a member of from class_members table
-        $stmt = $this->db->prepare("SELECT class_id FROM class_members WHERE user_id = ? AND role = 'student'");
+        $stmt = $this->db->prepare("SELECT class_id FROM class_members WHERE user_id = ? AND role = 'user'");
         $stmt->bind_param('i', $studentId);
         $stmt->execute();
         $result = $stmt->get_result();

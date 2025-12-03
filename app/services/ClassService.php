@@ -25,7 +25,7 @@ class ClassService {
      * @return bool True on success, false otherwise
      * @throws Exception
      */
-    public function joinClass(int $userId, int $classId, string $role = 'student'): bool {
+    public function joinClass(int $userId, int $classId, string $role = 'user'): bool {
         try {
             $this->db->beginTransaction();
             

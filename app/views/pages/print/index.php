@@ -120,64 +120,7 @@
             <?php endforeach; ?>
         </div>
 
-        <!-- Print All Section -->
-        <div class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-700 bg-[#111827]">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-semibold text-gray-100">Batch Operations</h2>
-                        <p class="text-sm text-gray-400 mt-0.5">Print atau export semua tabel sekaligus</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-6 py-6">
-                <div class="grid sm:grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-3">
-                        <div class="flex items-start gap-3 p-4 bg-[#111827] rounded-lg border border-gray-700">
-                            <svg class="w-5 h-5 text-[#5865F2] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            <div>
-                                <h3 class="text-sm font-semibold text-gray-100 mb-1">Print All Tables</h3>
-                                <p class="text-xs text-gray-400 mb-3">Cetak semua data dari <?= count($tables) ?> tabel dalam satu dokumen PDF</p>
-                                <a href="index.php?page=print_all" 
-                                   class="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md transition-colors text-sm font-medium">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                                    </svg>
-                                    Print All
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-3">
-                        <div class="flex items-start gap-3 p-4 bg-[#111827] rounded-lg border border-gray-700">
-                            <svg class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            <div>
-                                <h3 class="text-sm font-semibold text-gray-100 mb-1">Export All to CSV</h3>
-                                <p class="text-xs text-gray-400 mb-3">Download semua data dalam format CSV terpisah</p>
-                                <button onclick="exportAllTables()" 
-                                        class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-md transition-colors text-sm font-medium">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                                    </svg>
-                                    Export All CSV
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Batch/Print-All functionality removed from UI -->
     </div>
 </div>
 

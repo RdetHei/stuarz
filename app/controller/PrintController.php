@@ -38,21 +38,10 @@ class PrintController {
     }
     
     public function printAll() {
-        global $config;
-        // Get all table names
-        $tables = $this->getAllTables($config);
-        
-        // Get data for all tables
-        $allData = [];
-        foreach ($tables as $table) {
-            $allData[$table] = [
-                'columns' => $this->getTableColumns($config, $table),
-                'data' => $this->getTableData($config, $table)
-            ];
-        }
-        
-        // Include print all view
-        include dirname(__DIR__) . '/views/pages/print/print_all.php';
+        // printAll removed: functionality deprecated and removed from UI.
+        header('HTTP/1.1 404 Not Found');
+        echo 'Print All is no longer available.';
+        exit;
     }
     
     private function getAllTables($db) {

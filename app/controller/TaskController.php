@@ -411,14 +411,18 @@ class TaskController {
             header('Location: index.php?page=tasks'); exit;
         }
 
-        $uploadDir = 'public/uploads/task_submissions/';
-        if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
+        // Use absolute filesystem path for storing files and store a public web path in DB
+        $uploadDirFs = dirname(__DIR__, 2) . '/public/uploads/task_submissions/';
+        $uploadDirWeb = 'public/uploads/task_submissions/';
+        if (!file_exists($uploadDirFs)) mkdir($uploadDirFs, 0777, true);
         // generate safe filename
         $safeBase = preg_replace('/[^A-Za-z0-9_\-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
         $fileName = time() . '_' . $safeBase . '.' . $ext;
-        $filePath = $uploadDir . $fileName;
+        $targetFsPath = $uploadDirFs . $fileName;
+        $filePath = $uploadDirWeb . $fileName; // store web-accessible path in DB
 
-        if (!move_uploaded_file($_FILES['file']['tmp_name'], $filePath)) {
+        if (!move_uploaded_file($_FILES['file']['tmp_name'], $targetFsPath)) {
+            error_log('move_uploaded_file failed, tmp_name: ' . ($_FILES['file']['tmp_name'] ?? ''));
             $_SESSION['error'] = 'Failed to move uploaded file.';
             header('Location: index.php?page=tasks'); exit;
         }
@@ -443,13 +447,29 @@ class TaskController {
             $this->submissionModel->markFinalAttempt($task_id, $user_id);
         }
 
+        $studentName = $_SESSION['user']['name'] ?? 'Siswa';
         if ($ok) {
-            $studentName = $_SESSION['user']['name'] ?? 'Siswa';
             notify_event($this->db, 'submission', 'task', $task_id, intval($task['user_id']), $studentName . " mengumpulkan tugas (percobaan #{$attemptNo}).", 'index.php?page=tasks');
             $finalNote = $isFinal ? ' (Final)' : '';
-            $_SESSION['success'] = "Pengumpulan percobaan #{$attemptNo}{$finalNote} tersimpan.";
+            $message = "Pengumpulan percobaan #{$attemptNo}{$finalNote} tersimpan.";
         } else {
-            $_SESSION['error'] = 'Failed to save submission.';
+            $message = 'Failed to save submission.';
+        }
+
+        // If request is AJAX/XHR, return JSON response for the client-side JS
+        $isXhr = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        if ($isXhr) {
+            $payload = ['success' => (bool)$ok, 'message' => $message];
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode($payload);
+            exit;
+        }
+
+        // Non-AJAX fallback: use session flash and redirect
+        if ($ok) {
+            $_SESSION['success'] = $message;
+        } else {
+            $_SESSION['error'] = $message;
         }
         header('Location: index.php?page=tasks'); exit;
     }

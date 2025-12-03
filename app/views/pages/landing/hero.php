@@ -3,8 +3,8 @@
   <div>
     <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/default-banner.png', ENT_QUOTES, 'UTF-8') ?>" alt="Background Hero" class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none select-none" />
   </div>
-  <div class="relative mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-5">
-    <div class="mx-auto max-w-4xl text-center">
+  <div class="relative w-full px-6 py-24 sm:py-32 lg:px-8 lg:py-5">
+    <div class="w-full text-center">
       <div class="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-gray-800 border border-gray-700 rounded-full">
         <div class="w-2 h-2 bg-green-500 rounded-full"></div>
         <span class="text-gray-300 text-sm font-medium">50K+ Active Users</span>
@@ -40,7 +40,7 @@
       <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(88, 101, 242, 0.05) 1px, transparent 0); background-size: 40px 40px;"></div>
     </div>
 
-    <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8">
+    <div class="w-full px-6 py-16 sm:py-24 lg:px-8">
       <!-- Hero Section -->
       <div class="text-center mb-16">
         <div class="mb-6">
@@ -57,7 +57,7 @@
       </div>
 
       <!-- App Screenshot -->
-      <div class="max-w-5xl mx-auto mb-24">
+      <div class="w-full mb-24">
         <div class="relative group">
           <div class="absolute -inset-4 bg-gradient-to-r from-[#5865F2]/20 to-[#4752C4]/20 rounded-2xl blur-2xl group-hover:blur-3xl transition-all duration-500 opacity-50"></div>
           <div class="relative overflow-hidden rounded-xl border border-gray-700 bg-[#1f2937] shadow-2xl">
@@ -143,14 +143,14 @@
     <!-- Hero Illustration -->
      
 <div class="bg-gray-900 py-24">
-  <div class="text-center mx-auto max-w-7xl px-6">
+  <div class="text-center w-full px-6">
     <h2 class="text-base font-semibold leading-7 text-indigo-600">Dashboard</h2>
     <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
       Overview
     </p>
   </div>
 
-  <div class="mt-16 mx-auto max-w-7xl overflow-hidden relative">
+  <div class="mt-16 w-full overflow-hidden relative">
 
     <!-- Container yang bisa pause -->
     <div id="slider-container" class="overflow-hidden">
@@ -223,7 +223,7 @@ sliderContainer.addEventListener("mouseleave", () => {
 
 <!-- Features Section -->
 <div class="relative bg-gray-900 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+  <div class="w-full px-6 lg:px-8">
     <div class="text-center">
       <h2 class="text-base font-semibold leading-7 text-indigo-600">Features</h2>
       <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -315,7 +315,7 @@ sliderContainer.addEventListener("mouseleave", () => {
         Stuarz membantu siswa, guru, dan sekolah dalam proses belajar, pengiriman tugas, dan absensi secara digital dengan mudah dan aman.
       </p>
     </div>
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+    <div class="w-full mt-16 sm:mt-20 lg:mt-24">
       <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
         <!-- Step 1 -->
         <div class="relative pl-16 group">
@@ -391,14 +391,14 @@ sliderContainer.addEventListener("mouseleave", () => {
   <div class="absolute inset-0 bg-gray-900/60"></div>
   
   <!-- Content -->
-  <div class="relative mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:mx-0">
+  <div class="relative w-full px-6 lg:px-8">
+    <div class="w-full lg:mx-0">
       <h2 class="text-5xl font-semibold tracking-tight text-white sm:text-6xl">Bergabung bersama Stuarz</h2>
       <p class="mt-6 text-lg leading-8 text-gray-300">
         Stuarz mengajak siswa, guru, dan sekolah untuk berkolaborasi dalam dunia pendidikan digital. Bersama kami, proses belajar menjadi lebih mudah dan menyenangkan.
       </p>
     </div>
-    <dl class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4">
+    <dl class="w-full mt-16 grid grid-cols-1 gap-8 sm:mt-20 sm:grid-cols-2 lg:grid-cols-4">
       <div class="flex flex-col-reverse gap-2 p-6 bg-gray-900 border border-gray-700 rounded-2xl backdrop-blur-sm">
         <dt class="text-base text-gray-400">Sekolah bergabung</dt>
         <dd class="text-4xl font-bold tracking-tight text-white">12</dd>
@@ -424,8 +424,8 @@ sliderContainer.addEventListener("mouseleave", () => {
 
 <!-- CTA Section -->
 <div class="relative bg-gray-900 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl text-center">
+  <div class="w-full px-6 lg:px-8">
+    <div class="w-full text-center">
       <h2 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">Siap untuk memulai?</h2>
       <p class="mt-6 text-lg leading-8 text-gray-400">
         Bergabunglah dengan ribuan siswa dan guru yang telah memilih Stuarz untuk pendidikan digital yang lebih baik.

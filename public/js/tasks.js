@@ -75,10 +75,23 @@
       });
       xhr.onload = function(){
         if (xhr.status >= 200 && xhr.status < 300){
-          alert('Upload berhasil');
-          window.closeSubmitModal();
-          // optional: refresh page or update card state
-          window.location.reload();
+          // Try to parse JSON response
+          let json = null;
+          try { json = JSON.parse(xhr.responseText); } catch(e) { json = null; }
+          if (json && typeof json.success !== 'undefined') {
+            if (json.success) {
+              // show success message, close modal and update progress bar to full
+              alert(json.message || 'Upload berhasil');
+              window.closeSubmitModal();
+              document.getElementById('uploadProgress').style.width = '100%';
+            } else {
+              alert(json.message || 'Upload gagal');
+            }
+          } else {
+            // Fallback for non-JSON responses
+            alert('Upload selesai (server response).');
+            window.closeSubmitModal();
+          }
         } else {
           alert('Upload gagal: ' + xhr.statusText);
         }

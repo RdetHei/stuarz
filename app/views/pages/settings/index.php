@@ -8,7 +8,6 @@ if (!$user) {
 $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 if ($baseUrl === '/') $baseUrl = '';
 
-// Determine dashboard URL based on user level
 $userLevel = $user['level'] ?? '';
 if ($userLevel === 'admin') {
     $dashHref = 'index.php?page=dashboard-admin';

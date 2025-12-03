@@ -15,3 +15,8 @@ if (mysqli_connect_errno()){
 function base_url($path = '') {
     return "http://localhost/stuarz/public/" . ltrim($path, '/');
 }
+
+// Load level helper for normalizing legacy role strings
+if (file_exists(__DIR__ . '/../helpers/level_helper.php')) {
+	require_once __DIR__ . '/../helpers/level_helper.php';
+}

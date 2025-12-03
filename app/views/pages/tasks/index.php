@@ -389,7 +389,7 @@
 </div>
 
 <!-- Submissions Modal -->
-  <script src="public/js/tasks.js"></script>
+  <script src="<?= base_url('js/tasks.js') ?>"></script>
 
 <div id="submissionsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
   <div class="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">

@@ -23,7 +23,7 @@ $filterClass = $_GET['class_id'] ?? null;
           <p class="text-gray-400 text-sm mt-1">Berikan nilai pada tugas yang sudah dikumpulkan siswa</p>
         </div>
       </div>
-        <script src="public/js/grades.js"></script>
+        <script src="<?= base_url('js/grades.js') ?>"></script>
     </div>
 
     <!-- Filters -->

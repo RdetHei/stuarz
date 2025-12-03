@@ -49,7 +49,7 @@ class AccountController
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
-    // show users with level = 'teacher' (teachers page)
+    // show users with level = 'guru' (teachers page)
     public function teachers()
     {
         // Use DB-level filter for efficiency

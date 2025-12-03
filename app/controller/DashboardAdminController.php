@@ -60,7 +60,7 @@ class DashboardAdminController
     private function getStats() {
         $stats = [
             'total_users' => 0,
-            'total_students' => 0,
+            'total_teachers' => 0,
             'total_certificates' => 0,
             'average_grade' => 0
         ];
@@ -71,7 +71,7 @@ class DashboardAdminController
             $stats['total_users'] = $row['total'];
         }
 
-        // Total Students (count users with level = 'student')
+        // Total Teachers (count users with level = 'guru')
         $result = $this->db->query("SELECT COUNT(*) as total FROM users WHERE level = 'guru'");
         if ($result && $row = $result->fetch_assoc()) {
             $stats['total_teachers'] = $row['total'];
@@ -175,18 +175,37 @@ class DashboardAdminController
             'values' => []
         ];
 
-        // Count members per class using classes and class_members tables
-        $sql = "SELECT c.name as class, COUNT(cm.user_id) as total
+        // Primary method: count members from class_members table (only students)
+        $sql = "SELECT c.id, c.name as class, SUM(CASE WHEN cm.role IN ('student','user') THEN 1 ELSE 0 END) as total
                 FROM classes c
                 LEFT JOIN class_members cm ON c.id = cm.class_id
                 GROUP BY c.id
                 ORDER BY c.name";
 
         $result = $this->db->query($sql);
+        $rowsFound = 0;
         if ($result) {
             while ($row = $result->fetch_assoc()) {
+                $rowsFound++;
                 $data['labels'][] = $row['class'];
                 $data['values'][] = (int)$row['total'];
+            }
+        }
+
+        // Fallback: some installations may not populate class_members. Try users.class column.
+        if ($rowsFound === 0 || array_sum($data['values']) === 0) {
+            $data = ['labels' => [], 'values' => []];
+            $sql2 = "SELECT c.id, c.name as class, COUNT(u.id) as total
+                     FROM classes c
+                     LEFT JOIN users u ON (u.class = c.id AND (u.level = 'user' OR u.level = 'student'))
+                     GROUP BY c.id
+                     ORDER BY c.name";
+            $res2 = $this->db->query($sql2);
+            if ($res2) {
+                while ($r = $res2->fetch_assoc()) {
+                    $data['labels'][] = $r['class'];
+                    $data['values'][] = (int)$r['total'];
+                }
             }
         }
 
@@ -204,7 +223,7 @@ class DashboardAdminController
                     COUNT(s.id) as total_schedules
                 FROM users u
                 LEFT JOIN schedule s ON u.id = s.teacher_id
-                WHERE u.level = 'teacher'
+                WHERE u.level = 'guru'
                 GROUP BY u.id
                 ORDER BY total_schedules DESC
                 LIMIT 10";
@@ -231,7 +250,7 @@ class DashboardAdminController
                     DATE_FORMAT(join_date, '%b') as month,
                     COUNT(*) as total
                 FROM users
-                WHERE `level` = 'student' AND join_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                WHERE `level` = 'user' AND join_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
                 GROUP BY YEAR(join_date), MONTH(join_date)
                 ORDER BY join_date";
 

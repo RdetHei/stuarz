@@ -162,7 +162,7 @@ class ClassModel {
     // Get classes managed by user (admin/guru)
     public function getManagedClasses($userId) {
         $result = [];
-        $sql = 'SELECT c.*, u.username as creator, (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count FROM classes c LEFT JOIN users u ON c.created_by = u.id WHERE c.created_by = ? OR EXISTS (SELECT 1 FROM class_members cm WHERE cm.class_id = c.id AND cm.user_id = ? AND cm.role IN ("teacher", "admin")) ORDER BY c.id DESC';
+        $sql = 'SELECT c.*, u.username as creator, (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count FROM classes c LEFT JOIN users u ON c.created_by = u.id WHERE c.created_by = ? OR EXISTS (SELECT 1 FROM class_members cm WHERE cm.class_id = c.id AND cm.user_id = ? AND cm.role IN ("guru", "admin")) ORDER BY c.id DESC';
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param('ii', $userId, $userId);
         $stmt->execute();
@@ -183,9 +183,9 @@ class ClassModel {
             $checkStmt->close();
 
             if (!$memberRole && intval($row['created_by']) === intval($userId)) {
-                $row['member_role'] = 'teacher';
+                $row['member_role'] = 'guru';
                 $row['is_joined'] = 1;
-                $row['my_role'] = 'teacher';
+                $row['my_role'] = 'guru';
             } else {
                 $row['member_role'] = $memberRole;
                 $row['is_joined'] = $memberRole ? 1 : 0;

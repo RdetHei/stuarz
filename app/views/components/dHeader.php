@@ -101,16 +101,12 @@ if ($currentPage === 'dashboard' && $currentSub) {
 
         <?php
         $userLevel = $_SESSION['level'] ?? null;
-        if ($userLevel === 'admin' || $userLevel === 'teacher') :
+        if ($userLevel === 'admin' || $userLevel === 'guru' || $userLevel === 'teacher') :
         ?>
         <div class="relative">
-            <button id="printDropdownBtn" class="p-2 hover:bg-slate-700 rounded flex items-center gap-2" aria-haspopup="true" aria-expanded="false" title="Print Options">
+            <a href="index.php?page=print_table" class="p-2 hover:bg-slate-700 rounded relative inline-flex items-center" aria-label="Print" title="Print">
                 <span class="material-symbols-outlined">print</span>
-            </button>
-            <div id="printDropdownMenu" class="absolute right-0 mt-2 w-44 bg-slate-800 text-white rounded shadow-lg hidden z-10 border border-slate-700">
-                <a href="index.php?page=print_all" class="block px-4 py-2 hover:bg-slate-700">Print All</a>
-                <a href="index.php?page=print" class="block px-4 py-2 hover:bg-slate-700">Print Table</a>
-            </div>
+            </a>
         </div>
         <?php endif; ?>
 
@@ -151,30 +147,7 @@ if ($currentPage === 'dashboard' && $currentSub) {
         });
     })();
 
-    (function(){
-        var btn = document.getElementById('printDropdownBtn');
-        var menu = document.getElementById('printDropdownMenu');
-        if (!btn || !menu) return;
-
-        btn.addEventListener('click', function(e){
-            e.stopPropagation();
-            var expanded = btn.getAttribute('aria-expanded') === 'true';
-            btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-            menu.classList.toggle('hidden');
-        });
-
-        document.addEventListener('click', function(){
-            menu.classList.add('hidden');
-            if (btn) btn.setAttribute('aria-expanded', 'false');
-        });
-
-        document.addEventListener('keydown', function(e){
-            if (e.key === 'Escape') {
-                menu.classList.add('hidden');
-                if (btn) btn.setAttribute('aria-expanded', 'false');
-            }
-        });
-    })();
+    // Print button now links directly to print_table; no dropdown required.
 </script>
 
 <script>

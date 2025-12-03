@@ -101,9 +101,9 @@ class ClassController {
             $newClassId = $this->db->insert_id;
             $creatorId = intval($data['created_by']);
             
-            // Add creator to class_members with role 'teacher'
+            // Add creator to class_members with role 'guru' (normalized)
             try {
-                $this->model->addMember($newClassId, $creatorId, 'teacher');
+                $this->model->addMember($newClassId, $creatorId, 'guru');
             } catch (\Exception $e) {
                 error_log('Warning: Could not add creator as member: ' . $e->getMessage());
                 // Non-fatal; continue to schedule creation
@@ -210,7 +210,8 @@ class ClassController {
             }
 
             // Determine role
-            $role = ($level === 'admin' || $level === 'guru') ? 'teacher' : 'student';
+            // Normalize: 'guru' for teacher-level users, 'user' for students
+            $role = (is_teacher_level($level) || $level === 'admin') ? 'guru' : 'user';
 
             // Attempt to add member via ClassService if available, fallback to model
             if ($this->classService) {
