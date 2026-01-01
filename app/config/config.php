@@ -4,9 +4,7 @@ if (!ini_get('date.timezone')) {
 	date_default_timezone_set($tz);
 }
 $GLOBALS['app_timezone'] = $tz;
-$OPENAI_API_KEY = "";
 
-$GLOBALS['OPENAI_API_KEY'] = $OPENAI_API_KEY;
 
 $config = mysqli_connect("localhost","root","","stuarz");
 
