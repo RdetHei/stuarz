@@ -4,7 +4,7 @@ if (!ini_get('date.timezone')) {
 	date_default_timezone_set($tz);
 }
 $GLOBALS['app_timezone'] = $tz;
-$OPENAI_API_KEY = "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";
+$OPENAI_API_KEY = "";
 
 $GLOBALS['OPENAI_API_KEY'] = $OPENAI_API_KEY;
 
