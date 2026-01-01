@@ -29,7 +29,7 @@ if (!empty($news) && is_array($news)) {
 ?>
 
 <div class="max-w-7xl mx-auto p-6">
-    <!-- Header -->
+    
     <div class="mb-8">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-4">
@@ -54,7 +54,7 @@ if (!empty($news) && is_array($news)) {
         </div>
     </div>
 
-    <!-- Flash Message -->
+    
     <?php if (!empty($_SESSION['flash'])): ?>
       <div class="mb-6 px-6 py-4 bg-gray-800/60 border border-gray-700 rounded-lg text-sm text-gray-200">
           <?= htmlspecialchars($_SESSION['flash']) ?>
@@ -63,10 +63,10 @@ if (!empty($news) && is_array($news)) {
     <?php endif; ?>
 
 <?php if (!$ajax): ?>
-    <!-- Filter & Search Bar -->
+    
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-6">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <!-- Show Entries -->
+            
             <form method="get" class="flex items-center gap-3">
                 <input type="hidden" name="page" value="dashboard-admin-news">
                 <input type="hidden" name="q" value="<?= htmlspecialchars($q) ?>">
@@ -81,7 +81,7 @@ if (!empty($news) && is_array($news)) {
                 <label class="text-sm font-medium text-gray-400">entries</label>
             </form>
 
-            <!-- Search Form -->
+            
             <form method="get" class="flex items-center gap-2">
                 <input type="hidden" name="page" value="dashboard-admin-news">
                 <input type="hidden" name="limit" value="<?= htmlspecialchars($limit ?? 10) ?>">
@@ -111,7 +111,7 @@ if (!empty($news) && is_array($news)) {
 
     <div id="adminNewsContent">
 
-    <!-- Table -->
+    
     <?php if (!empty($news)): ?>
     <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
@@ -180,19 +180,17 @@ if (!empty($news) && is_array($news)) {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </a>
-                                <form method="post" 
-                                      action="index.php?page=dashboard-admin-news-delete" 
-                                      class="inline" 
-                                      onsubmit="return confirm('Hapus berita ini?')">
-                                    <input type="hidden" name="id" value="<?= (int)$n['id'] ?>">
-                                    <button type="submit" 
-                                            class="p-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 rounded-lg transition-all duration-200" 
-                                            title="Delete">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                        class="delete-btn p-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 rounded-lg transition-all duration-200" 
+                                        title="Delete"
+                                        data-id="<?= (int)$n['id'] ?>"
+                                        data-url="index.php?page=dashboard-admin-news-delete"
+                                        data-item-name="<?= htmlspecialchars($n['title'] ?? 'Berita', ENT_QUOTES, 'UTF-8') ?>"
+                                        data-row-selector="tr">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -201,7 +199,7 @@ if (!empty($news) && is_array($news)) {
             </table>
         </div>
 
-        <!-- Pagination Footer -->
+        
         <div class="px-6 py-4 bg-gray-900 border-t border-gray-700">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="text-sm text-gray-400">
@@ -222,7 +220,7 @@ if (!empty($news) && is_array($news)) {
                     
                     <div class="flex items-center gap-1 flex-wrap">
                         <?php
-                        // Always show first page
+
                         if ((int)$page > 3): ?>
                             <a href="?page=dashboard-admin-news&limit=<?= $limit ?>&p=1&q=<?= urlencode($q ?? '') ?>" 
                                class="px-4 py-2 rounded-lg font-medium transition-all bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">
@@ -233,11 +231,9 @@ if (!empty($news) && is_array($news)) {
                             <?php endif; 
                         endif;
 
-                        // Calculate range of pages to show
                         $start = max(1, (int)$page - 2);
                         $end = min($totalPages, (int)$page + 2);
 
-                        // Show page numbers
                         for ($i = $start; $i <= $end; $i++): ?>
                             <a href="?page=dashboard-admin-news&limit=<?= $limit ?>&p=<?= $i ?>&q=<?= urlencode($q ?? '') ?>" 
                                class="px-4 py-2 rounded-lg font-medium transition-all <?= (int)$i === (int)$page ? 'bg-indigo-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700' ?>">
@@ -245,7 +241,6 @@ if (!empty($news) && is_array($news)) {
                             </a>
                         <?php endfor;
 
-                        // Show last page if needed
                         if ($end < $totalPages): ?>
                             <?php if ($end < $totalPages - 1): ?>
                                 <span class="px-2 text-gray-500">...</span>
@@ -273,7 +268,7 @@ if (!empty($news) && is_array($news)) {
     </div>
 
     <?php else: ?>
-    <!-- Empty State -->
+    
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-12 text-center">
         <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-indigo-600/20 flex items-center justify-center">
             <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,7 +302,7 @@ if (!empty($news) && is_array($news)) {
 
 <?php if (!$ajax): ?>
 <script>
-// Live search for Admin News (targets admin news search form)
+
 (function(){
     const pageInput = document.querySelector('input[name="page"][value="dashboard-admin-news"]');
     const form = pageInput ? pageInput.closest('form') : null;

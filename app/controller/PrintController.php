@@ -3,9 +3,6 @@ class PrintController {
     
     public function index() {
         global $config;
-        // Get all table names from database
-        // Note: tables will be fetched in the view for simplicity
-        // This allows the view to also get count for each table
         
         $title = "Print Data - Stuarz";
         $description = "Print data dari semua tabel";
@@ -23,22 +20,18 @@ class PrintController {
             exit;
         }
         
-        // Validate table name to prevent SQL injection
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
             die('Invalid table name');
         }
         
-        // Get table data
         $data = $this->getTableData($config, $table);
         $columns = $this->getTableColumns($config, $table);
         $tableName = ucfirst(str_replace('_', ' ', $table));
         
-        // Include print view
         include dirname(__DIR__) . '/views/pages/print/print_table.php';
     }
     
     public function printAll() {
-        // printAll removed: functionality deprecated and removed from UI.
         header('HTTP/1.1 404 Not Found');
         echo 'Print All is no longer available.';
         exit;
@@ -89,4 +82,3 @@ class PrintController {
         return $data;
     }
 }
-

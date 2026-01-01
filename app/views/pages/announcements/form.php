@@ -4,7 +4,7 @@
 <div class="bg-gray-900 min-h-screen py-8 px-4 lg:px-8">
     <div class="max-w-2xl mx-auto">
         
-        <!-- Header -->
+        
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-white"><?= $isEdit ? 'Edit Pengumuman' : 'Tambah Pengumuman' ?></h1>
@@ -21,7 +21,7 @@
             </a>
         </div>
 
-        <!-- Flash Message -->
+        
         <?php if (!empty($_SESSION['flash'])): ?>
             <div class="mb-6 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-200 text-sm">
                 <div class="flex items-center gap-2">
@@ -34,7 +34,7 @@
             <?php unset($_SESSION['flash']); ?>
         <?php endif; ?>
 
-        <!-- Form -->
+        
         <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700">
             <form method="post" 
                   action="index.php?page=<?= $isEdit ? 'announcement_update' : 'announcement_store' ?>" 
@@ -46,7 +46,7 @@
                     <input type="hidden" name="photo_existing" value="<?= htmlspecialchars($announcement['photo'] ?? '') ?>">
                 <?php endif; ?>
 
-                <!-- Judul -->
+                
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">
                         Judul Pengumuman <span class="text-red-400">*</span>
@@ -60,7 +60,7 @@
                         placeholder="Masukkan judul pengumuman...">
                 </div>
 
-                <!-- Isi Pengumuman -->
+                
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">
                         Isi Pengumuman <span class="text-red-400">*</span>
@@ -73,11 +73,11 @@
                         placeholder="Tulis isi pengumuman di sini..."><?= htmlspecialchars($announcement['content'] ?? '') ?></textarea>
                 </div>
 
-                <!-- Foto Upload -->
+                
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Foto</label>
                     
-                    <!-- Preview Area -->
+                    
                     <div id="photoPreviewContainer" class="mb-3 <?= ($isEdit && !empty($announcement['photo'])) ? '' : 'hidden' ?>">
                         <div class="relative w-full h-64 bg-gray-900/50 border border-gray-700 rounded-lg overflow-hidden group">
                             <img 
@@ -122,7 +122,7 @@
 
                 <div class="border-t border-gray-700 pt-6"></div>
 
-                <!-- Action Buttons -->
+                
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button 
                         type="submit" 
@@ -158,26 +158,23 @@
     return;
   }
 
-  // Handle file input change
   photoInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     
     if (file) {
-      // Validate file size (5MB)
+
       if (file.size > 5 * 1024 * 1024) {
         alert('Ukuran file terlalu besar! Maksimal 5MB');
         photoInput.value = '';
         return;
       }
-      
-      // Validate file type
+
       if (!file.type.startsWith('image/')) {
         alert('File harus berupa gambar!');
         photoInput.value = '';
         return;
       }
-      
-      // Show preview
+
       const reader = new FileReader();
       reader.onload = function(event) {
         photoPreview.src = event.target.result;
@@ -187,7 +184,6 @@
     }
   });
 
-  // Handle remove button
   if (removeButton) {
     removeButton.addEventListener('click', function() {
       photoInput.value = '';

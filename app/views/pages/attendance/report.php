@@ -1,17 +1,15 @@
 <?php
-// Ensure session is started
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Get data from controller
 $report = $report ?? null;
 $students = $students ?? [];
 $selectedUserId = $_GET['user_id'] ?? '';
 $fromDate = $_GET['from'] ?? '';
 $toDate = $_GET['to'] ?? '';
 
-// Get student name if selected
 $selectedStudentName = '';
 if ($selectedUserId) {
     foreach ($students as $student) {
@@ -24,7 +22,7 @@ if ($selectedUserId) {
 ?>
 
 <div class="max-w-6xl mx-auto p-6">
-    <!-- Header -->
+    
     <div class="mb-8">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#5865F2] to-[#7289da] flex items-center justify-center shadow-lg">
@@ -37,7 +35,7 @@ if ($selectedUserId) {
         </div>
     </div>
 
-    <!-- Filter Form -->
+    
     <div class="bg-[#2b2d31] border border-[#3f4147] rounded-xl p-6 mb-6">
         <h2 class="text-xl font-semibold text-white mb-4">Filter Laporan</h2>
         
@@ -89,9 +87,9 @@ if ($selectedUserId) {
     </div>
 
     <?php if ($report && $selectedStudentName): ?>
-    <!-- Report Results -->
+    
     <div class="space-y-6">
-        <!-- Student Info -->
+        
         <div class="bg-[#2b2d31] border border-[#3f4147] rounded-xl p-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -110,7 +108,7 @@ if ($selectedUserId) {
             </div>
         </div>
 
-        <!-- Attendance Stats -->
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <?php
             $statusConfig = [
@@ -145,7 +143,7 @@ if ($selectedUserId) {
             <?php endforeach; ?>
         </div>
 
-        <!-- Summary Card -->
+        
         <div class="bg-[#2b2d31] border border-[#3f4147] rounded-xl p-6">
             <h3 class="text-lg font-semibold text-white mb-4">Ringkasan</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -164,7 +162,7 @@ if ($selectedUserId) {
             </div>
         </div>
 
-        <!-- Export Options -->
+        
         <div class="bg-[#2b2d31] border border-[#3f4147] rounded-xl p-6">
             <h3 class="text-lg font-semibold text-white mb-4">Ekspor Laporan</h3>
             <div class="flex items-center gap-4">
@@ -183,7 +181,7 @@ if ($selectedUserId) {
     </div>
 
     <?php elseif ($selectedUserId && empty($report)): ?>
-    <!-- No Data Found -->
+    
     <div class="bg-[#2b2d31] border border-[#3f4147] rounded-xl p-8 text-center">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-500/20 flex items-center justify-center">
             <span class="material-symbols-outlined text-orange-400 text-3xl">data_usage</span>
@@ -198,7 +196,7 @@ if ($selectedUserId) {
     </div>
 
     <?php else: ?>
-    <!-- Initial State -->
+    
     <div class="bg-[#2b2d31] border border-[#3f4147] rounded-xl p-8 text-center">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#5865F2]/20 flex items-center justify-center">
             <span class="material-symbols-outlined text-[#8ea1f7] text-3xl">analytics</span>
@@ -208,7 +206,7 @@ if ($selectedUserId) {
     </div>
     <?php endif; ?>
 
-    <!-- Info Card -->
+    
     <div class="mt-6 bg-[#2b2d31] border border-[#3f4147] rounded-xl p-6">
         <div class="flex items-start gap-4">
             <div class="p-3 bg-[#5865F2]/10 rounded-lg">
@@ -241,14 +239,13 @@ if ($selectedUserId) {
 
 <script>
 function exportToPDF() {
-    // Simple print functionality for now
-    // In a real application, you might want to use a library like jsPDF
+
+
     window.print();
 }
 
-// Print styles
 document.addEventListener('DOMContentLoaded', function() {
-    // Add print styles
+
     const style = document.createElement('style');
     style.textContent = `
         @media print {

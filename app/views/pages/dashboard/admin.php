@@ -17,11 +17,11 @@
 <div class="bg-gray-900 min-h-screen">
     <div class="max-w-7xl mx-auto p-6">
        
-        <!-- Hero Header -->
+        
         <div class="mb-8">
             <div class="bg-gradient-to-br from-gray-800 to-gray-850 border border-gray-700 rounded-2xl p-8 shadow-xl">
                 
-                <!-- Top Section: Logo & Title -->
+                
                 <div class="flex items-center gap-5 mb-8">
                     <div class="bg-gray-900/50 border border-gray-700 rounded-2xl p-4 backdrop-blur-sm">
                         <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/diamond.png', ENT_QUOTES, 'UTF-8') ?>"
@@ -35,7 +35,7 @@
                     </div>
                 </div>
 
-                <!-- Stats Grid -->
+                
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
                     <div class="bg-gray-900/30 backdrop-blur-sm border border-blue-500/20 rounded-xl p-5 hover:border-blue-500/40 transition-all">
@@ -120,7 +120,7 @@
                 <a href="index.php?page=announcement&id=<?= (int)($a['id'] ?? 0) ?>"
                    class="group bg-gray-800 border border-gray-700 rounded-xl p-5 hover:border-blue-500/50 hover:bg-gray-750 transition-all">
 
-                    <!-- Creator avatar & name -->
+                    
                     <div class="flex items-center gap-3 mb-3">
                         <?php
                             $creatorAvatar = $a['creator_avatar'] ?? 'assets/default-avatar.png';
@@ -169,7 +169,7 @@
         </div>
         <?php endif; ?>
 
-        <!-- Analytics Section -->
+        
         <div class="mb-6">
             <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,10 +179,10 @@
             </h2>
         </div>
 
-        <!-- Charts Grid -->
+        
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <!-- Attendance Chart -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-colors">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-lg flex items-center justify-center">
@@ -197,7 +197,7 @@
                 </div>
             </div>
 
-            <!-- Grade Distribution -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-colors">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-purple-600/10 rounded-lg flex items-center justify-center">
@@ -212,7 +212,7 @@
                 </div>
             </div>
 
-            <!-- Task Status -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-colors">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 rounded-lg flex items-center justify-center">
@@ -227,7 +227,7 @@
                 </div>
             </div>
 
-            <!-- Students per Class -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-colors">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="w-10 h-10 bg-gradient-to-br from-amber-500/20 to-amber-600/10 rounded-lg flex items-center justify-center">
@@ -242,7 +242,7 @@
                 </div>
             </div>
 
-            <!-- Teaching Schedule -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-colors">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="w-10 h-10 bg-gradient-to-br from-rose-500/20 to-rose-600/10 rounded-lg flex items-center justify-center">
@@ -257,7 +257,7 @@
                 </div>
             </div>
 
-            <!-- New Students -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-colors">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="w-10 h-10 bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 rounded-lg flex items-center justify-center">
@@ -272,7 +272,7 @@
                 </div>
             </div>
 
-            <!-- Certificates -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-colors">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="w-10 h-10 bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 rounded-lg flex items-center justify-center">
@@ -287,7 +287,7 @@
                 </div>
             </div>
 
-            <!-- Documentation -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-colors">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="w-10 h-10 bg-gradient-to-br from-violet-500/20 to-violet-600/10 rounded-lg flex items-center justify-center">
@@ -306,279 +306,329 @@
 </div>
 
 <script>
-const ctxGrad = (ctx, color1, color2) => {
-    const gradient = ctx.createLinearGradient(0, 0, 0, 280);
-    gradient.addColorStop(0, color1);
-    gradient.addColorStop(1, color2);
-    return gradient;
-};
 
-const chartData = {
-    attendance: {
-        labels: <?= json_encode($data['attendance']['labels']) ?>,
-        datasets: [
-            {
-                label: 'Hadir',
-                data: <?= json_encode($data['attendance']['hadir']) ?>,
-                borderColor: '#3b82f6',
-                backgroundColor: (ctx) => ctxGrad(ctx.chart.ctx, 'rgba(59,130,246,0.3)', 'rgba(59,130,246,0.0)'),
-                fill: true,
-                tension: 0.4,
-                borderWidth: 3,
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#3b82f6',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2
-            },
-            {
-                label: 'Absen',
-                data: <?= json_encode($data['attendance']['absen']) ?>,
-                borderColor: '#ef4444',
-                backgroundColor: (ctx) => ctxGrad(ctx.chart.ctx, 'rgba(239,68,68,0.25)', 'rgba(239,68,68,0.0)'),
-                fill: true,
-                tension: 0.4,
-                borderWidth: 3,
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#ef4444',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2
-            },
-            {
-                label: 'Terlambat',
-                data: <?= json_encode($data['attendance']['terlambat']) ?>,
-                borderColor: '#f59e0b',
-                backgroundColor: (ctx) => ctxGrad(ctx.chart.ctx, 'rgba(245,158,11,0.25)', 'rgba(245,158,11,0.0)'),
-                fill: true,
-                tension: 0.4,
-                borderWidth: 3,
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#f59e0b',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2
-            }
-        ]
-    },
-    grades: {
-        labels: <?= json_encode($data['grades']['labels']) ?>,
-        datasets: [{
-            label: 'Rata-rata Nilai',
-            data: <?= json_encode($data['grades']['values']) ?>,
-            backgroundColor: (ctx) => {
-                const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 280);
-                gradient.addColorStop(0, '#a855f7');
-                gradient.addColorStop(1, '#7c3aed');
-                return gradient;
-            },
-            borderColor: '#a855f7',
-            borderWidth: 0,
-            borderRadius: 8,
-            barThickness: 32
-        }]
-    },
-    tasks: {
-        labels: ['Completed', 'Pending'],
-        datasets: [{
-            data: [<?= $data['tasks']['completed'] ?>, <?= $data['tasks']['pending'] ?>],
-            backgroundColor: ['#10b981', '#f59e0b'],
-            hoverBackgroundColor: ['#059669', '#d97706'],
-            borderWidth: 4,
-            borderColor: '#1f2937',
-            cutout: '75%',
-            
-        }]
-    },
-    students: {
-        labels: <?= json_encode($data['students']['labels']) ?>,
-        datasets: [{
-            label: 'Jumlah Siswa',
-            data: <?= json_encode($data['students']['values']) ?>,
-            backgroundColor: (ctx) => {
-                const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 280, 0);
-                gradient.addColorStop(0, '#f59e0b');
-                gradient.addColorStop(1, '#d97706');
-                return gradient;
-            },
-            borderRadius: 6,
-            barThickness: 24
-        }]
-    },
-    teaching: {
-        labels: <?= json_encode($data['teaching']['labels']) ?>,
-        datasets: [{
-            label: 'Jumlah Jadwal',
-            data: <?= json_encode($data['teaching']['values']) ?>,
-            backgroundColor: (ctx) => {
-                const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 280);
-                gradient.addColorStop(0, '#f43f5e');
-                gradient.addColorStop(1, '#be123c');
-                return gradient;
-            },
-            borderRadius: 8,
-            barThickness: 32
-        }]
-    },
-    newStudents: {
-        labels: <?= json_encode($data['newStudents']['labels']) ?>,
-        datasets: [{
-            label: 'Siswa Baru',
-            data: <?= json_encode($data['newStudents']['values']) ?>,
-            borderColor: '#06b6d4',
-            backgroundColor: (ctx) => ctxGrad(ctx.chart.ctx, 'rgba(6,182,212,0.3)', 'rgba(6,182,212,0.0)'),
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: '#06b6d4',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 4,
-            pointHoverRadius: 7,
-            borderWidth: 3
-        }]
-    },
-    certificates: {
-        labels: <?= json_encode($data['certificates']['labels']) ?>,
-        datasets: [{
-            label: 'Sertifikat',
-            data: <?= json_encode($data['certificates']['values']) ?>,
-            backgroundColor: (ctx) => {
-                const colors = ['#6366f1', '#8b5cf6', '#a855f7', '#c084fc'];
-                return colors[ctx.dataIndex % colors.length];
-            },
-            borderRadius: 8,
-            barThickness: 32
-        }]
-    },
-    documentation: {
-        labels: <?= json_encode($data['documentation']['labels']) ?>,
-        datasets: [{
-            data: <?= json_encode($data['documentation']['values']) ?>,
-            backgroundColor: ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444'],
-            hoverBackgroundColor: ['#7c3aed', '#059669', '#d97706', '#dc2626'],
-            borderWidth: 4,
-            borderColor: '#1f2937'
-        }]
+if (typeof Chart === 'undefined') {
+    console.error('Chart.js library is not loaded. Please check if the script is included in the layout.');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not available. Charts will not be initialized.');
+        return;
     }
-};
 
-const defaultOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-        duration: 1000,
-        easing: 'easeInOutQuart'
-    },
-    plugins: {
-        legend: {
-            labels: {
-                color: '#9ca3af',
-                font: { size: 12, family: 'system-ui, -apple-system, sans-serif', weight: '500' },
-                padding: 16,
-                usePointStyle: true,
-                pointStyle: 'circle'
-            }
-        },
-        tooltip: {
-            backgroundColor: 'rgba(17, 24, 39, 0.95)',
-            titleColor: '#f3f4f6',
-            bodyColor: '#d1d5db',
-            borderColor: 'rgba(75, 85, 99, 0.5)',
-            borderWidth: 1,
-            padding: 12,
-            cornerRadius: 8,
-            titleFont: { size: 13, weight: 'bold' },
-            bodyFont: { size: 12 }
+    const ctxGrad = (ctx, color1, color2) => {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+        return gradient;
+    };
+
+    const attendanceData = <?= json_encode($data['attendance'] ?? ['labels' => [], 'hadir' => [], 'absen' => [], 'terlambat' => []]) ?>;
+    const gradesData = <?= json_encode($data['grades'] ?? ['labels' => [], 'values' => []]) ?>;
+    const tasksData = <?= json_encode($data['tasks'] ?? ['completed' => 0, 'pending' => 0]) ?>;
+    const studentsData = <?= json_encode($data['students'] ?? ['labels' => [], 'values' => []]) ?>;
+    const teachingData = <?= json_encode($data['teaching'] ?? ['labels' => [], 'values' => []]) ?>;
+    const newStudentsData = <?= json_encode($data['newStudents'] ?? ['labels' => [], 'values' => []]) ?>;
+    const certificatesData = <?= json_encode($data['certificates'] ?? ['labels' => [], 'values' => []]) ?>;
+    const documentationData = <?= json_encode($data['documentation'] ?? ['labels' => [], 'values' => []]) ?>;
+
+    if (!attendanceData.labels || attendanceData.labels.length === 0) {
+        const last7Days = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            last7Days.push(date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }));
         }
-    },
-    scales: {
-        x: {
-            grid: { 
-                color: 'rgba(75, 85, 99, 0.15)', 
-                drawBorder: false,
-                lineWidth: 1
+        attendanceData.labels = last7Days;
+        attendanceData.hadir = [0, 0, 0, 0, 0, 0, 0];
+        attendanceData.absen = [0, 0, 0, 0, 0, 0, 0];
+        attendanceData.terlambat = [0, 0, 0, 0, 0, 0, 0];
+    }
+
+    if (!gradesData.labels || gradesData.labels.length === 0) {
+        gradesData.labels = ['Tidak ada data'];
+        gradesData.values = [0];
+    }
+    if (!studentsData.labels || studentsData.labels.length === 0) {
+        studentsData.labels = ['Tidak ada data'];
+        studentsData.values = [0];
+    }
+    if (!teachingData.labels || teachingData.labels.length === 0) {
+        teachingData.labels = ['Tidak ada data'];
+        teachingData.values = [0];
+    }
+    if (!newStudentsData.labels || newStudentsData.labels.length === 0) {
+        const last6Months = [];
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            last6Months.push(date.toLocaleDateString('id-ID', { month: 'short' }));
+        }
+        newStudentsData.labels = last6Months;
+        newStudentsData.values = [0, 0, 0, 0, 0, 0];
+    }
+    if (!certificatesData.labels || certificatesData.labels.length === 0) {
+        const last6Months = [];
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            last6Months.push(date.toLocaleDateString('id-ID', { month: 'short' }));
+        }
+        certificatesData.labels = last6Months;
+        certificatesData.values = [0, 0, 0, 0, 0, 0];
+    }
+    if (!documentationData.labels || documentationData.labels.length === 0) {
+        documentationData.labels = ['Tidak ada data'];
+        documentationData.values = [0];
+    }
+
+    const chartData = {
+        attendance: {
+            labels: attendanceData.labels,
+            datasets: [
+                {
+                    label: 'Hadir',
+                    data: attendanceData.hadir,
+                    borderColor: '#3b82f6',
+                    backgroundColor: (ctx) => ctxGrad(ctx.chart.ctx, 'rgba(59,130,246,0.3)', 'rgba(59,130,246,0.0)'),
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                },
+                {
+                    label: 'Absen',
+                    data: attendanceData.absen,
+                    borderColor: '#ef4444',
+                    backgroundColor: (ctx) => ctxGrad(ctx.chart.ctx, 'rgba(239,68,68,0.25)', 'rgba(239,68,68,0.0)'),
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                },
+                {
+                    label: 'Terlambat',
+                    data: attendanceData.terlambat,
+                    borderColor: '#f59e0b',
+                    backgroundColor: (ctx) => ctxGrad(ctx.chart.ctx, 'rgba(245,158,11,0.25)', 'rgba(245,158,11,0.0)'),
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#f59e0b',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }
+            ]
+        },
+        grades: {
+            labels: gradesData.labels,
+            datasets: [{
+                label: 'Rata-rata Nilai',
+                data: gradesData.values,
+                backgroundColor: (ctx) => {
+                    const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 280);
+                    gradient.addColorStop(0, '#a855f7');
+                    gradient.addColorStop(1, '#7c3aed');
+                    return gradient;
+                },
+                borderColor: '#a855f7',
+                borderWidth: 0,
+                borderRadius: 8,
+                barThickness: 32
+            }]
+        },
+        tasks: {
+            labels: ['Completed', 'Pending'],
+            datasets: [{
+                data: [tasksData.completed || 0, tasksData.pending || 0],
+                backgroundColor: ['#10b981', '#f59e0b'],
+                hoverBackgroundColor: ['#059669', '#d97706'],
+                borderWidth: 4,
+                borderColor: '#1f2937',
+                cutout: '75%'
+            }]
+        },
+        students: {
+            labels: studentsData.labels,
+            datasets: [{
+                label: 'Jumlah Siswa',
+                data: studentsData.values,
+                backgroundColor: (ctx) => {
+                    const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 280, 0);
+                    gradient.addColorStop(0, '#f59e0b');
+                    gradient.addColorStop(1, '#d97706');
+                    return gradient;
+                },
+                borderRadius: 6,
+                barThickness: 24
+            }]
+        },
+        teaching: {
+            labels: teachingData.labels,
+            datasets: [{
+                label: 'Jumlah Jadwal',
+                data: teachingData.values,
+                backgroundColor: (ctx) => {
+                    const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 280);
+                    gradient.addColorStop(0, '#f43f5e');
+                    gradient.addColorStop(1, '#be123c');
+                    return gradient;
+                },
+                borderRadius: 8,
+                barThickness: 32
+            }]
+        },
+        newStudents: {
+            labels: newStudentsData.labels,
+            datasets: [{
+                label: 'Siswa Baru',
+                data: newStudentsData.values,
+                borderColor: '#06b6d4',
+                backgroundColor: (ctx) => ctxGrad(ctx.chart.ctx, 'rgba(6,182,212,0.3)', 'rgba(6,182,212,0.0)'),
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#06b6d4',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 7,
+                borderWidth: 3
+            }]
+        },
+        certificates: {
+            labels: certificatesData.labels,
+            datasets: [{
+                label: 'Sertifikat',
+                data: certificatesData.values,
+                backgroundColor: (ctx) => {
+                    const colors = ['#6366f1', '#8b5cf6', '#a855f7', '#c084fc'];
+                    return colors[ctx.dataIndex % colors.length];
+                },
+                borderRadius: 8,
+                barThickness: 32
+            }]
+        },
+        documentation: {
+            labels: documentationData.labels,
+            datasets: [{
+                data: documentationData.values,
+                backgroundColor: ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444'],
+                hoverBackgroundColor: ['#7c3aed', '#059669', '#d97706', '#dc2626'],
+                borderWidth: 4,
+                borderColor: '#1f2937'
+            }]
+        }
+    };
+
+    const defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+            duration: 1000,
+            easing: 'easeInOutQuart'
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#9ca3af',
+                    font: { size: 12, family: 'system-ui, -apple-system, sans-serif', weight: '500' },
+                    padding: 16,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                }
             },
-            ticks: { 
-                color: '#9ca3af', 
-                font: { size: 11, weight: '500' },
-                padding: 8
+            tooltip: {
+                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                titleColor: '#f3f4f6',
+                bodyColor: '#d1d5db',
+                borderColor: 'rgba(75, 85, 99, 0.5)',
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 8,
+                titleFont: { size: 13, weight: 'bold' },
+                bodyFont: { size: 12 }
             }
         },
-        y: {
-            grid: { 
-                color: 'rgba(75, 85, 99, 0.15)', 
-                drawBorder: false,
-                lineWidth: 1
+        scales: {
+            x: {
+                grid: { 
+                    color: 'rgba(75, 85, 99, 0.15)', 
+                    drawBorder: false,
+                    lineWidth: 1
+                },
+                ticks: { 
+                    color: '#9ca3af', 
+                    font: { size: 11, weight: '500' },
+                    padding: 8
+                }
             },
-            ticks: { 
-                color: '#9ca3af', 
-                font: { size: 11, weight: '500' },
-                padding: 8
+            y: {
+                grid: { 
+                    color: 'rgba(75, 85, 99, 0.15)', 
+                    drawBorder: false,
+                    lineWidth: 1
+                },
+                ticks: { 
+                    color: '#9ca3af', 
+                    font: { size: 11, weight: '500' },
+                    padding: 8
+                }
             }
+        }
+    };
+
+    const doughnutOptions = {
+        ...defaultOptions,
+        plugins: { 
+            legend: { 
+                position: 'bottom',
+                labels: {
+                    ...defaultOptions.plugins.legend.labels,
+                    padding: 20
+                }
+            },
+            tooltip: defaultOptions.plugins.tooltip
+        },
+        scales: undefined
+    };
+
+    function createChart(canvasId, type, data, options) {
+        try {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.warn(`Canvas element '${canvasId}' not found`);
+                return null;
+            }
+            return new Chart(canvas, { 
+                type: type, 
+                data: data, 
+                options: options 
+            });
+        } catch (error) {
+            console.error(`Error creating chart '${canvasId}':`, error);
+            return null;
         }
     }
-};
 
-const doughnutOptions = {
-    ...defaultOptions,
-    plugins: { 
-        legend: { 
-            position: 'bottom',
-            labels: {
-                ...defaultOptions.plugins.legend.labels,
-                padding: 20
-            }
-        },
-        tooltip: defaultOptions.plugins.tooltip
-    },
-    scales: undefined
-};
-
-new Chart(document.getElementById('attendanceChart'), { 
-    type: 'line', 
-    data: chartData.attendance, 
-    options: defaultOptions 
-});
-
-new Chart(document.getElementById('gradeChart'), { 
-    type: 'bar', 
-    data: chartData.grades, 
-    options: defaultOptions 
-});
-
-new Chart(document.getElementById('taskChart'), { 
-    type: 'doughnut', 
-    data: chartData.tasks, 
-    options: doughnutOptions 
-});
-
-new Chart(document.getElementById('studentChart'), { 
-    type: 'bar', 
-    data: chartData.students, 
-    options: { ...defaultOptions, indexAxis: 'y' } 
-});
-
-new Chart(document.getElementById('teacherChart'), { 
-    type: 'bar', 
-    data: chartData.teaching, 
-    options: defaultOptions 
-});
-
-new Chart(document.getElementById('newStudentChart'), { 
-    type: 'line', 
-    data: chartData.newStudents, 
-    options: defaultOptions 
-});
-
-new Chart(document.getElementById('certificateChart'), { 
-    type: 'bar', 
-    data: chartData.certificates, 
-    options: defaultOptions 
-});
-
-new Chart(document.getElementById('docChart'), { 
-    type: 'pie', 
-    data: chartData.documentation, 
-    options: doughnutOptions 
+    createChart('attendanceChart', 'line', chartData.attendance, defaultOptions);
+    createChart('gradeChart', 'bar', chartData.grades, defaultOptions);
+    createChart('taskChart', 'doughnut', chartData.tasks, doughnutOptions);
+    createChart('studentChart', 'bar', chartData.students, { ...defaultOptions, indexAxis: 'y' });
+    createChart('teacherChart', 'bar', chartData.teaching, defaultOptions);
+    createChart('newStudentChart', 'line', chartData.newStudents, defaultOptions);
+    createChart('certificateChart', 'bar', chartData.certificates, defaultOptions);
+    createChart('docChart', 'pie', chartData.documentation, doughnutOptions);
 });
 </script>

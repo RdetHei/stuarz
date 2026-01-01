@@ -60,7 +60,6 @@ class AnnouncementController {
             if ($result) {
                 $_SESSION['flash'] = "Announcement created successfully";
                 $_SESSION['flash_level'] = 'success';
-                // record notification
                 $insertId = mysqli_insert_id($config);
                 $uid = $_SESSION['user']['id'] ?? 0;
                 notify_event($config, 'create', 'announcement', $insertId, $uid, "Pengumuman dibuat: {$title}", 'index.php?page=announcement_show&id=' . $insertId);
@@ -107,9 +106,7 @@ class AnnouncementController {
         $content = trim($_POST['content'] ?? '');
         $ok = false;
 
-        // Basic validation before inserting
         if ($announcement_id > 0 && $user_id > 0 && $content !== '') {
-            // Use prepared statement to safely insert the comment.
             $stmt = mysqli_prepare($config, "INSERT INTO announcement_comments (announcement_id, user_id, content, created_at) VALUES (?, ?, ?, NOW())");
             if ($stmt) {
                 mysqli_stmt_bind_param($stmt, "iis", $announcement_id, $user_id, $content);
@@ -119,9 +116,7 @@ class AnnouncementController {
                 mysqli_stmt_close($stmt);
             }
         }
-        // If comment added, notify announcement owner (if not commenter)
         if ($ok) {
-            // attempt to find announcement owner and notify
             $announcement = $this->model->getById($announcement_id);
             $ownerId = $announcement['created_by'] ?? null;
             $title = $announcement['title'] ?? '';
@@ -217,19 +212,23 @@ class AnnouncementController {
     }
 
     public function delete() {
+        header('Content-Type: application/json');
+        
         $id = intval($_POST['id'] ?? $_GET['id'] ?? 0);
         if ($id <= 0) {
-            $_SESSION['flash'] = 'ID pengumuman tidak valid.';
-            $_SESSION['flash_level'] = 'danger';
-            header('Location: index.php?page=announcement');
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID pengumuman tidak valid.'
+            ]);
             exit;
         }
 
         $announcement = $this->model->getById($id);
         if (!$announcement) {
-            $_SESSION['flash'] = 'Pengumuman tidak ditemukan.';
-            $_SESSION['flash_level'] = 'danger';
-            header('Location: index.php?page=announcement');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Pengumuman tidak ditemukan.'
+            ]);
             exit;
         }
 
@@ -241,14 +240,16 @@ class AnnouncementController {
             }
             $uid = $_SESSION['user']['id'] ?? 0;
             notify_event($config, 'delete', 'announcement', $id, $uid, "Pengumuman dihapus: {$announcement['title']}", null);
-            $_SESSION['flash'] = 'Pengumuman dihapus.';
-            $_SESSION['flash_level'] = 'success';
+            echo json_encode([
+                'success' => true,
+                'message' => 'Pengumuman berhasil dihapus.'
+            ]);
         } else {
-            $_SESSION['flash'] = 'Gagal menghapus pengumuman.';
-            $_SESSION['flash_level'] = 'danger';
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menghapus pengumuman.'
+            ]);
         }
-
-        header('Location: index.php?page=announcement');
         exit;
     }
 

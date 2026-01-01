@@ -3,6 +3,60 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once __DIR__ . '/../app/config/config.php';
 
+
+
+$isAjaxRequest = (
+    (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') ||
+    (isset($_GET['ajax']) && $_GET['ajax'] == '1') ||
+    (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)
+);
+
+if ($isAjaxRequest && isset($_GET['page'])) {
+    // direct route for class AJAX operations
+    $page = $_GET['page'] ?? '';
+    $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+    
+    error_log('Routing AJAX: page=' . $page . ', method=' . $method . ', POST data: ' . json_encode($_POST));
+    
+    if ($page === 'class_store' && $method === 'POST') {
+        error_log('Routing to ClassController::store()');
+        require_once __DIR__ . '/../app/controller/ClassController.php';
+        $controller = new ClassController();
+        $controller->store();
+        exit;
+    }
+
+    if ($page === 'join_class' && $method === 'POST') {
+        error_log('Routing to ClassController::join()');
+        require_once __DIR__ . '/../app/controller/ClassController.php';
+        $controller = new ClassController();
+        $controller->join();
+        exit;
+    }
+
+    if ($page === 'class_delete' && $method === 'POST') {
+        error_log('Routing to ClassController::delete()');
+        require_once __DIR__ . '/../app/controller/ClassController.php';
+        $controller = new ClassController();
+        $controller->delete();
+        exit;
+    }
+    
+    error_log('Routing AJAX: No matching route found for page=' . $page . ', method=' . $method);
+}
+
+
+$isAjaxRequest = (
+    (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') ||
+    (isset($_GET['ajax']) && $_GET['ajax'] == '1') ||
+    (isset($_SERVER['HTTP_ACCEPT']) && 
+     strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)
+);
+
+// Remove duplicate routing block - already handled above
+
 if (!isset($_GET['page'])) {
     header('Location: index.php?page=home');
     exit;
@@ -39,21 +93,30 @@ spl_autoload_register(function ($class) {
     $root = dirname(__DIR__);
     $appDir = $root . '/app/';
 
-    // App\ namespace -> app/
+    // Handle App\ namespace classes (e.g., App\Core\Router)
     if (strpos($class, 'App\\') === 0) {
         $relative = substr($class, 4);
         $file = $appDir . str_replace('\\', '/', $relative) . '.php';
         if (is_file($file)) {
-            require $file;
+            require_once $file;
             return;
         }
     }
 
-    // Legacy global controllers seperti HomeController (no namespace)
+    // Handle Controller classes (e.g., AuthController, TaskController)
     if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*Controller$/', $class)) {
         $file = $appDir . 'controller/' . $class . '.php';
         if (is_file($file)) {
-            require $file;
+            require_once $file;
+            return;
+        }
+    }
+
+    // Handle Model classes (e.g., UsersModel, TaskModel)
+    if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*Model$/', $class)) {
+        $file = $appDir . 'model/' . $class . '.php';
+        if (is_file($file)) {
+            require_once $file;
             return;
         }
     }
@@ -64,7 +127,6 @@ use App\Core\Router;
 
 $router = new Router();
 
-//Routes
 $router->get('/', 'HomeController@index');
 $router->get('/home', 'HomeController@index');
 $router->get('/login', 'AuthController@login');
@@ -88,7 +150,6 @@ $router->get('/profile', 'ProfileController@profile');
 $router->get('/settings', 'SettingsController@index');
 $router->post('/settings', 'SettingsController@update');
 $router->get('/notifications', 'NotificationController@index');
-// Notifications API
 $router->post('/notifications/mark-read', 'NotificationController@markRead');
 $router->post('/notifications/mark-unread', 'NotificationController@markUnread');
 $router->post('/notifications/delete', 'NotificationController@delete');
@@ -105,6 +166,7 @@ $router->post('/store_user', 'AccountController@store');
 $router->get('/edit_user', 'AccountController@edit');
 $router->post('/update_user', 'AccountController@update');
 $router->post('/delete_user', 'AccountController@delete');
+$router->get('/get_user_profile', 'AccountController@getUserProfile');
 $router->get('/certificates', 'CertificatesController@certificate');
 $router->get('/my_certificates', 'CertificatesController@myCertificates');
 $router->post('/upload_certificate', 'CertificatesController@upload');
@@ -119,9 +181,8 @@ $router->get('/class_members', 'ClassController@members');
 $router->post('/class_add_member', 'ClassController@addMember');
 $router->post('/class_update_role', 'ClassController@updateMemberRole');
 $router->get('/class/detail/{id}', 'ClassController@detail');
-// Join class routes
 $router->get('/join_class', 'ClassController@joinForm');
-$router->get('/join_form', 'ClassController@joinForm'); // Alias for sidebar navigation
+$router->get('/join_form', 'ClassController@joinForm');
 $router->post('/join_class', 'ClassController@join');
 $router->post('/join-class', 'ClassController@join');
 $router->get('/grades', 'GradeController@index');
@@ -185,7 +246,6 @@ $router->get('/admin/news-form', 'NewsController@newsForm');
 $router->get('/admin/docs-form', 'DocsController@docsForm');
 $router->get('/admin/upload-announcement', 'AnnouncementController@uploadAnnouncement');
 
-// Schedule
 $router->get('/schedule', 'ScheduleController@index');
 $router->get('/schedule/create', 'ScheduleController@create');
 $router->post('/schedule/store', 'ScheduleController@store');
@@ -193,7 +253,6 @@ $router->get('/schedule/edit/{id}', 'ScheduleController@edit');
 $router->post('/schedule/update/{id}', 'ScheduleController@update');
 $router->post('/schedule/delete/{id}', 'ScheduleController@delete');
 
-// Attendance routes
 $router->get('/attendance', 'AttendanceController@index');
 $router->get('/attendance_manage', 'AttendanceController@manage');
 $router->post('/attendance_checkin', 'AttendanceController@checkIn');
@@ -201,7 +260,6 @@ $router->post('/attendance_checkout', 'AttendanceController@checkOut');
 $router->post('/attendance_edit', 'AttendanceController@edit');
 $router->post('/attendance_delete', 'AttendanceController@delete');
 
-// Student-only UI routes
 $router->get('/student/tasks', 'TaskController@studentTasks');
 $router->get('/student/task/{id}', 'TaskController@studentTaskDetail');
 $router->get('/student/submit', 'TaskController@studentSubmit');
@@ -213,22 +271,51 @@ $router->get('/student/notifications', 'NotificationController@index');
 
 
 
-// Backward-compat: map ?page=... into a path for dispatching
-$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
+// Determine request URI from GET parameter or REQUEST_URI
+$requestUri = '/';
 if (!empty($_GET['page'])) {
-    $page = '/' . trim((string)$_GET['page'], '/');
-    if ($page === 'index.php?page=home') {
+    $page = trim((string)$_GET['page'], '/');
+    // Normalize page parameter to route format
+    if ($page === 'home' || $page === '') {
         $requestUri = '/';
     } else {
-        $requestUri = $page;
+        $requestUri = '/' . $page;
+    }
+} else {
+    // Fallback to REQUEST_URI if no page parameter
+    $rawUri = $_SERVER['REQUEST_URI'] ?? '/';
+    $parsedUri = parse_url($rawUri, PHP_URL_PATH);
+    if ($parsedUri) {
+        $requestUri = $parsedUri;
+    }
+    if ($requestUri === '' || $requestUri === 'index.php' || $requestUri === '/index.php') {
+        $requestUri = '/';
     }
 }
 
-$matched = $router->dispatch($method, $requestUri);
+// Ensure requestUri starts with /
+if ($requestUri !== '/' && strpos($requestUri, '/') !== 0) {
+    $requestUri = '/' . $requestUri;
+}
 
-if (!$matched) {
+try {
+    $matched = $router->dispatch($method, $requestUri);
+    
+    if (!$matched) {
         http_response_code(404);
         include __DIR__ . '/../app/views/pages/errors/notFound.php';
+    }
+} catch (Throwable $e) {
+    error_log('Router dispatch error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+    http_response_code(500);
+    echo '<!DOCTYPE html><html><head><title>Error</title></head><body>';
+    echo '<h1>Internal Server Error</h1>';
+    echo '<p>An error occurred while processing your request.</p>';
+    if (defined('DEBUG') && constant('DEBUG')) {
+        echo '<pre>' . htmlspecialchars($e->getMessage()) . '</pre>';
+    }
+    echo '</body></html>';
+    exit;
 }

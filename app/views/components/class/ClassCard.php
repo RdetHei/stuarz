@@ -1,6 +1,6 @@
 <?php
-// Props expected: $name, $code, $members_count, $role, $link
-// Optional: $creator_name, $creator_avatar, $creator_id
+
+
 $name = $name ?? 'Nama Kelas';
 $code = $code ?? '';
 $members_count = isset($members_count) ? intval($members_count) : 0;
@@ -9,7 +9,7 @@ $link = $link ?? '#';
 $creator_name = $creator_name ?? ($creator ?? null);
 $creator_avatar = $creator_avatar ?? null;
 $creator_id = isset($creator_id) ? intval($creator_id) : null;
-// Resolve avatar URL
+
 $avatarUrl = '';
 if (!empty($creator_avatar)) {
   if (preg_match('#^https?://#i', $creator_avatar)) {

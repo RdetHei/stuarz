@@ -10,7 +10,6 @@ if (!isset($user) || !is_array($user)) {
     exit;
 }
 
-//
 $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 if ($baseUrl === '/') $baseUrl = '';
 $prefix = ($baseUrl ? $baseUrl . '/' : '');
@@ -77,7 +76,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                 </div>
             </div>
 
-            <!-- Form Section -->
+            
             <div class="p-6 bg-gray-800">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-white">Edit Profil</h2>
@@ -90,7 +89,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                     <input name="avatar" id="avatarInput" type="file" accept="image/*" class="hidden">
                     <input name="banner" id="bannerInput" type="file" accept="image/*" class="hidden">
 
-                    <!-- Username & Name -->
+                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">
@@ -113,7 +112,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                         </div>
                     </div>
 
-                    <!-- Email & Phone -->
+                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">
@@ -137,7 +136,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                         </div>
                     </div>
 
-                    <!-- Address -->
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Alamat</label>
                         <input 
@@ -147,7 +146,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                             placeholder="Jl. Contoh No. 123">
                     </div>
 
-                    <!-- Bio -->
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Bio</label>
                         <textarea 
@@ -159,7 +158,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
 
                     <div class="border-t border-gray-700 pt-6"></div>
 
-                    <!-- Password & Level -->
+                    
                     <?php if (($sessionUser['level'] ?? '') === 'admin'): ?>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -194,7 +193,7 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
                     </div>
                     <?php endif; ?>
 
-                    <!-- Action Buttons -->
+                    
                     <div class="flex flex-col sm:flex-row gap-3 pt-4">
                         <button 
                             type="submit" 
@@ -229,14 +228,12 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
 (function() {
     function readPreview(file, previewEl) {
         if (!file) return;
-        
-        // Validate file size (5MB)
+
         if (file.size > 5 * 1024 * 1024) {
             alert('Ukuran file terlalu besar! Maksimal 5MB');
             return;
         }
-        
-        // Validate file type
+
         if (!file.type.startsWith('image/')) {
             alert('File harus berupa gambar!');
             return;
@@ -245,7 +242,6 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
         previewEl.src = URL.createObjectURL(file);
     }
 
-    // Avatar upload
     const avatarInput = document.getElementById('avatarInput');
     const avatarContainer = document.getElementById('avatarContainer');
     const avatarPreview = document.getElementById('avatarPreview');
@@ -277,7 +273,6 @@ $user['banner'] = $user['banner'] ?? 'assets/default-banner.png';
         }
     });
 
-    // Banner upload
     const bannerInput = document.getElementById('bannerInput');
     const bannerContainer = document.getElementById('bannerContainer');
     const bannerPreview = document.getElementById('bannerPreview');

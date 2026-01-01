@@ -292,7 +292,7 @@ if (!isset($ajax)) $ajax = false;
         const url = 'index.php?' + params.toString();
         fetch(url, { credentials: 'same-origin' }).then(r => r.text()).then(html => {
           contentEl.innerHTML = html;
-          // Execute script tags inside returned HTML
+
           const scripts = contentEl.querySelectorAll('script');
           scripts.forEach(s => {
             const ns = document.createElement('script');

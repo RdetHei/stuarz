@@ -1,6 +1,6 @@
 <?php
-// Student: Notifications
-// Expects: $notifications (array of notifications for the user)
+
+
 $notifications = $notifications ?? [];
 ?>
 <div class="max-w-4xl mx-auto p-6">

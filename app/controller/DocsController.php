@@ -15,7 +15,6 @@ class DocsController
 
     private function stmt_fetch_all($stmt)
     {
-        // Return array of assoc rows from a prepared statement, with fallback when get_result not available
         $rows = [];
         if (method_exists($stmt, 'get_result')) {
             $res = $stmt->get_result();
@@ -26,7 +25,6 @@ class DocsController
             return $rows;
         }
 
-        // Fallback: use metadata + bind_result
         $meta = $stmt->result_metadata();
         if (!$meta) return $rows;
         $fields = [];
@@ -52,7 +50,6 @@ class DocsController
         $docs = [];
         $allDocs = [];
 
-        // Build WHERE clauses dynamically
         $where = [];
         $params = [];
         $types = '';
@@ -72,7 +69,6 @@ class DocsController
         $where_sql = '';
         if (!empty($where)) $where_sql = 'WHERE ' . implode(' AND ', $where);
 
-        // Fetch all matching rows (no pagination)
         $select_sql = "SELECT * FROM documentation " . $where_sql . " ORDER BY section, title";
         $stmt = mysqli_prepare($this->db, $select_sql);
         if ($stmt) {
@@ -92,7 +88,6 @@ class DocsController
                 $docs[$row['section']][] = $row;
             }
         } else {
-            // fallback: escaped query
             $escWhere = '';
             if ($search !== '') {
                 $esc = mysqli_real_escape_string($this->db, $search);
@@ -114,20 +109,16 @@ class DocsController
             }
         }
 
-        // categories list
         $cats = [];
         if ($res = mysqli_query($this->db, "SELECT DISTINCT section FROM documentation ORDER BY section")) {
             while ($r = mysqli_fetch_assoc($res)) $cats[] = $r['section'];
             mysqli_free_result($res);
         }
 
-        // expose variables used by view
         $q = $search;
-        // $cat already set above
         $page = 1;
         $totalPages = 1;
 
-        // detail doc if slug provided
         $slug = trim((string)($_GET['doc'] ?? ''));
         $currentDoc = null;
         if ($slug !== '') {
@@ -148,12 +139,10 @@ class DocsController
             }
         }
 
-        // Data for layout
         $title = "Documentation - Stuarz";
         $description = "Panduan penggunaan Stuarz documentation";
         $content = dirname(__DIR__) . '/views/pages/docs/docs.php';
 
-        // If this is an AJAX request, return only the page fragment (no layout)
         $isAjax = !empty($_GET['ajax']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
         if ($isAjax) {
             $ajax = true;
@@ -228,10 +217,8 @@ class DocsController
             exit;
         }
 
-        // show confirmation card if GET or not confirmed
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         if ($method === 'GET' || !isset($_POST['confirm'])) {
-            // load doc to show
             $stmt = mysqli_prepare($this->db, "SELECT * FROM documentation WHERE id = ? LIMIT 1");
             $doc = null;
             if ($stmt) {
@@ -254,9 +241,7 @@ class DocsController
             exit;
         }
 
-        // perform deletion when confirmed via POST
         if (isset($_POST['confirm']) && (string)$_POST['confirm'] === '1') {
-            // fetch title for message
             $stmt = mysqli_prepare($this->db, "SELECT title FROM documentation WHERE id = ? LIMIT 1");
             $title = '';
             if ($stmt) {
@@ -279,7 +264,6 @@ class DocsController
             exit;
         }
 
-        // fallback
         $_SESSION['flash'] = 'Aksi dibatalkan.';
         header('Location: index.php?page=docs');
         exit;
@@ -305,7 +289,6 @@ class DocsController
             $insertId = mysqli_insert_id($this->db);
             mysqli_stmt_close($stmt);
             $_SESSION['flash'] = 'Dokumentasi berhasil dibuat';
-            // notify
             $uid = $_SESSION['user']['id'] ?? 0;
             notify_event($this->db, 'create', 'documentation', $insertId, $uid, "Dokumentasi dibuat: {$title}", 'index.php?page=docs&doc=' . urlencode($slug));
         } else {
@@ -386,7 +369,6 @@ class DocsController
         $id = (int)($_GET['id'] ?? 0);
         $model = new Documentation($this->db);
         if ($id > 0) {
-            // fetch title for message
             $stmt = mysqli_prepare($this->db, "SELECT title FROM documentation WHERE id = ? LIMIT 1");
             $title = '';
             if ($stmt) {
@@ -401,7 +383,6 @@ class DocsController
             $_SESSION['flash'] = $ok ? 'Dokumentasi dihapus' : 'Gagal menghapus dokumentasi';
             if ($ok) {
                 $uid = $_SESSION['user']['id'] ?? 0;
-                // do not include a localhost link for delete notifications; show a special card instead
                 notify_event($this->db, 'delete', 'documentation', $id, $uid, "Dokumentasi dihapus: {$title}", null);
             }
         } else {

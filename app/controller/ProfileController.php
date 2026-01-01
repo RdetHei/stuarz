@@ -7,7 +7,6 @@ class ProfileController
         global $config;
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-        // Allow viewing other user's profile via ?user_id=ID
         $targetId = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
         $userId = $targetId ?: ($_SESSION['user_id'] ?? null);
         if (!$userId) {
@@ -136,7 +135,6 @@ class ProfileController
         }
 
         if ($user && empty($targetId)) {
-            // Only override session when viewing own profile
             $_SESSION['user'] = $user;
         }
 
@@ -146,9 +144,6 @@ class ProfileController
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
-    /**
-     * Student-facing profile (simplified view)
-     */
     public function studentProfile()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
@@ -175,7 +170,7 @@ class ProfileController
 
         $bio = trim($_POST['bio'] ?? '');
         $allowedExt = ['jpg','jpeg','png'];
-        $maxSize = 2 * 1024 * 1024; // 2MB for avatar
+        $maxSize = 2 * 1024 * 1024;
 
         $avatarPath = null;
         if (!empty($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
@@ -201,7 +196,6 @@ class ProfileController
             $avatarPath = $dest;
         }
 
-        // Update DB
         $fields = [];
         $params = '';
         $values = [];

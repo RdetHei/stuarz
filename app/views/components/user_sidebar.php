@@ -1,5 +1,5 @@
 <?php
-// Enhanced student sidebar matching admin/guru style but limited to student features
+
 if (session_status() === PHP_SESSION_NONE) session_start();
 $sessionUser = $_SESSION['user'] ?? [];
 $page = isset($_GET['page']) && $_GET['page'] !== '' ? $_GET['page'] : 'dashboard';
@@ -9,7 +9,7 @@ function navActiveUser($navPage, string $currentPage): string
   $candidates = is_array($navPage) ? $navPage : [$navPage];
   foreach ($candidates as $nav) {
     if ($nav === $currentPage) return 'bg-gray-800 bg-gray-100 text-white text-gray-900';
-    // support student routes like student/tasks
+
     if (strpos($currentPage, 'student/') === 0) {
       $parts = explode('/', $currentPage);
       if (($parts[1] ?? '') === $nav) return 'bg-gray-800 bg-gray-100 text-white text-gray-900';

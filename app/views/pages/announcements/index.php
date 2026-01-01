@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gray-900">
   <div class="max-w-6xl mx-auto px-6 py-8">
 
-    <!-- Flash Message -->
+    
     <?php if (!empty($_SESSION['flash'])): ?>
       <?php 
       $flashLevel = $_SESSION['flash_level'] ?? 'info';
@@ -38,7 +38,7 @@
       <?php unset($_SESSION['flash'], $_SESSION['flash_level']); ?>
     <?php endif; ?>
 
-    <!-- Header -->
+    
     <div class="mb-8 bg-gradient-to-br from-gray-800 to-gray-850 border border-gray-700 rounded-2xl p-8 shadow-xl">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div>
@@ -62,9 +62,9 @@
       </div>
     </div>
 
-    <!-- List -->
+    
     <?php if (empty($announcements)): ?>
-      <!-- Empty State -->
+      
       <div class="bg-gray-800 border border-gray-700 rounded-xl p-16 text-center shadow-lg">
         <div class="max-w-md mx-auto">
           <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gray-700/50 flex items-center justify-center">
@@ -84,7 +84,7 @@
         </div>
       </div>
     <?php else: ?>
-      <!-- Table View -->
+      
       <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-lg">
         <div class="overflow-x-auto">
           <table class="w-full">
@@ -100,10 +100,10 @@
               <?php foreach ($announcements as $a): ?>
                 <tr class="hover:bg-gray-750/50 transition-colors group">
                   
-                  <!-- Title Column -->
+                  
                   <td class="px-6 py-5">
                     <div class="flex items-start gap-4">
-                      <!-- Thumbnail -->
+                      
                       <?php if (!empty($a['photo'])): ?>
                         <div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-700 border border-gray-600">
                           <img src="<?= htmlspecialchars($a['photo']) ?>" 
@@ -119,7 +119,7 @@
                         </div>
                       <?php endif; ?>
                       
-                      <!-- Title & Author -->
+                      
                       <div class="flex-1 min-w-0">
                         <div class="flex items-start gap-2 mb-2">
                           <h3 class="text-base font-semibold text-white line-clamp-2 flex-1">
@@ -144,7 +144,7 @@
                             <?php endif; ?>
                             <span class="font-medium text-gray-300"><?= htmlspecialchars($a['username'] ?? 'Anonim') ?></span>
                           
-                          <!-- Mobile: Show time here -->
+                          
                           <span class="md:hidden text-gray-600">•</span>
                           <span class="md:hidden text-xs text-gray-500"><?= date('d/m/Y', strtotime($a['created_at'])) ?></span>
                         </div>
@@ -152,14 +152,14 @@
                     </div>
                   </td>
 
-                  <!-- Content Column (Hidden on mobile) -->
+                  
                   <td class="px-6 py-5 hidden lg:table-cell">
                     <p class="text-sm text-gray-400 line-clamp-2 leading-relaxed">
                       <?= htmlspecialchars(substr($a['content'], 0, 120)) ?><?= strlen($a['content']) > 120 ? '...' : '' ?>
                     </p>
                   </td>
 
-                  <!-- Time Column (Hidden on mobile) -->
+                  
                   <td class="px-6 py-5 hidden md:table-cell">
                     <div class="flex items-center gap-2 text-sm text-gray-400">
                       <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,10 +172,10 @@
                     </div>
                   </td>
 
-                  <!-- Actions Column -->
+                  
                   <td class="px-6 py-5">
                     <div class="flex items-center justify-end gap-2">
-                      <!-- View Button -->
+                      
                       <button onclick="showAnnouncementModal(<?= htmlspecialchars(json_encode($a), ENT_QUOTES) ?>)"
                               class="p-2 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 rounded-lg transition-all"
                               title="Lihat Detail">
@@ -185,7 +185,7 @@
                         </svg>
                       </button>
                       
-                      <!-- Edit Button -->
+                      
                       <a href="index.php?page=announcement_edit&id=<?= $a['id'] ?>" 
                          class="p-2 text-gray-400 hover:text-emerald-400 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20 rounded-lg transition-all"
                          title="Edit">
@@ -194,19 +194,18 @@
                         </svg>
                       </a>
                       
-                      <!-- Delete Button -->
-                      <form method="POST" action="index.php?page=announcement_delete" 
-                            class="inline" 
-                            onsubmit="return confirm('Yakin ingin menghapus pengumuman ini?')">
-                        <input type="hidden" name="id" value="<?= $a['id'] ?>">
-                        <button type="submit" 
-                                class="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-lg transition-all"
-                                title="Hapus">
-                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                          </svg>
-                        </button>
-                      </form>
+                      
+                      <button type="button" 
+                              class="delete-btn p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-lg transition-all"
+                              title="Hapus"
+                              data-id="<?= $a['id'] ?>"
+                              data-url="index.php?page=announcement_delete"
+                              data-item-name="<?= htmlspecialchars($a['title'] ?? 'Pengumuman', ENT_QUOTES, 'UTF-8') ?>"
+                              data-row-selector="tr">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -219,10 +218,10 @@
   </div>
 </div>
 
-<!-- Modal for viewing announcement details -->
+
 <div id="announcementModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
   <div class="bg-gray-800 border border-gray-700 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-    <!-- Modal Header -->
+    
     <div class="px-6 py-5 bg-gray-750 border-b border-gray-700 flex items-center justify-between">
       <h3 id="modalTitle" class="text-xl font-bold text-white">Detail Pengumuman</h3>
       <button onclick="closeAnnouncementModal()" class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
@@ -232,9 +231,9 @@
       </button>
     </div>
     
-    <!-- Modal Content -->
+    
     <div class="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-      <!-- Author Info -->
+      
       <div class="flex items-center gap-3 mb-6 pb-6 border-b border-gray-700">
         <div id="modalAvatar" class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg"></div>
         <div>
@@ -243,12 +242,12 @@
         </div>
       </div>
       
-      <!-- Content -->
+      
       <div id="modalContent" class="prose prose-invert prose-sm max-w-none mb-6">
         <p class="text-gray-300 leading-relaxed whitespace-pre-wrap"></p>
       </div>
       
-      <!-- Photo -->
+      
       <div id="modalPhotoContainer" class="hidden">
         <img id="modalPhoto" src="" alt="Foto Pengumuman" class="w-full rounded-lg border border-gray-700">
       </div>
@@ -268,7 +267,7 @@ function showAnnouncementModal(announcement) {
   const photo = document.getElementById('modalPhoto');
   
   title.textContent = announcement.title;
-  // Show avatar image if available, otherwise show initial
+
   if (announcement.avatar) {
     avatar.innerHTML = '<img src="' + announcement.avatar + '" alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-700">';
   } else {
@@ -304,14 +303,12 @@ function closeAnnouncementModal() {
   document.body.style.overflow = 'auto';
 }
 
-// Close modal when clicking outside
 document.getElementById('announcementModal')?.addEventListener('click', function(e) {
   if (e.target === this) {
     closeAnnouncementModal();
   }
 });
 
-// Close modal with Escape key
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     closeAnnouncementModal();

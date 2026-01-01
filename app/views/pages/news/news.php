@@ -163,7 +163,7 @@ if (!isset($baseUrl)) {
 
     </div>
 
-    <!-- Pagination -->
+    
     <?php if ($totalPages > 1): ?>
     <div class="flex justify-center">
       <div class="inline-flex items-center gap-2 bg-[#1f2937] border border-gray-700 rounded-lg p-2">
@@ -239,10 +239,10 @@ if (!isset($baseUrl)) {
     fetch('index.php?' + params.toString(), { credentials: 'same-origin' }).then(r => r.text()).then(html => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
-      // Prefer exact fragment id
+
       const newWrapper = doc.getElementById('newsContent') || doc.querySelector('.grid.grid-cols-1') || doc.querySelector('.bg-[#1f2937]');
       if (newWrapper) {
-        // If we have an existing #newsContent, update its innerHTML; otherwise replace fallback element
+
         const existingWrapper = document.getElementById('newsContent');
         if (existingWrapper) {
           existingWrapper.innerHTML = newWrapper.innerHTML;

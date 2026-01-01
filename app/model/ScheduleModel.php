@@ -46,8 +46,8 @@ class ScheduleModel {
         }
         $sql = "INSERT INTO schedule (`class`,`subject`,`teacher_id`,`class_id`,`day`,`start_time`,`end_time`) VALUES (?,?,?,?,?,?,?)";
         $stmt = $this->db->prepare($sql);
-        // Parameter types: s=string, i=integer
-        // class(string), subject(string), teacher_id(int), class_id(int), day(string), start_time(string), end_time(string)
+
+
         $stmt->bind_param('ssiisss', $data['class'], $data['subject'], $data['teacher_id'], $data['class_id'], $data['day'], $data['start_time'], $data['end_time']);
         $ok = $stmt->execute();
         if (!$ok) {
@@ -63,8 +63,8 @@ class ScheduleModel {
         }
         $sql = "UPDATE schedule SET `class`=?, `subject`=?, teacher_id=?, class_id=?, `day`=?, start_time=?, end_time=? WHERE id=?";
         $stmt = $this->db->prepare($sql);
-        // Parameter types: s=string, i=integer
-        // class(string), subject(string), teacher_id(int), class_id(int), day(string), start_time(string), end_time(string), id(int)
+
+
         $stmt->bind_param('ssiisssi', $data['class'], $data['subject'], $data['teacher_id'], $data['class_id'], $data['day'], $data['start_time'], $data['end_time'], $id);
         $ok = $stmt->execute();
         if (!$ok) {
@@ -82,7 +82,6 @@ class ScheduleModel {
         return $ok;
     }
 
-    // Cek overlap pada kelas yang sama. exclude_id untuk update.
     public function checkOverlap($class_id, $day, $start, $end, $exclude_id = null) {
         $sql = "SELECT COUNT(*) as cnt FROM schedule WHERE class_id = ? AND day = ? AND NOT (end_time <= ? OR start_time >= ?)";
         $types = 'isss';
@@ -97,7 +96,6 @@ class ScheduleModel {
         return $row && intval($row['cnt']) > 0;
     }
 
-    // Get schedules with relations (class name and teacher name)
     public function getAllWithRelations($filters = []) {
         $sql = "SELECT s.*, 
                        c.name as class_name, 
@@ -158,7 +156,6 @@ class ScheduleModel {
         return $data;
     }
 
-    // Get schedules grouped by class
     public function getSchedulesByClass($filters = []) {
         $schedules = $this->getAllWithRelations($filters);
         $grouped = [];

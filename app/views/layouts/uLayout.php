@@ -4,6 +4,10 @@ if (!isset($_SESSION['user'])) {
     header("Location: index.php?page=login");
     exit;
 }
+
+$baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+if ($baseUrl === '/') $baseUrl = '';
+$prefix = ($baseUrl ? $baseUrl . '/' : '');
 ?>
 
 <!DOCTYPE html>
@@ -32,7 +36,6 @@ if (!isset($_SESSION['user'])) {
 <body class="bg-gray-900">
 
     <?php
-    // Determine active page for highlighting student sidebar items
     $page = $_GET['page'] ?? '';
     $active = '';
     if (strpos($page, 'student/') === 0) {
@@ -44,14 +47,11 @@ if (!isset($_SESSION['user'])) {
     ?>
 
     <div class="min-h-screen flex">
-        <!-- Sidebar -->
         <?php
-            // Use the main sidebar implementation but render it in student mode
             $student_mode = true;
             include __DIR__ . '/../components/sidebar.php';
         ?>
 
-        <!-- Right column: header + content -->
         <div class="flex-1 flex flex-col">
             <?php include __DIR__ . '/../components/dHeader.php'; ?>
 
@@ -68,15 +68,14 @@ if (!isset($_SESSION['user'])) {
         ?>
     </main>
 
-    <?php 
-        define('BASEPATH', true);
-        include __DIR__ . '/../components/ai-helper/chat-modal.php'; 
-        ?>
         </div>
     </div>
 
+    <div id="toast-container" class="fixed top-4 right-4 z-[100000] flex flex-col gap-3 pointer-events-none"></div>
+
+    <?php include __DIR__ . '/../components/modals/confirm_delete_modal.php'; ?>
+
     <script>
-    // Toggle mobile sidebar visibility (button placed in header)
     (function(){
         var btn = document.getElementById('mobileSidebarToggle');
         var sidebar = document.getElementById('sidebar');
@@ -86,9 +85,42 @@ if (!isset($_SESSION['user'])) {
         });
     })();
     </script>
-    </body>
-    </html>
-    ?>
-        <script src="js/notifications.js"></script>
+
+    <script src="js/toast.js"></script>
+    
+    <script>
+    (function() {
+        <?php if (!empty($_SESSION['flash'])): ?>
+            const flashMessage = <?= json_encode($_SESSION['flash'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+            const flashType = <?= json_encode($_SESSION['flash_type'] ?? 'success', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+            if (window.showToast) {
+                window.showToast(flashMessage, flashType, 5000);
+            } else {
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (window.showToast) {
+                        window.showToast(flashMessage, flashType, 5000);
+                    }
+                });
+            }
+            <?php unset($_SESSION['flash'], $_SESSION['flash_type']); ?>
+        <?php endif; ?>
+        
+        <?php if (!empty($_SESSION['error'])): ?>
+            const errorMessage = <?= json_encode($_SESSION['error'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+            if (window.showToast) {
+                window.showToast(errorMessage, 'error', 5000);
+            } else {
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (window.showToast) {
+                        window.showToast(errorMessage, 'error', 5000);
+                    }
+                });
+            }
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+    })();
+    </script>
+    
+    <script src="js/notifications.js"></script>
 </body>
 </html>

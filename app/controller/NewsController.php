@@ -20,7 +20,6 @@ class NewsController{
 
         $content = dirname(__DIR__) . '/views/pages/news/news.php';
 
-        // support AJAX fragment for live search
         $isAjax = !empty($_GET['ajax']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
         if ($isAjax) {
             $ajax = true;

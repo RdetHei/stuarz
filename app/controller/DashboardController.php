@@ -36,7 +36,6 @@ class DashboardController
         $userId = (int) ($_SESSION['user_id'] ?? 0);
         $user = $this->userModel->getUserById($userId);
 
-        // Generate notifications from recent changes (best-effort) with session throttle
         if (class_exists('NotificationsModel')) {
             $notifModel = new NotificationsModel($config);
             $lastScan = isset($_SESSION['notif_scan_last']) ? intval($_SESSION['notif_scan_last']) : 0;
@@ -74,7 +73,6 @@ class DashboardController
         $description = "Welcome to your dashboard";
         $content = dirname(__DIR__) . '/views/pages/dashboard/user.php';
 
-        // Stats
         $submissions = $subsModel->getByUser($userId);
         $currentMonth = date('Y-m');
         $distinctSubmittedThisMonth = [];
@@ -110,8 +108,6 @@ class DashboardController
             'average_grade' => $avgGrade
         ];
 
-        // Additional actionable stats for the user dashboard
-        // Tasks for student's classes
         $allClassTasks = [];
         try {
             $allClassTasks = $tasksModel->getByStudentClass($userId);
@@ -119,7 +115,6 @@ class DashboardController
             $allClassTasks = [];
         }
 
-        // Build submitted task ids for progress calculation
         $distinctSubmittedAll = [];
         foreach ($submissions as $s) {
             $tid = intval($s['task_id'] ?? 0);
@@ -130,11 +125,9 @@ class DashboardController
         $completedCount = count($distinctSubmittedAll);
         $progressPct = $totalTasks > 0 ? (int) round(($completedCount / $totalTasks) * 100) : 0;
 
-        // Determine tasks due this week and overdue
         $tasksDueWeek = 0;
         $overdueTasks = 0;
         $now = time();
-        // Start and end of current week (Mon-Sun)
         $monday = strtotime('monday this week');
         $sunday = strtotime('sunday this week');
         if ($monday === false) $monday = strtotime('today');
@@ -155,7 +148,6 @@ class DashboardController
             }
         }
 
-        // Unread notifications count
         $unreadNotifications = 0;
         if (class_exists('NotificationsModel')) {
             try {
@@ -164,7 +156,6 @@ class DashboardController
             } catch (Exception $e) { $unreadNotifications = 0; }
         }
 
-        // Next class (reuse previously computed $nextClass if available)
         $nextClassLabel = null;
         if (!empty($nextClass)) {
             $nextClassLabel = ($nextClass['subject'] ?? '') . (
@@ -174,14 +165,12 @@ class DashboardController
             $nextClassLabel = ($s0['subject'] ?? '') . (!empty($s0['time']) ? ' • ' . ($s0['time']) : '');
         }
 
-        // Merge into stats (preserve existing keys)
         $stats['tasks_due_week'] = $tasksDueWeek;
         $stats['overdue_tasks'] = $overdueTasks;
         $stats['unread_notifications'] = $unreadNotifications;
         $stats['next_class'] = $nextClassLabel;
         $stats['progress_percent'] = $progressPct;
 
-        // Activities (merge latest submissions and attendance)
         $activities = [];
         foreach (array_slice($submissions, 0, 10) as $s) {
             $time = $s['submitted_at'] ?? $s['created_at'] ?? '';
@@ -197,40 +186,71 @@ class DashboardController
         usort($activities, function($x,$y){ return strcmp($y['time'],$x['time']); });
         $activities = array_slice($activities, 0, 8);
 
-        // Today schedule
         $weekdayMap = [1=>'Senin',2=>'Selasa',3=>'Rabu',4=>'Kamis',5=>'Jumat',6=>'Sabtu',7=>'Minggu'];
         $todayName = $weekdayMap[(int)date('N')] ?? 'Senin';
         $joinedClasses = $classModel->getAll($userId);
         $schedule = [];
         $scheduleByDay = ['Senin'=>[],'Selasa'=>[],'Rabu'=>[],'Kamis'=>[],'Jumat'=>[],'Sabtu'=>[],'Minggu'=>[]];
+        
+        $formatTime = function($timeStr) {
+            if (empty($timeStr)) return '';
+            if (strlen($timeStr) >= 5) {
+                return substr($timeStr, 0, 5);
+            }
+            return $timeStr;
+        };
+        
         foreach ($joinedClasses as $cl) {
             $clsId = intval($cl['id'] ?? 0);
             if ($clsId <= 0) continue;
+            
             $rowsToday = $schModel->getAllWithRelations(['class_id' => $clsId, 'day' => $todayName]);
             foreach ($rowsToday as $r) {
+                $startTime = $formatTime($r['start_time'] ?? '');
+                $endTime = $formatTime($r['end_time'] ?? '');
+                $timeStr = $startTime && $endTime ? $startTime . ' — ' . $endTime : ($startTime ?: 'TBA');
+                
                 $schedule[] = [
-                    'time' => trim(($r['start_time'] ?? '') . ' — ' . ($r['end_time'] ?? '')),
+                    'start_time' => $startTime,
+                    'time' => $timeStr,
                     'subject' => $r['subject'] ?? ($r['schedule_subject'] ?? 'Pelajaran'),
                     'teacher' => $r['teacher_name'] ?? 'Guru',
                     'room' => $cl['code'] ?? ($r['class_code'] ?? '-')
                 ];
             }
+            
             $rowsAll = $schModel->getAllWithRelations(['class_id' => $clsId]);
             foreach ($rowsAll as $r) {
                 $dname = $r['day'] ?? '';
                 if (!isset($scheduleByDay[$dname])) continue;
+                
+                $startTime = $formatTime($r['start_time'] ?? '');
+                $endTime = $formatTime($r['end_time'] ?? '');
+                $timeStr = $startTime && $endTime ? $startTime . ' — ' . $endTime : ($startTime ?: 'TBA');
+                
                 $scheduleByDay[$dname][] = [
-                    'start' => $r['start_time'] ?? '',
-                    'end' => $r['end_time'] ?? '',
-                    'time' => trim(($r['start_time'] ?? '') . ' — ' . ($r['end_time'] ?? '')),
+                    'start' => $startTime,
+                    'end' => $endTime,
+                    'time' => $timeStr,
                     'subject' => $r['subject'] ?? ($r['schedule_subject'] ?? 'Pelajaran'),
                     'teacher' => $r['teacher_name'] ?? 'Guru',
                     'room' => $cl['code'] ?? ($r['class_code'] ?? '-')
                 ];
             }
         }
+        
+        usort($schedule, function($a, $b) {
+            $timeA = $a['start_time'] ?? '';
+            $timeB = $b['start_time'] ?? '';
+            return strcmp($timeA, $timeB);
+        });
+        
         foreach ($scheduleByDay as $dn => $items) {
-            usort($items, function($a,$b){ return strcmp(substr($a['start'] ?? '',0,5), substr($b['start'] ?? '',0,5)); });
+            usort($items, function($a, $b) {
+                $timeA = $a['start'] ?? '';
+                $timeB = $b['start'] ?? '';
+                return strcmp($timeA, $timeB);
+            });
             $scheduleByDay[$dn] = $items;
         }
 
@@ -288,7 +308,6 @@ class DashboardController
             'next' => $nextClass
         ];
 
-        // Learning stats
         $distinctSubjects = 0;
         if ($stmt2 = $config->prepare("SELECT COUNT(DISTINCT subject_id) AS c FROM grades WHERE user_id = ?")) {
             $stmt2->bind_param('i', $userId);
@@ -330,8 +349,33 @@ class DashboardController
             $stmt4->close();
         }
 
-        // Normalize expected user fields
         $user['joined'] = $user['join_date'] ?? ($user['joined'] ?? '');
+        
+        $latestAnnouncements = [];
+        require_once dirname(__DIR__) . '/model/AnnouncementModel.php';
+        try {
+            $annModel = new AnnouncementModel($config);
+            $allAnnouncements = $annModel->getAll();
+            if (!empty($allAnnouncements)) {
+                $latestAnnouncements = array_slice($allAnnouncements, 0, 3);
+            }
+        } catch (Exception $e) {
+            error_log('Failed to fetch announcements: ' . $e->getMessage());
+            $latestAnnouncements = [];
+        }
+        
+        if (!isset($schedule) || !is_array($schedule)) {
+            $schedule = [];
+        }
+        if (!isset($activities) || !is_array($activities)) {
+            $activities = [];
+        }
+        if (!isset($stats) || !is_array($stats)) {
+            $stats = [];
+        }
+        if (!isset($attendanceChart) || !is_array($attendanceChart)) {
+            $attendanceChart = [0, 0, 0];
+        }
 
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -352,7 +396,6 @@ class DashboardController
         $userId = (int) ($_SESSION['user_id'] ?? 0);
         $user = $this->userModel->getUserById($userId);
 
-        // If a teacher logs in, redirect to guru dashboard
         if (!empty($user['level']) && $user['level'] === 'guru') {
             header('Location: index.php?page=dashboard-guru');
             exit;
@@ -380,14 +423,13 @@ class DashboardController
         global $config;
         $teacherId = (int) ($_SESSION['user_id'] ?? 0);
 
-        // Only allow access if user is guru
         $teacher = $this->userModel->getUserById($teacherId);
         if (!$teacher || ($teacher['level'] ?? '') !== 'guru') {
             header('Location: index.php?page=dashboard');
             exit;
         }
 
-        $cacheTtl = 120; // seconds
+        $cacheTtl = 120;
         $cacheDir = dirname(__DIR__) . '/cache';
         if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
         $cacheFile = $cacheDir . '/dashboard_guru_' . $teacherId . '.json';
@@ -396,31 +438,63 @@ class DashboardController
         $submissions = [];
         $summary = ['classes' => 0, 'students' => 0, 'pending_grading' => 0, 'messages' => 0];
         $performance = ['average' => 0, 'min' => 0, 'max' => 0, 'grades' => [0]];
+        $scheduleByDay = ['Senin'=>[],'Selasa'=>[],'Rabu'=>[],'Kamis'=>[],'Jumat'=>[],'Sabtu'=>[],'Minggu'=>[]];
+        $latestAnnouncements = [];
+        $latestAnnouncement = null;
+        
+        require_once dirname(__DIR__) . '/model/AnnouncementModel.php';
+        try {
+            $annModel = new AnnouncementModel($config);
+            $allAnnouncements = $annModel->getAll();
+            if (!empty($allAnnouncements)) {
+                $latestAnnouncements = array_slice($allAnnouncements, 0, 3);
+            }
+        } catch (Exception $e) {
+            error_log('Failed to fetch announcements: ' . $e->getMessage());
+            $latestAnnouncements = [];
+        }
 
-        // Always fetch teacher profile (do not rely on cache for profile validation)
         $teacher = $this->userModel->getUserById($teacherId);
         if (!$teacher || ($teacher['level'] ?? '') !== 'guru') {
-            // Not a teacher — redirect to normal dashboard
             header('Location: index.php?page=dashboard');
             exit;
         }
 
+        $useCache = false;
         if (is_file($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTtl) {
             $cached = json_decode(@file_get_contents($cacheFile), true);
             if (is_array($cached)) {
-                $classes = $cached['classes'] ?? [];
-                $submissions = $cached['submissions'] ?? [];
-                $summary = $cached['summary'] ?? $summary;
-                $performance = $cached['performance'] ?? $performance;
-                $scheduleByDay = $cached['scheduleByDay'] ?? ['Senin'=>[],'Selasa'=>[],'Rabu'=>[],'Kamis'=>[],'Jumat'=>[],'Sabtu'=>[],'Minggu'=>[]];
+                $cachedSubmissions = $cached['submissions'] ?? [];
+                if (!empty($cachedSubmissions) && isset($cachedSubmissions[0]['title'])) {
+                    $classes = $cached['classes'] ?? [];
+                    $submissions = $cachedSubmissions;
+                    $summary = $cached['summary'] ?? $summary;
+                    $performance = $cached['performance'] ?? $performance;
+                    $scheduleByDay = $cached['scheduleByDay'] ?? $scheduleByDay;
+                    require_once dirname(__DIR__) . '/model/AnnouncementModel.php';
+                    try {
+                        $annModel = new AnnouncementModel($config);
+                        $allAnnouncements = $annModel->getAll();
+                        if (!empty($allAnnouncements)) {
+                            $latestAnnouncements = array_slice($allAnnouncements, 0, 3);
+                        }
+                    } catch (Exception $e) {
+                        error_log('Failed to fetch announcements: ' . $e->getMessage());
+                        $latestAnnouncements = [];
+                    }
+                    $useCache = true;
+                } else {
+                    @unlink($cacheFile);
+                }
             }
-        } else {
+        }
+        
+        if (!$useCache) {
             $classModel = new ClassModel($config);
             $tasksModel = new TasksCompletedModel($config);
             $submissionsModel = new TaskSubmissionsModel($config);
             $notificationsModel = new NotificationsModel($config);
 
-            // Also generate notifications for recent changes (light-weight) with session throttle
             try {
                 $lastScan = isset($_SESSION['notif_scan_last']) ? intval($_SESSION['notif_scan_last']) : 0;
                 if ($lastScan <= 0 || (time() - $lastScan) >= 300) {
@@ -431,11 +505,8 @@ class DashboardController
                 error_log('generateFromSources failed: ' . $e->getMessage());
             }
 
-            // Use getManagedClasses so we include classes the teacher created
-            // or classes where they are a member with role guru/admin
             $rawClasses = $classModel->getManagedClasses($teacherId);
 
-            // Enrich classes with student counts and a human-friendly time (from schedule)
             $scheduleModel = new ScheduleModel($config);
             $classes = [];
             $scheduleByDay = ['Senin'=>[],'Selasa'=>[],'Rabu'=>[],'Kamis'=>[],'Jumat'=>[],'Sabtu'=>[],'Minggu'=>[]];
@@ -445,7 +516,6 @@ class DashboardController
                 $schedules = $scheduleModel->getAll(['class_id' => $cl['id']]);
                 $timeStr = '';
                 if (!empty($schedules)) {
-                    // create a short summary like "Mon/Wed 08:00"
                     $parts = [];
                     foreach ($schedules as $sch) {
                         $parts[] = ($sch['day'] ?? '') . ' ' . (($sch['start_time'] ?? '') ? substr($sch['start_time'],0,5) : '');
@@ -487,7 +557,6 @@ class DashboardController
             $studentsCount = count($studentIds);
 
             $tasks = $tasksModel->getByTeacherId($teacherId);
-            // Compute task-related stats for teacher: due this week, overdue
             $tasksDueWeek = 0;
             $overdueTasks = 0;
             $now = time();
@@ -508,9 +577,11 @@ class DashboardController
                     } else {
                         $grades[] = floatval($s['grade']);
                     }
-                    $recentSubmissions[] = $s + ['task_title' => $t['title'] ?? ''];
+                    $recentSubmissions[] = $s + [
+                        'task_title' => $t['title'] ?? '',
+                        'class_name' => $t['class_name'] ?? 'N/A'
+                    ];
                 }
-                // Task deadline handling
                 $dl = $t['deadline'] ?? null;
                 if (!empty($dl)) {
                     $ts = strtotime($dl);
@@ -523,7 +594,6 @@ class DashboardController
                 }
             }
 
-            // Determine next upcoming class for the teacher using $scheduleByDay
             $nextClass = null;
             $nowTime = date('H:i');
             $scanDays = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
@@ -534,14 +604,22 @@ class DashboardController
                 $orderDays = array_merge(array_slice($scanDays, $startIdx), array_slice($scanDays, 0, $startIdx));
             }
             foreach ($orderDays as $dn) {
-                $cands = $scheduleByDay[$dn] ?? [];
-                usort($cands, function($a,$b){ return strcmp(($a['start'] ?? ''), ($b['start'] ?? '')); });
-                foreach ($cands as $r) {
-                    $st = substr($r['start'] ?? '', 0, 5);
+                $candidates = [];
+                foreach ($classes as $cl) {
+                    $clsId = intval($cl['id'] ?? 0);
+                    if ($clsId <= 0) continue;
+                    $rows = $scheduleModel->getAllWithRelations(['class_id' => $clsId, 'day' => $dn]);
+                    foreach ($rows as $r) {
+                        $candidates[] = $r + ['class_code' => $cl['code'] ?? ($r['class_code'] ?? '-')];
+                    }
+                }
+                usort($candidates, function($a,$b){ return strcmp(($a['start_time'] ?? ''), ($b['start_time'] ?? '')); });
+                foreach ($candidates as $r) {
+                    $st = substr($r['start_time'] ?? '', 0, 5);
                     if ($dn !== $todayName || $st > $nowTime) {
                         $nextClass = [
                             'day' => $dn,
-                            'time' => trim(($r['start'] ?? '') . ' — ' . ($r['end'] ?? '')),
+                            'time' => trim(($r['start_time'] ?? '') . ' — ' . ($r['end_time'] ?? '')),
                             'subject' => $r['subject'] ?? ($r['schedule_subject'] ?? 'Pelajaran'),
                             'teacher' => $r['teacher'] ?? ($teacher['name'] ?? 'Guru'),
                             'room' => $r['room'] ?? ($r['class_code'] ?? '-')
@@ -576,7 +654,38 @@ class DashboardController
                 if ($tb === null) return -1;
                 return strtotime($tb) <=> strtotime($ta);
             });
-            $submissions = array_slice($recentSubmissions, 0, 8);
+            
+            $formattedSubmissions = [];
+            foreach (array_slice($recentSubmissions, 0, 8) as $s) {
+                $submittedAt = $s['submitted_at'] ?? $s['created_at'] ?? null;
+                $age = 'N/A';
+                if ($submittedAt) {
+                    $diff = time() - strtotime($submittedAt);
+                    if ($diff < 3600) {
+                        $age = round($diff / 60) . 'm';
+                    } elseif ($diff < 86400) {
+                        $age = round($diff / 3600) . 'h';
+                    } else {
+                        $age = round($diff / 86400) . 'd';
+                    }
+                }
+                
+                $reviewStatus = strtolower($s['review_status'] ?? 'pending');
+                $meta = ucfirst(str_replace('_', ' ', $reviewStatus));
+                if (!empty($s['grade'])) {
+                    $meta .= ' • Grade: ' . number_format(floatval($s['grade']), 1);
+                }
+                
+                $formattedSubmissions[] = [
+                    'title' => $s['task_title'] ?? $s['title'] ?? 'Untitled Task',
+                    'class' => $s['class_name'] ?? $s['class'] ?? 'N/A',
+                    'meta' => $meta,
+                    'age' => $age,
+                    'submission_id' => $s['id'] ?? null,
+                    'task_id' => $s['task_id'] ?? null
+                ];
+            }
+            $submissions = $formattedSubmissions;
 
             $payload = [
                 'classes' => $classes,
@@ -592,7 +701,6 @@ class DashboardController
         $description = "Halaman dashboard untuk guru";
         $content = dirname(__DIR__) . '/views/pages/dashboard/guru.php';
 
-        // Normalize teacher fields expected by the view
         $teacher['subject'] = $teacher['subject'] ?? ($teacher['role'] ?? '');
         $teacher['joined'] = $teacher['joined'] ?? ($teacher['join_date'] ?? '');
         $teacher['email'] = $teacher['email'] ?? ($teacher['username'] ?? '');
@@ -620,7 +728,7 @@ class DashboardController
         $diff = time() - $t;
         if ($diff < 60) return 'Baru';
         if ($diff < 3600) return floor($diff/60) . 'm';
-        if ($diff < 86400) return floor($diff/3600) . 'h';
+        if ($diff < 86400) return floor($diff/86400) . 'h';
         return floor($diff/86400) . 'd';
     }
 

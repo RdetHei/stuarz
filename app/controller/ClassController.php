@@ -13,19 +13,19 @@ class ClassController {
         global $config;
         $this->db = $config;
         $this->model = new ClassModel($config);
-        // Instantiate ClassService using PDO (separate from existing mysqli connection)
         try {
             $pdo = new PDO('mysql:host=localhost;dbname=stuarz;charset=utf8mb4', 'root', '');
             $this->classService = new ClassService($pdo);
         } catch (Exception $e) {
-            // fallback: null service (controllers will still try model methods)
             $this->classService = null;
         }
         if (session_status() === PHP_SESSION_NONE) session_start();
     }
 
     public function index() {
-        // Use service (PDO) when available to fetch all classes with user's join status
+        $search = trim((string)($_GET['q'] ?? ''));
+        $filterJoined = isset($_GET['filter']) ? $_GET['filter'] : '';
+        
         $userId = intval($_SESSION['user']['id'] ?? 0);
         if ($this->classService) {
             try {
@@ -38,22 +38,37 @@ class ClassController {
             $classes = $this->model->getAllClassesWithUserStatus($userId);
         }
 
-        // Filter: by default show only classes the user has joined. Use ?show=all to view all.
         $showAll = (isset($_GET['show']) && $_GET['show'] === 'all');
         if (!$showAll) {
             $classes = array_values(array_filter($classes, function($c){ return intval($c['is_joined'] ?? 0) === 1; }));
         }
+        
+        if ($search !== '') {
+            $classes = array_filter($classes, function($c) use ($search) {
+                $name = strtolower($c['name'] ?? '');
+                $code = strtolower($c['code'] ?? '');
+                $desc = strtolower($c['description'] ?? '');
+                $searchLower = strtolower($search);
+                return strpos($name, $searchLower) !== false || 
+                       strpos($code, $searchLower) !== false || 
+                       strpos($desc, $searchLower) !== false;
+            });
+            $classes = array_values($classes);
+        }
+        
+        if ($filterJoined === 'joined') {
+            $classes = array_values(array_filter($classes, function($c){ return intval($c['is_joined'] ?? 0) === 1; }));
+        } elseif ($filterJoined === 'not_joined') {
+            $classes = array_values(array_filter($classes, function($c){ return intval($c['is_joined'] ?? 0) === 0; }));
+        }
 
-        // Get statistics
         $totalClasses = count($classes);
-        // safe student count (class_members may be missing or empty)
         $totalStudents = 0;
         $res = $this->db->query("SELECT COUNT(DISTINCT user_id) as count FROM class_members");
         if ($res) {
             $row = $res->fetch_assoc();
             $totalStudents = intval($row['count'] ?? 0);
         }
-        // Some schemas don't have an `is_active` column — fallback to total classes
         $totalActiveClasses = $totalClasses;
         $averageStudentsPerClass = $totalClasses > 0 ? round($totalStudents / $totalClasses) : 0;
         
@@ -64,8 +79,17 @@ class ClassController {
             'averageStudents' => $averageStudentsPerClass
         ];
         
+        $ajax = false;
+        if ((isset($_GET['ajax']) && $_GET['ajax'] == '1') || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')) {
+            $ajax = true;
+        }
+        
         $content = dirname(__DIR__) . '/views/pages/classes/index.php';
-        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        if ($ajax) {
+            include $content;
+        } else {
+            include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        }
     }
 
     public function create() {
@@ -74,37 +98,81 @@ class ClassController {
     }
 
     public function store() {
+       
+        if (ob_get_level()) ob_clean();
+        header('Content-Type: application/json; charset=utf-8');
+        
         try {
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            if (empty($_SESSION['user']) && empty($_SESSION['user_id'])) {
+                http_response_code(401);
+                echo json_encode(['ok' => false, 'message' => 'Silakan login terlebih dahulu.']);
+                exit;
+            }
+            
+            $userId = intval($_SESSION['user']['id'] ?? $_SESSION['user_id'] ?? 0);
+            if ($userId <= 0) {
+                http_response_code(400);
+                echo json_encode(['ok' => false, 'message' => 'User ID tidak valid.']);
+                exit;
+            }
+            
+            
+            $codeValue = trim($_POST['code'] ?? $_POST['class_code'] ?? '');
+            
+          
+            error_log('ClassController::store - Received POST data: ' . json_encode($_POST));
+            
             $data = [
                 'name' => trim($_POST['name'] ?? ''),
-                'code' => trim($_POST['code'] ?? ''),
+                'code' => $codeValue,
                 'description' => trim($_POST['description'] ?? ''),
-                'created_by' => $_SESSION['user']['id'] ?? 0
+                'created_by' => $userId
             ];
-        // Auto-generate code if empty (6 uppercase alphanumeric) and ensure uniqueness
-        if (empty($data['code'])) {
-            $tries = 0;
-            do {
-                $data['code'] = generateClassCode(6);
-                $exists = $this->model->findByCode($data['code']);
-                $tries++;
-            } while ($exists && $tries < 6);
-        }
-        $errors = $this->model->validate($data);
-        if ($errors) {
-            $_SESSION['flash'] = implode(' ', $errors);
-            header('Location: index.php?page=class_create');
-            exit;
-        }
-            $ok = $this->model->create($data);
+        
+            if (empty($data['code'])) {
+                $tries = 0;
+                do {
+                    $data['code'] = generateClassCode(6);
+                    $exists = $this->model->findByCode($data['code']);
+                    $tries++;
+                } while ($exists && $tries < 6);
+            }
+            
+       
+            $errors = $this->model->validate($data);
+            if ($errors) {
+                $errorMessage = implode(' ', $errors);
+                error_log('ClassController::store - Validation failed: ' . $errorMessage);
+                error_log('ClassController::store - Data being validated: ' . json_encode($data));
+                http_response_code(400);
+                echo json_encode(['ok' => false, 'message' => $errorMessage]);
+                exit;
+            }
+            
+         
+            try {
+                $ok = $this->model->create($data);
+            } catch (\Exception $e) {
+                error_log('ClassModel::create error: ' . $e->getMessage());
+                error_log('ClassModel::create error trace: ' . $e->getTraceAsString());
+                http_response_code(500);
+                echo json_encode(['ok' => false, 'message' => 'Gagal membuat kelas: ' . $e->getMessage()]);
+                exit;
+            }
+            
+            $newClassId = 0;
             if ($ok) {
-            // Auto-add creator as teacher member to class_members (CRITICAL for unique constraint)
-            $newClassId = $this->db->insert_id;
+                $newClassId = intval($this->db->insert_id ?? 0);
+            if ($newClassId <= 0) {
+                $class = $this->model->findByCode($data['code']);
+                if ($class) {
+                    $newClassId = intval($class['id'] ?? 0);
+                }
+            }
             $creatorId = intval($data['created_by']);
             
-            // Add creator to class_members with role determined from user's level
             try {
-                // Fetch creator level from users table and map to role
                 $stmt = $this->db->prepare('SELECT level FROM users WHERE id = ? LIMIT 1');
                 $roleToAdd = 'user';
                 if ($stmt) {
@@ -119,55 +187,50 @@ class ClassController {
                 $this->model->addMember($newClassId, $creatorId, $roleToAdd);
             } catch (\Exception $e) {
                 error_log('Warning: Could not add creator as member: ' . $e->getMessage());
-                // Non-fatal; continue to schedule creation
             }
             
-            // Auto-generate default schedules for this class (Mon-Sat) so it appears in schedule table
-            $stmt = $this->db->prepare("INSERT INTO schedule (`class`,`subject`,`teacher_id`,`class_id`,`day`,`start_time`,`end_time`) VALUES (?,?,?,?,?,?,?)");
-            $days = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-            foreach ($days as $d) {
-                // Defaults: empty room, subject TBD, teacher = creator/admin, times placeholder
-                $room = '';
-                $subject = 'TBD';
-                $teacherId = $creatorId; // ensure FK satisfied
-                $start = '07:00:00';
-                $end = '08:00:00';
-                $stmt->bind_param('ssiiiss', $room, $subject, $teacherId, $newClassId, $d, $start, $end);
-                $stmt->execute();
-            }
-            $stmt->close();
-            }
-
-            // Respond appropriately for AJAX clients
-            if (!empty($_GET['ajax']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)) {
-                header('Content-Type: application/json');
-                if ($ok) {
-                    echo json_encode(['ok' => true, 'message' => 'Kelas berhasil ditambah.', 'class_id' => intval($this->db->insert_id ?? 0)]);
-                } else {
-                    echo json_encode(['ok' => false, 'message' => 'Gagal menambah kelas.']);
+            if ($newClassId > 0) {
+                try {
+                    $classCode = $data['code'] ?? '';
+                    $stmt = $this->db->prepare("INSERT INTO schedule (`class`,`subject`,`teacher_id`,`class_id`,`day`,`start_time`,`end_time`) VALUES (?,?,?,?,?,?,?)");
+                    if ($stmt) {
+                        $days = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+                        foreach ($days as $d) {
+                            $room = $classCode;
+                            $subject = 'TBD';
+                            $teacherId = $creatorId;
+                            $start = '07:00:00';
+                            $end = '08:00:00';
+                            $stmt->bind_param('ssiiiss', $room, $subject, $teacherId, $newClassId, $d, $start, $end);
+                            if (!$stmt->execute()) {
+                                error_log('Warning: Failed to insert schedule for day ' . $d . ': ' . $stmt->error);
+                            }
+                        }
+                        $stmt->close();
+                    }
+                } catch (\Exception $e) {
+                    error_log('Warning: Could not create default schedule: ' . $e->getMessage());
                 }
-                exit;
+            }
             }
 
-            $_SESSION['flash'] = $ok ? 'Kelas berhasil ditambah.' : 'Gagal menambah kelas.';
-            header('Location: index.php?page=class');
-            exit;
-        } catch (\Throwable $e) {
-            // Log the full exception for debugging
-            error_log('ClassController::store error: ' . $e->getMessage() . " -- " . $e->getTraceAsString());
-            // If AJAX, return JSON error so client-side can show appropriate message
-            if (!empty($_GET['ajax']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)) {
-                header('Content-Type: application/json', true, 500);
-                echo json_encode(['ok' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+            if ($ok && $newClassId > 0) {
+                echo json_encode(['ok' => true, 'message' => 'Kelas berhasil ditambah.', 'class_id' => $newClassId]);
+                exit;
+            } else {
+                error_log('ClassController::store - Insert failed: ok=' . ($ok ? 'true' : 'false') . ', newClassId=' . $newClassId);
+                http_response_code(500);
+                echo json_encode(['ok' => false, 'message' => 'Gagal menambah kelas. Pastikan semua field diisi dengan benar.']);
                 exit;
             }
-            $_SESSION['flash'] = 'Gagal menambah kelas: ' . $e->getMessage();
-            header('Location: index.php?page=class_create');
+        } catch (\Throwable $e) {
+            error_log('ClassController::store error: ' . $e->getMessage() . " -- " . $e->getTraceAsString());
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'message' => 'Server error: ' . $e->getMessage()]);
             exit;
         }
     }
 
-    // Show join class form
     public function joinForm() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (empty($_SESSION['user'])) {
@@ -175,40 +238,50 @@ class ClassController {
             header('Location: index.php?page=login');
             exit;
         }
-        // FIXED: Use ClassService to get ALL classes with user's join status
-        // This ensures is_joined is correctly set based on class_members, not fallback logic
         $userId = intval($_SESSION['user']['id'] ?? 0);
         if ($this->classService) {
             try {
                 $classes = $this->classService->getAllClassesWithUserStatus($userId);
             } catch (Exception $e) {
-                // Fallback to model if service fails
                 error_log('ClassService error: ' . $e->getMessage());
                 $classes = $this->model->getAllClassesWithUserStatus($userId);
             }
         } else {
-            // Fallback to model
             $classes = $this->model->getAllClassesWithUserStatus($userId);
         }
         $content = dirname(__DIR__) . '/views/pages/classes/index.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
-    // Handle join class POST
     public function join() {
         try {
             if (session_status() === PHP_SESSION_NONE) session_start();
+            $isAjax = (!empty($_GET['ajax']) && $_GET['ajax'] == '1') || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
             if (empty($_SESSION['user'])) {
+                if ($isAjax) {
+                    http_response_code(401);
+                    header('Content-Type: application/json');
+                    error_log('ClassController::join - unauthenticated AJAX request from ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+                    echo json_encode(['ok' => false, 'message' => 'Silakan login terlebih dahulu.']);
+                    exit;
+                }
                 throw new \Exception('Silakan login terlebih dahulu.');
             }
             $user = $_SESSION['user'];
             $level = $user['level'] ?? 'user';
 
-            // Admin/guru may pass class_id to join directly
             $classId = intval($_POST['class_id'] ?? 0);
             $code = trim($_POST['class_code'] ?? trim($_POST['code'] ?? ''));
 
             if (($level !== 'admin' && $level !== 'guru') && empty($code)) {
+                if ($isAjax) {
+                    error_log('ClassController::join - missing code in AJAX request from ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+                    header('Content-Type: application/json');
+                    http_response_code(400);
+                    echo json_encode(['ok' => false, 'message' => 'Kode kelas wajib diisi.']);
+                    exit;
+                }
                 throw new \Exception('Kode kelas wajib diisi.');
             }
 
@@ -219,20 +292,24 @@ class ClassController {
             }
 
             if (!$class) {
+                if ($isAjax) {
+                    error_log('ClassController::join - invalid code "' . $code . '" from ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+                    header('Content-Type: application/json');
+                    http_response_code(400);
+                    echo json_encode(['ok' => false, 'message' => 'Kode kelas tidak valid atau kelas tidak ditemukan.']);
+                    exit;
+                }
                 throw new \Exception('Kode kelas tidak valid atau kelas tidak ditemukan.');
             }
 
-            // Determine role from user's level: 'teacher' for teacher-level, 'user' for students
             $role = (is_teacher_level($level) || $level === 'admin') ? 'teacher' : 'user';
 
-            // Attempt to add member via ClassService if available, fallback to model
             if ($this->classService) {
                 $result = $this->classService->joinClass(intval($user['id']), intval($class['id']), $role);
             } else {
                 $result = $this->model->addMember(intval($class['id']), intval($user['id']), $role);
             }
             if ($result) {
-                // success
                 if (!empty($_GET['ajax']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)) {
                     header('Content-Type: application/json');
                     echo json_encode(['ok' => true, 'message' => 'Berhasil bergabung ke kelas.', 'class_id' => intval($class['id'])]);
@@ -241,6 +318,7 @@ class ClassController {
                 $_SESSION['success'] = 'Berhasil bergabung ke kelas.';
             } else {
                 if (!empty($_GET['ajax']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)) {
+                    error_log('ClassController::join - failed to add member: class_id=' . intval($class['id'] ?? 0) . ' user_id=' . intval($user['id'] ?? 0));
                     header('Content-Type: application/json');
                     echo json_encode(['ok' => false, 'message' => 'Gagal bergabung ke kelas.']);
                     exit;
@@ -248,12 +326,17 @@ class ClassController {
                 $_SESSION['error'] = 'Gagal bergabung ke kelas.';
             }
         } catch (\Exception $e) {
+            if (!empty($isAjax)) {
+                http_response_code(400);
+                header('Content-Type: application/json');
+                echo json_encode(['ok' => false, 'message' => $e->getMessage()]);
+                exit;
+            }
             $_SESSION['error'] = $e->getMessage();
+            $back = $_SERVER['HTTP_REFERER'] ?? 'index.php?page=class';
+            header('Location: ' . $back);
+            exit;
         }
-        // Redirect back to referrer or class list
-        $back = $_SERVER['HTTP_REFERER'] ?? 'index.php?page=class';
-        header('Location: ' . $back);
-        exit;
     }
 
     public function edit() {
@@ -268,13 +351,10 @@ class ClassController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
-    // Show class detail
     public function detail($id = null) {
         if ($id === null) {
-            // try to parse from PATH_INFO or GET
             $id = intval($_GET['id'] ?? 0);
             if (!$id && isset($_GET['page'])) {
-                // page may be like 'class/detail/12'
                 $parts = explode('/', $_GET['page']);
                 if (isset($parts[2])) $id = intval($parts[2]);
             }
@@ -285,38 +365,38 @@ class ClassController {
             header('Location: index.php?page=class');
             exit;
         }
-        $class = $this->model->getById($id);
+
+        $currentUserId = intval($_SESSION['user']['id'] ?? 0);
+        $currentUserLevel = $_SESSION['user']['level'] ?? 'user';
+
+        $class = $this->model->getById($id, $currentUserId);
+
         if (!$class) {
             $_SESSION['flash'] = 'Kelas tidak ditemukan.';
             header('Location: index.php?page=class');
             exit;
         }
-        // members and schedules
+
+        $isMember = (isset($class['is_joined']) && $class['is_joined'] == 1);
+        $isAdmin = ($currentUserLevel === 'admin');
+
+        if (!$isMember && !$isAdmin) {
+            $_SESSION['flash'] = 'Anda tidak memiliki akses untuk melihat kelas ini.';
+            header('Location: index.php?page=class');
+            exit;
+        }
+
         $members = $this->model->getMembers($id);
 
-        // Determine whether current user can manage roles/members (creator, class guru, or admin)
-        $currentUserId = intval($_SESSION['user']['id'] ?? 0);
         $canManage = false;
         if (!empty($currentUserId)) {
-            // class creator
             if (intval($class['created_by'] ?? 0) === $currentUserId) $canManage = true;
-            // site admin level
-            $currLevel = $_SESSION['user']['level'] ?? '';
-            if (!$canManage && ($currLevel === 'admin' || $currLevel === 'Guru' || $currLevel === 'guru')) $canManage = true;
-            // check membership role for current user
+            if (!$canManage && $isAdmin) $canManage = true;
             if (!$canManage) {
-                $stmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ? LIMIT 1');
-                if ($stmt) {
-                    $stmt->bind_param('ii', $id, $currentUserId);
-                    $stmt->execute();
-                    $res = $stmt->get_result();
-                    $r = $res ? $res->fetch_assoc() : null;
-                    if ($r && in_array(strtolower($r['role'] ?? ''), ['guru','admin','teacher'])) $canManage = true;
-                    $stmt->close();
-                }
+                $memberRole = $class['member_role'] ?? '';
+                if (in_array(strtolower($memberRole), ['guru','admin','teacher'])) $canManage = true;
             }
         }
-        // use ScheduleModel to fetch schedules with relations if available
         $schedules = [];
         if (is_file(dirname(__DIR__) . '/model/ScheduleModel.php')) {
             require_once dirname(__DIR__) . '/model/ScheduleModel.php';
@@ -324,7 +404,6 @@ class ClassController {
             $schedules = $schedModel->getAllWithRelations(['class_id' => $id]);
         }
 
-        // fetch tasks for this class only
         $tasks = [];
         if (is_file(dirname(__DIR__) . '/model/TasksCompletedModel.php')) {
             require_once dirname(__DIR__) . '/model/TasksCompletedModel.php';
@@ -336,7 +415,6 @@ class ClassController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
-    // Update a member's role (only for class managers: creator, guru, or admin)
     public function updateMemberRole() {
         try {
             if (session_status() === PHP_SESSION_NONE) session_start();
@@ -345,10 +423,8 @@ class ClassController {
             $currentUserId = intval($_SESSION['user']['id'] ?? 0);
             $classId = intval($_POST['class_id'] ?? 0);
             $userId = intval($_POST['user_id'] ?? 0);
-            // determine role from the target user's level (ignore arbitrary POST role)
             if (!$classId || !$userId) throw new \Exception('Parameter tidak lengkap.');
 
-            // Fetch target user's level
             $stmt = $this->db->prepare('SELECT level FROM users WHERE id = ? LIMIT 1');
             $newRole = 'user';
             if ($stmt) {
@@ -361,17 +437,13 @@ class ClassController {
                 $stmt->close();
             }
 
-            // Permission check: must be class creator, class guru/admin, or site admin
             $allowed = false;
-            // site admin
             $currLevel = $_SESSION['user']['level'] ?? '';
             if ($currLevel === 'admin' || $currLevel === 'Guru' || $currLevel === 'guru') $allowed = true;
 
-            // class creator
             $class = $this->model->getById($classId);
             if (!$allowed && $class && intval($class['created_by'] ?? 0) === $currentUserId) $allowed = true;
 
-            // membership role
             if (!$allowed) {
                 $stmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ? LIMIT 1');
                 if ($stmt) {
@@ -386,7 +458,6 @@ class ClassController {
 
             if (!$allowed) throw new \Exception('Tidak memiliki izin untuk mengubah role.');
 
-            // Perform update via service if available, else fallback to model/db
             $ok = false;
             if ($this->classService) {
                 try {
@@ -433,19 +504,80 @@ class ClassController {
     }
 
     public function delete() {
-        $id = intval($_POST['id'] ?? 0);
-        $ok = $this->model->delete($id);
-        $_SESSION['flash'] = $ok ? 'Kelas dihapus.' : 'Gagal menghapus kelas.';
-        header('Location: index.php?page=class');
+        header('Content-Type: application/json');
+        try {
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            if (empty($_SESSION['user'])) {
+                throw new \Exception('Silakan login terlebih dahulu.');
+            }
+
+            $id = intval($_POST['id'] ?? 0);
+            if (!$id) {
+                throw new \Exception('ID kelas tidak valid.');
+            }
+
+            $currentUserId = intval($_SESSION['user']['id'] ?? 0);
+            $currentLevel = $_SESSION['user']['level'] ?? '';
+            
+            $class = $this->model->getById($id);
+            if (!$class) {
+                throw new \Exception('Kelas tidak ditemukan.');
+            }
+
+            $canDelete = ($currentLevel === 'admin') || (intval($class['created_by'] ?? 0) === $currentUserId);
+
+            if (!$canDelete) {
+                throw new \Exception('Anda tidak memiliki izin untuk menghapus kelas ini.');
+            }
+
+            $this->db->begin_transaction();
+            
+            try {
+                $taskIds = [];
+                $taskRes = $this->db->query('SELECT id FROM tasks_completed WHERE class_id = ' . intval($id));
+                if ($taskRes) {
+                    while ($row = $taskRes->fetch_assoc()) {
+                        $taskIds[] = intval($row['id']);
+                    }
+                }
+                
+                if (!empty($taskIds)) {
+                    $taskIdsStr = implode(',', $taskIds);
+                    if (!$this->db->query('DELETE FROM task_reminders WHERE task_id IN (' . $taskIdsStr . ')')) {
+                        throw new Exception('Gagal menghapus pengingat tugas terkait.');
+                    }
+                }
+                
+                if (!$this->db->query('DELETE FROM task_submissions WHERE class_id = ' . intval($id))) throw new Exception('Gagal menghapus pengumpulan tugas.');
+                if (!$this->db->query('DELETE FROM tasks_completed WHERE class_id = ' . intval($id))) throw new Exception('Gagal menghapus tugas.');
+                if (!$this->db->query('DELETE FROM schedule WHERE class_id = ' . intval($id))) throw new Exception('Gagal menghapus jadwal.');
+                if (!$this->db->query('DELETE FROM class_members WHERE class_id = ' . intval($id))) throw new Exception('Gagal menghapus anggota kelas.');
+                
+                if (!$this->model->delete($id)) {
+                    throw new \Exception('Gagal menghapus data kelas utama.');
+                }
+
+                $this->db->commit();
+                
+                echo json_encode(['success' => true, 'message' => 'Kelas dan semua data terkait berhasil dihapus.']);
+
+            } catch (\Exception $e) {
+                $this->db->rollback();
+                throw $e;
+            }
+        } catch (\Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
         exit;
     }
 
-    // Anggota kelas
     public function members() {
         $class_id = intval($_GET['id'] ?? 0);
         $class = $this->model->getById($class_id);
         $members = $this->model->getMembers($class_id);
-        // Determine whether current user can manage roles (creator, guru, or admin)
         $currentUserId = intval($_SESSION['user']['id'] ?? 0);
         $canManage = false;
         if (!empty($currentUserId)) {
@@ -471,7 +603,6 @@ class ClassController {
         try {
             $classId = intval($_POST['class_id'] ?? 0);
             $userId = intval($_POST['user_id'] ?? 0);
-            // Determine role from the user's level to avoid mismatches
             $role = 'user';
             $stmt = $this->db->prepare('SELECT level FROM users WHERE id = ? LIMIT 1');
             if ($stmt) {
@@ -506,15 +637,36 @@ class ClassController {
         exit;
     }
     public function removeMember() {
+        header('Content-Type: application/json');
+        
         $class_id = intval($_POST['class_id'] ?? 0);
         $user_id = intval($_POST['user_id'] ?? 0);
+        
+        if ($class_id <= 0 || $user_id <= 0) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID tidak valid.'
+            ]);
+            exit;
+        }
+        
         if ($this->classService) {
             $ok = $this->classService->leaveClass($user_id, $class_id);
         } else {
             $ok = $this->model->removeMember($class_id, $user_id);
         }
-        $_SESSION['flash'] = $ok ? 'Anggota dihapus.' : 'Gagal menghapus anggota.';
-        header('Location: index.php?page=class_members&id=' . $class_id);
+        
+        if ($ok) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Anggota berhasil dihapus dari kelas.'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menghapus anggota.'
+            ]);
+        }
         exit;
     }
 }

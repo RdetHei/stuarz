@@ -1,4 +1,3 @@
-
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user'])) {
@@ -6,7 +5,10 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
-// Check for admin access on admin-only pages
+$baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+if ($baseUrl === '/') $baseUrl = '';
+$prefix = ($baseUrl ? $baseUrl . '/' : '');
+
 $current_page = $_GET['page'] ?? '';
 if (strpos($current_page, 'attendance_manage') === 0) {
     if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'admin') {
@@ -15,7 +17,6 @@ if (strpos($current_page, 'attendance_manage') === 0) {
     }
 }
 
-// If the logged-in user is a student, use the user layout which is tailored for students
 $level = $_SESSION['level'] ?? '';
 if ($level === 'user' && file_exists(__DIR__ . '/uLayout.php')) {
     include __DIR__ . '/uLayout.php';
@@ -53,6 +54,12 @@ if ($level === 'user' && file_exists(__DIR__ . '/uLayout.php')) {
     <?php include __DIR__ . '/../components/dHeader.php'; ?>
     
 
+    <div id="toast-container" class="fixed top-4 right-4 z-[100000] flex flex-col gap-3 pointer-events-none"></div>
+
+    <?php include __DIR__ . '/../components/modals/confirm_delete_modal.php'; ?>
+    
+    <?php include __DIR__ . '/../components/modals/user_profile_modal.php'; ?>
+
     <main id="content" class="p-6">
         <?php
         
@@ -66,10 +73,45 @@ if ($level === 'user' && file_exists(__DIR__ . '/uLayout.php')) {
         ?>
     </main>
 
-    <?php 
-    define('BASEPATH', true);
-    include __DIR__ . '/../components/ai-helper/chat-modal.php'; 
-    ?>
-        <script src="js/notifications.js"></script>
+    <script src="js/toast.js"></script>
+    
+    <script src="js/admin.js"></script>
+    
+    <script src="js/user_profile_modal.js"></script>
+    
+    <script>
+    (function() {
+        <?php if (!empty($_SESSION['flash'])): ?>
+            const flashMessage = <?= json_encode($_SESSION['flash'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+            const flashType = <?= json_encode($_SESSION['flash_type'] ?? 'success', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+            if (window.showToast) {
+                window.showToast(flashMessage, flashType, 5000);
+            } else {
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (window.showToast) {
+                        window.showToast(flashMessage, flashType, 5000);
+                    }
+                });
+            }
+            <?php unset($_SESSION['flash'], $_SESSION['flash_type']); ?>
+        <?php endif; ?>
+        
+        <?php if (!empty($_SESSION['error'])): ?>
+            const errorMessage = <?= json_encode($_SESSION['error'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+            if (window.showToast) {
+                window.showToast(errorMessage, 'error', 5000);
+            } else {
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (window.showToast) {
+                        window.showToast(errorMessage, 'error', 5000);
+                    }
+                });
+            }
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+    })();
+    </script>
+    
+    <script src="js/notifications.js"></script>
 </body>
 </html>

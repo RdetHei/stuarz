@@ -5,7 +5,7 @@ class AnnouncementModel
 
     public function __construct($db)
     {
-        // Expecting mysqli connection
+
         $this->db = $db;
     }
 
@@ -49,8 +49,8 @@ class AnnouncementModel
 
     public function getByClassId($classId)
     {
-        // The announcements table no longer contains a class_id column in this schema.
-        // Keep the method for compatibility but return an empty result to avoid SQL errors.
+
+
         return [];
     }
 

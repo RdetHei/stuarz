@@ -12,7 +12,7 @@ class ClassService {
     
     public function __construct(PDO $db) {
         $this->db = $db;
-        // Ensure exceptions on errors
+
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
@@ -28,23 +28,20 @@ class ClassService {
     public function joinClass(int $userId, int $classId, string $role = 'user'): bool {
         try {
             $this->db->beginTransaction();
-            
-            // Verify class exists
+
             $stmt = $this->db->prepare('SELECT id FROM classes WHERE id = ? LIMIT 1');
             $stmt->execute([$classId]);
             if (!$stmt->fetch()) {
                 throw new Exception('Class not found');
             }
 
-            // Verify user exists
             $stmt = $this->db->prepare('SELECT id FROM users WHERE id = ? LIMIT 1');
             $stmt->execute([$userId]);
             if (!$stmt->fetch()) {
                 throw new Exception('User not found');
             }
 
-            // Insert or update member (handles duplicate via unique constraint)
-            // Using ON DUPLICATE KEY UPDATE to make operation idempotent
+
             $sql = "INSERT INTO class_members (class_id, user_id, role, joined_at)
                     VALUES (:classId, :userId, :role, NOW())
                     ON DUPLICATE KEY UPDATE role = VALUES(role), joined_at = NOW()";
@@ -61,8 +58,8 @@ class ClassService {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
-            // Log or handle error as needed
-            // error_log('ClassService::joinClass error: ' . $e->getMessage());
+
+
             throw $e;
         }
     }
@@ -80,8 +77,8 @@ class ClassService {
             $stmt->execute([$classId, $userId]);
             return $stmt->rowCount() > 0;
         } catch (Exception $e) {
-            // Log error
-            // error_log('ClassService::leaveClass error: ' . $e->getMessage());
+
+
             throw $e;
         }
     }
@@ -105,8 +102,8 @@ class ClassService {
             $stmt->execute([$userId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            // Log error
-            // error_log('ClassService::getMyClasses error: ' . $e->getMessage());
+
+
             throw $e;
         }
     }
@@ -137,8 +134,8 @@ class ClassService {
             $stmt->execute([$userId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            // Log error
-            // error_log('ClassService::getAllClassesWithUserStatus error: ' . $e->getMessage());
+
+
             throw $e;
         }
     }
@@ -156,8 +153,8 @@ class ClassService {
             $stmt->execute([$userId, $classId]);
             return (bool)$stmt->fetchColumn();
         } catch (Exception $e) {
-            // Log error
-            // error_log('ClassService::isUserMember error: ' . $e->getMessage());
+
+
             throw $e;
         }
     }
@@ -176,8 +173,8 @@ class ClassService {
             $result = $stmt->fetchColumn();
             return $result ?: null;
         } catch (Exception $e) {
-            // Log error
-            // error_log('ClassService::getUserRoleInClass error: ' . $e->getMessage());
+
+
             throw $e;
         }
     }
@@ -201,8 +198,8 @@ class ClassService {
             $stmt->execute([$classId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            // Log error
-            // error_log('ClassService::getClassMembers error: ' . $e->getMessage());
+
+
             throw $e;
         }
     }
@@ -219,8 +216,8 @@ class ClassService {
             $stmt->execute([$classId]);
             return (int)$stmt->fetchColumn();
         } catch (Exception $e) {
-            // Log error
-            // error_log('ClassService::getMemberCount error: ' . $e->getMessage());
+
+
             throw $e;
         }
     }
@@ -239,8 +236,8 @@ class ClassService {
             $stmt->execute([$newRole, $classId, $userId]);
             return $stmt->rowCount() > 0;
         } catch (Exception $e) {
-            // Log error
-            // error_log('ClassService::updateMemberRole error: ' . $e->getMessage());
+
+
             throw $e;
         }
     }

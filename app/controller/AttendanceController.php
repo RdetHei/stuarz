@@ -15,7 +15,7 @@ class AttendanceController {
         $this->db = $db;
         $this->model = new AttendanceModel($db);
         $this->classModel = new ClassModel($db);
-        // Ensure timezone follows session if available (login sets it)
+
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (isset($_SESSION['timezone'])) {
             date_default_timezone_set($_SESSION['timezone']);
@@ -33,12 +33,11 @@ class AttendanceController {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $userId = intval($_SESSION['user_id'] ?? $_SESSION['user']['id'] ?? 0);
 
-        // If user is admin show all classes, otherwise show only classes user has joined
         if ($this->isAdmin()) {
             $classes = $this->model->getClasses();
         } else {
             $classes = $this->classModel->getAll($userId);
-            // If a class filter is provided but user is not member, ignore it
+
             if ($filterClass) {
                 $c = $this->classModel->getById($filterClass, $userId);
                 if (empty($c) || empty($c['is_joined'])) {
@@ -51,9 +50,8 @@ class AttendanceController {
         $activeClass = null;
         $activeClassId = intval($_SESSION['active_class_id'] ?? 0);
 
-        // Auto-select an active class when none is set and classes are available
         if (!$activeClassId && !empty($classes)) {
-            // Prefer the first class in the list (for non-admin this is a joined class)
+
             $first = $classes[0];
             $activeClassId = intval($first['id'] ?? 0);
             $_SESSION['active_class_id'] = $activeClassId;
@@ -62,7 +60,6 @@ class AttendanceController {
         if ($activeClassId) {
             $activeClass = $this->classModel->getById($activeClassId, $_SESSION['user']['id'] ?? null);
 
-            // If non-admin and the active class is not actually joined, try to find a joined class
             if (!$this->isAdmin() && (empty($activeClass) || empty($activeClass['is_joined']))) {
                 foreach ($classes as $c) {
                     if (!empty($c['is_joined'])) {
@@ -74,7 +71,7 @@ class AttendanceController {
                 }
             }
         }
-        // Get aggregated stats from DB (respect current filters)
+
         $stats = $this->getStats($startDate, $endDate, $filterClass);
 
         $content = dirname(__DIR__) . '/views/pages/attendance/index.php';
@@ -94,7 +91,6 @@ class AttendanceController {
 
         $records = $this->model->getByUser(intval($userId));
 
-        // Simple summary counts
         $present = $late = $leave = $sick = 0;
         foreach ($records as $r) {
             $s = strtolower($r['status'] ?? '');
@@ -122,7 +118,7 @@ class AttendanceController {
 
         $records = $this->model->getFilteredAttendance($startDate, $endDate, $filterClass);
         $classes = $this->model->getClasses();
-        // Get aggregated stats from DB (respect current filters)
+
         $stats = $this->getStats($startDate, $endDate, $filterClass);
 
         $content = dirname(__DIR__) . '/views/pages/attendance/manage.php';
@@ -139,7 +135,6 @@ class AttendanceController {
             }
             if (!$classId) throw new Exception('Pilih kelas terlebih dahulu.');
 
-            // Non-admin users must be member of the class
             if (!$this->isAdmin()) {
                 $classInfo = $this->classModel->getById($classId, $userId);
                 if (empty($classInfo) || empty($classInfo['is_joined'])) {
@@ -171,7 +166,6 @@ class AttendanceController {
             }
             if (!$classId) throw new Exception('Pilih kelas terlebih dahulu.');
 
-            // Non-admin users must be member of the class
             if (!$this->isAdmin()) {
                 $classInfo = $this->classModel->getById($classId, $userId);
                 if (empty($classInfo) || empty($classInfo['is_joined'])) {
@@ -216,7 +210,6 @@ class AttendanceController {
                 'status' => $_POST['status'] ?? null
             ];
 
-            // Validate check-in/check-out times
             if ($data['check_in'] && $data['check_out']) {
                 $checkIn = strtotime($data['check_in']);
                 $checkOut = strtotime($data['check_out']);
@@ -273,7 +266,6 @@ class AttendanceController {
             'Sakit' => 0
         ];
 
-        // Build WHERE clause for optional filters
         $conds = [];
         if ($startDate) {
             $sd = $this->db->real_escape_string($startDate);
@@ -292,7 +284,6 @@ class AttendanceController {
             $where = ' AND ' . implode(' AND ', $conds);
         }
 
-        // Map statuses in DB to localized keys
         $mapping = [
             'present' => 'Hadir',
             'late' => 'Terlambat',
@@ -301,7 +292,6 @@ class AttendanceController {
             'sick' => 'Sakit'
         ];
 
-        // Use a single query to count per status for efficiency
         $sql = "SELECT status, COUNT(*) as total FROM attendance WHERE 1=1 " . $where . " GROUP BY status";
         $res = $this->db->query($sql);
         if ($res) {

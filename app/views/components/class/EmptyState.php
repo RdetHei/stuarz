@@ -1,6 +1,6 @@
 <?php
-// EmptyState component
-// Expects: $title, $message, $cta (array with 'text' and 'href')
+
+
 $title = $title ?? 'Belum ada kelas';
 $message = $message ?? 'Anda belum mengikuti atau mengelola kelas apapun.';
 $cta = $cta ?? null;

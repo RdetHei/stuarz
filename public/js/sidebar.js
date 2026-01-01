@@ -126,18 +126,28 @@
 
         if (sidebar) {
             let modalMoved = false;
+            const profileModalBackdrop = document.getElementById('profileModalBackdrop');
 
             const ensureModalInBody = () => {
                 if (!profileModal || modalMoved) return;
                 document.body.appendChild(profileModal);
+                if (profileModalBackdrop && !profileModalBackdrop.parentElement) {
+                    document.body.appendChild(profileModalBackdrop);
+                }
                 profileModal.style.position = 'fixed';
                 profileModal.style.zIndex = '99999';
                 profileModal.style.pointerEvents = 'auto';
+                if (profileModalBackdrop) {
+                    profileModalBackdrop.style.position = 'fixed';
+                    profileModalBackdrop.style.zIndex = '99998';
+                    profileModalBackdrop.style.backdropFilter = 'none';
+                    profileModalBackdrop.style.webkitBackdropFilter = 'none';
+                }
                 modalMoved = true;
             };
 
             const measureModal = () => {
-                if (!profileModal) return { w: 260, h: 180 };
+                if (!profileModal) return { w: 288, h: 280 };
                 const wasHidden = profileModal.classList.contains('hidden');
                 let w, h;
                 if (wasHidden) {
@@ -151,7 +161,7 @@
                     w = profileModal.offsetWidth;
                     h = profileModal.offsetHeight;
                 }
-                return { w: w || 260, h: h || 180 };
+                return { w: w || 288, h: h || 280 };
             };
 
             const positionProfileModal = () => {
@@ -160,16 +170,41 @@
                 const btnRect = profileBtn.getBoundingClientRect();
                 const { w: modalWidth, h: modalHeight } = measureModal();
                 const gap = 8;
-                const spaceBelow = window.innerHeight - btnRect.bottom;
-                const spaceAbove = btnRect.top;
-                let top;
-                if (spaceBelow >= modalHeight + gap) top = Math.round(btnRect.bottom + gap);
-                else if (spaceAbove >= modalHeight + gap) top = Math.round(btnRect.top - modalHeight - gap);
-                else top = Math.round(Math.max(8, Math.min(window.innerHeight - modalHeight - 8, btnRect.top)));
-                let left = Math.round(btnRect.left);
-                left = Math.min(Math.max(8, left), Math.max(8, window.innerWidth - modalWidth - 8));
-                profileModal.style.top = top + 'px';
-                profileModal.style.left = left + 'px';
+                const isMobile = window.innerWidth <= 1023.98;
+
+                if (isMobile) {
+                    // Mobile: center at bottom
+                    const maxWidth = Math.min(320, window.innerWidth - 32);
+                    profileModal.style.width = maxWidth + 'px';
+                    profileModal.style.left = '50%';
+                    profileModal.style.transform = 'translateX(-50%) scale(1)';
+                    profileModal.style.bottom = '1rem';
+                    profileModal.style.top = 'auto';
+                } else {
+                    // Desktop: position relative to button
+                    const spaceBelow = window.innerHeight - btnRect.bottom;
+                    const spaceAbove = btnRect.top;
+                    let top;
+                    if (spaceBelow >= modalHeight + gap) {
+                        top = Math.round(btnRect.bottom + gap);
+                    } else if (spaceAbove >= modalHeight + gap) {
+                        top = Math.round(btnRect.top - modalHeight - gap);
+                    } else {
+                        top = Math.round(Math.max(8, Math.min(window.innerHeight - modalHeight - 8, btnRect.top)));
+                    }
+
+                    let left = Math.round(btnRect.left);
+                    // Ensure modal doesn't go off screen
+                    if (left + modalWidth > window.innerWidth - 8) {
+                        left = Math.max(8, window.innerWidth - modalWidth - 8);
+                    }
+                    if (left < 8) left = 8;
+
+                    profileModal.style.top = top + 'px';
+                    profileModal.style.left = left + 'px';
+                    profileModal.style.transform = 'scale(1)';
+                    profileModal.style.bottom = 'auto';
+                }
             };
 
             // Use fixed widths to avoid expensive layout measurements and thrashing
@@ -259,19 +294,140 @@
                 setTimeout(positionProfileModal, 50);
             });
 
+            // Flag to prevent modal from reopening immediately after closing
+            let isClosingModal = false;
+            let closeTimeout = null;
+
+            // Function to close modal
+            const closeProfileModal = (e) => {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                isClosingModal = true;
+                if (profileModal) profileModal.classList.add('hidden');
+                if (profileModalBackdrop) profileModalBackdrop.classList.add('hidden');
+                if (profileBtn) profileBtn.setAttribute('aria-expanded', 'false');
+
+                // Clear any existing timeout
+                if (closeTimeout) clearTimeout(closeTimeout);
+
+                // Reset flag after a short delay to prevent immediate reopening
+                closeTimeout = setTimeout(() => {
+                    isClosingModal = false;
+                }, 100);
+            };
+
+            // Function to open modal
+            const openProfileModal = (e) => {
+                // Don't open if we're in the process of closing
+                if (isClosingModal) {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    return;
+                }
+
+                ensureModalInBody();
+                if (profileModal) profileModal.classList.remove('hidden');
+                if (profileModalBackdrop) profileModalBackdrop.classList.remove('hidden');
+                positionProfileModal();
+                if (profileBtn) profileBtn.setAttribute('aria-expanded', 'true');
+            };
+
+            // Toggle modal when clicking profile button
             if (profileBtn) {
                 profileBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    if (profileModal.classList.contains('hidden')) {
-                        profileModal.classList.remove('hidden');
-                        positionProfileModal();
-                    } else {
-                        profileModal.classList.add('hidden');
+                    e.stopPropagation();
+
+                    // Don't toggle if we're closing
+                    if (isClosingModal) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
                     }
+
+                    const isHidden = profileModal.classList.contains('hidden');
+
+                    if (isHidden) {
+                        openProfileModal(e);
+                    } else {
+                        closeProfileModal(e);
+                    }
+                }, false); // Use bubble phase, not capture
+            }
+
+            // Close modal when clicking a link inside it
+            if (profileModal) {
+                const links = profileModal.querySelectorAll('a');
+                links.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        // Don't prevent default navigation, just close modal
+                        closeProfileModal();
+                    });
                 });
             }
 
-            window.addEventListener('scroll', () => setTimeout(positionProfileModal, 50), true);
+            // Close modal when clicking backdrop
+            if (profileModalBackdrop) {
+                const handleBackdropClick = (e) => {
+                    // Only close if clicking directly on backdrop, not on modal
+                    if (e.target === profileModalBackdrop && !profileModal.contains(e.target)) {
+                        closeProfileModal(e);
+                    }
+                };
+                profileModalBackdrop.addEventListener('click', handleBackdropClick);
+            }
+
+            // Close modal when clicking outside
+            const handleOutsideClick = (e) => {
+                if (!profileModal || profileModal.classList.contains('hidden')) return;
+                if (isClosingModal) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return; // Don't process if already closing
+                }
+
+                // Get the actual clicked element
+                const target = e.target;
+
+                // Check if click is on profile button
+                if (profileBtn && (target === profileBtn || profileBtn.contains(target))) {
+                    return; // Button has its own handler
+                }
+
+                // Check if click is on modal content
+                if (profileModal && profileModal.contains(target)) {
+                    return; // Don't close if clicking inside modal
+                }
+
+                // Check if click is on backdrop
+                if (profileModalBackdrop && (target === profileModalBackdrop || profileModalBackdrop.contains(target))) {
+                    return; // Backdrop has its own handler
+                }
+
+                // If we get here, click is outside modal - close it
+                closeProfileModal(e);
+            };
+
+            // Use only click event with capture phase to catch early and prevent bubbling
+            document.addEventListener('click', handleOutsideClick, true);
+
+            // Handle escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && profileModal && !profileModal.classList.contains('hidden')) {
+                    closeProfileModal();
+                }
+            });
+
+            window.addEventListener('scroll', () => {
+                if (profileModal && !profileModal.classList.contains('hidden')) {
+                    setTimeout(positionProfileModal, 50);
+                }
+            }, true);
         }
     });
 })();

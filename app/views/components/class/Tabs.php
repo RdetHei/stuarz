@@ -1,6 +1,6 @@
 <?php
-// Tabs component
-// Expects: $tabs (array of ['id'=>, 'title'=>]), $active (id of active tab)
+
+
 $tabs = $tabs ?? [];
 $active = $active ?? ($tabs[0]['id'] ?? null);
 ?>
@@ -15,7 +15,7 @@ $active = $active ?? ($tabs[0]['id'] ?? null);
   <div class="tab-contents">
     <?php foreach ($tabs as $t): $tid = $t['id']; ?>
       <div data-tab-content="<?= htmlspecialchars($tid) ?>" class="<?= $tid === $active ? '' : 'hidden' ?>">
-        <!-- content for <?= htmlspecialchars($tid) ?> -->
+        
       </div>
     <?php endforeach; ?>
   </div>

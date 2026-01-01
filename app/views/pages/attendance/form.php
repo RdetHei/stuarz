@@ -1,10 +1,9 @@
 <?php
-// Ensure session is started
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Get data from controller
 $classes = $classes ?? [];
 $students = $students ?? [];
 $date = $date ?? date('Y-m-d');
@@ -14,7 +13,7 @@ $selectedClassId = $_GET['class_id'] ?? '';
 <div class="container">
     <h2 class="text-3xl font-bold text-white mb-6">Ambil Absen</h2>
 
-    <!-- Class and Date Selection -->
+    
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-6">
         <form method="GET" action="index.php" class="mb-4">
             <input type="hidden" name="page" value="attendance/mark">
@@ -41,7 +40,7 @@ $selectedClassId = $_GET['class_id'] ?? '';
     </div>
 
     <?php if (!empty($students)): ?>
-        <!-- Attendance Form -->
+        
         <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
             <div class="p-6 border-b border-gray-700">
                 <div class="flex items-center justify-between">
@@ -108,7 +107,7 @@ $selectedClassId = $_GET['class_id'] ?? '';
                     </table>
                 </div>
 
-                <!-- Form Actions -->
+                
                 <div class="p-6 bg-gray-900 border-t border-gray-700">
                     <div class="flex items-center justify-between flex-wrap gap-4">
                         <div class="flex items-center gap-2 text-sm text-gray-400">
@@ -141,7 +140,7 @@ $selectedClassId = $_GET['class_id'] ?? '';
         </div>
 
     <?php elseif(isset($_GET['class_id'])): ?>
-        <!-- No Students Found -->
+        
         <div class="bg-gray-800 border border-gray-700 rounded-xl p-12 text-center">
             <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-orange-500/20 flex items-center justify-center">
                 <svg class="w-10 h-10 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +159,7 @@ $selectedClassId = $_GET['class_id'] ?? '';
         </div>
 
     <?php else: ?>
-        <!-- Initial State -->
+        
         <div class="bg-gray-800 border border-gray-700 rounded-xl p-12 text-center">
             <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-indigo-600/20 flex items-center justify-center">
                 <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +171,7 @@ $selectedClassId = $_GET['class_id'] ?? '';
         </div>
     <?php endif; ?>
 
-    <!-- Info Card -->
+    
     <div class="mt-6 bg-gray-800 border border-gray-700 rounded-xl p-6">
         <div class="flex items-start gap-4">
             <div class="flex-shrink-0 w-12 h-12 bg-indigo-600/20 rounded-xl flex items-center justify-center">

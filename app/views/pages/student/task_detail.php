@@ -1,6 +1,6 @@
 <?php
-// Student: Task Detail
-// Expects: $task (task data), $submission (task submission by this user or null)
+
+
 $task = $task ?? null;
 $submission = $submission ?? null;
 ?>

@@ -94,7 +94,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
                     </select>
                 </div>
 
-                <!-- Guru -->
+                
                 <div>
                     <label for="teacher_id" class="block text-sm font-medium text-gray-300 mb-2">
                         Guru <span class="text-red-500">*</span>
@@ -111,7 +111,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
                     </select>
                 </div>
 
-                <!-- Hari -->
+                
                 <div>
                     <label for="day" class="block text-sm font-medium text-gray-300 mb-2">
                         Hari <span class="text-red-500">*</span>
@@ -128,7 +128,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
                     </select>
                 </div>
 
-                <!-- Waktu Mulai -->
+                
                 <div>
                     <label for="start_time" class="block text-sm font-medium text-gray-300 mb-2">
                         Waktu Mulai <span class="text-red-500">*</span>
@@ -145,7 +145,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
                     </div>
                 </div>
 
-                <!-- Waktu Selesai -->
+                
                 <div>
                     <label for="end_time" class="block text-sm font-medium text-gray-300 mb-2">
                         Waktu Selesai <span class="text-red-500">*</span>
@@ -162,7 +162,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
                     </div>
                 </div>
 
-                <!-- Ruangan -->
+                
                 <div class="md:col-span-2">
                     <label for="class" class="block text-sm font-medium text-gray-300 mb-2">
                         Ruangan <span class="text-red-500">*</span>
@@ -181,7 +181,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
                 </div>
             </div>
 
-            <!-- Form Actions -->
+            
             <div class="flex items-center gap-3 pt-6 border-t border-gray-700">
                 <button type="submit" 
                         class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg">
@@ -202,7 +202,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
         </form>
     </div>
 
-    <!-- Info Card -->
+    
     <div class="mt-6 bg-gray-800 border border-gray-700 rounded-xl p-6">
         <div class="flex items-start gap-4">
             <div class="flex-shrink-0 w-12 h-12 bg-indigo-600/20 rounded-xl flex items-center justify-center">
@@ -232,7 +232,7 @@ $pageTitle = $mode === 'create' ? 'Tambah Jadwal' : 'Edit Jadwal';
 </div>
 
 <script>
-// Time validation
+
 document.addEventListener('DOMContentLoaded', function() {
     const startTime = document.getElementById('start_time');
     const endTime = document.getElementById('end_time');

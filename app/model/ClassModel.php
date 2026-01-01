@@ -5,7 +5,6 @@ class ClassModel {
         $this->db = $db;
     }
 
-    // Validasi kode unik dan field wajib
     public function validate($data, $isEdit = false, $id = null) {
         $errors = [];
         if (empty($data['name'])) $errors[] = 'Nama kelas wajib diisi.';
@@ -28,7 +27,6 @@ class ClassModel {
 
     public function getAll($userId = null) {
         $result = [];
-        // Returns only classes user has joined (INNER JOIN)
         $sql = 'SELECT c.*, u.username as creator, (SELECT COUNT(*) FROM class_members cm2 WHERE cm2.class_id = c.id) as members_count, cm.role as member_role FROM classes c LEFT JOIN users u ON c.created_by = u.id INNER JOIN class_members cm ON c.id = cm.class_id';
 
         if ($userId !== null) {
@@ -43,7 +41,7 @@ class ClassModel {
             $stmt->execute();
             $res = $stmt->get_result();
             while ($row = $res->fetch_assoc()) {
-                $row['is_joined'] = 1; // INNER JOIN ensures membership
+                $row['is_joined'] = 1;
                 $row['my_role'] = $row['member_role'];
                 $result[] = $row;
             }
@@ -60,13 +58,6 @@ class ClassModel {
         return $result;
     }
 
-    /**
-     * Get all classes with user's membership status (all classes + is_joined flag)
-     * CRITICAL: Uses LEFT JOIN with AND cm.user_id = :userId to avoid false positives
-     * 
-     * @param int $userId User ID
-     * @return array All classes with is_joined (0/1) and member_role (or null)
-     */
     public function getAllClassesWithUserStatus($userId) {
         $result = [];
         $sql = "SELECT c.id, c.name, c.code, c.description, c.created_by, c.created_at, u.username as creator, u.avatar AS creator_avatar, (SELECT COUNT(*) FROM class_members cm2 WHERE cm2.class_id = c.id) as members_count, CASE WHEN cm.user_id IS NOT NULL THEN 1 ELSE 0 END AS is_joined, cm.role AS member_role, cm.joined_at FROM classes c LEFT JOIN users u ON c.created_by = u.id LEFT JOIN class_members cm ON cm.class_id = c.id AND cm.user_id = ? ORDER BY c.id DESC";
@@ -77,10 +68,9 @@ class ClassModel {
         $res = $stmt->get_result();
         
         while ($row = $res->fetch_assoc()) {
-            // Ensure proper types
             $row['is_joined'] = (int)$row['is_joined'];
             $row['member_role'] = $row['member_role'] ?? null;
-            $row['my_role'] = $row['member_role']; // For backwards compatibility
+            $row['my_role'] = $row['member_role'];
             $result[] = $row;
         }
         $stmt->close();
@@ -120,7 +110,6 @@ class ClassModel {
         return $row;
     }
 
-    // Find class by its code
     public function findByCode($code) {
         $stmt = $this->db->prepare('SELECT * FROM classes WHERE code = ?');
         $stmt->bind_param('s', $code);
@@ -148,8 +137,6 @@ class ClassModel {
     }
 
     public function delete($id) {
-        // Hapus anggota dulu
-        $this->db->query('DELETE FROM class_members WHERE class_id = ' . intval($id));
         $stmt = $this->db->prepare('DELETE FROM classes WHERE id = ?');
         $stmt->bind_param('i', $id);
         $ok = $stmt->execute();
@@ -157,7 +144,6 @@ class ClassModel {
         return $ok;
     }
 
-    // Get classes managed by user (admin/guru)
     public function getManagedClasses($userId) {
         $result = [];
         $sql = 'SELECT c.*, u.username as creator, (SELECT COUNT(*) FROM class_members cm WHERE cm.class_id = c.id) as members_count FROM classes c LEFT JOIN users u ON c.created_by = u.id WHERE c.created_by = ? OR EXISTS (SELECT 1 FROM class_members cm WHERE cm.class_id = c.id AND cm.user_id = ? AND cm.role IN ("guru","teacher", "admin")) ORDER BY c.id DESC';
@@ -166,9 +152,6 @@ class ClassModel {
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
-            // To avoid an extra per-row query, obtain membership via a quick
-            // lookup using class_members where possible. Preserve backward
-            // compatible key `my_role` while preferring `member_role`.
             $memberRole = null;
             $checkStmt = $this->db->prepare('SELECT role FROM class_members WHERE class_id = ? AND user_id = ?');
             $checkStmt->bind_param('ii', $row['id'], $userId);
@@ -195,7 +178,6 @@ class ClassModel {
         return $result;
     }
 
-    // Anggota kelas
     public function getMembers($class_id) {
         $result = [];
         $sql = 'SELECT m.*, u.username, u.email, u.avatar, u.level AS level FROM class_members m LEFT JOIN users u ON m.user_id = u.id WHERE m.class_id = ?';
@@ -209,7 +191,6 @@ class ClassModel {
     }
     public function addMember($classId, $userId, $role) {
         try {
-            // Validate class exists
             $stmt = $this->db->prepare("SELECT id FROM classes WHERE id = ?");
             $stmt->bind_param("i", $classId);
             $stmt->execute();
@@ -220,7 +201,6 @@ class ClassModel {
             }
             $stmt->close();
 
-            // Validate user exists
             $stmt = $this->db->prepare("SELECT id FROM users WHERE id = ?");
             $stmt->bind_param("i", $userId);
             $stmt->execute();
@@ -231,7 +211,6 @@ class ClassModel {
             }
             $stmt->close();
 
-            // Check if member already exists
             $stmt = $this->db->prepare("SELECT id FROM class_members WHERE class_id = ? AND user_id = ?");
             $stmt->bind_param("ii", $classId, $userId);
             $stmt->execute();
@@ -242,7 +221,6 @@ class ClassModel {
             }
             $stmt->close();
 
-            // Add member
             $stmt = $this->db->prepare("INSERT INTO class_members (class_id, user_id, role) VALUES (?, ?, ?)");
             $stmt->bind_param("iis", $classId, $userId, $role);
             $result = $stmt->execute();

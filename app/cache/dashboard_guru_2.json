@@ -5,7 +5,10 @@
         "classes": 0,
         "students": 0,
         "pending_grading": 0,
-        "messages": 0
+        "messages": 0,
+        "tasks_due_week": 0,
+        "overdue_tasks": 0,
+        "next_class": null
     },
     "performance": {
         "average": 0,
@@ -14,5 +17,14 @@
         "grades": [
             0
         ]
+    },
+    "scheduleByDay": {
+        "Senin": [],
+        "Selasa": [],
+        "Rabu": [],
+        "Kamis": [],
+        "Jumat": [],
+        "Sabtu": [],
+        "Minggu": []
     }
 }

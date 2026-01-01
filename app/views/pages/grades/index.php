@@ -1,5 +1,5 @@
 <div class="max-w-7xl mx-auto p-6">
-  <!-- Header Section -->
+  
   <div class="mb-6">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-4">
@@ -28,7 +28,7 @@
       <?php endif; ?>
     </div>
 
-    <!-- Filter Section -->
+    
     <div class="mt-4 bg-gray-800 border border-gray-700 rounded-lg p-4">
       <form method="get" action="index.php" class="flex flex-wrap gap-3">
         <input type="hidden" name="page" value="grades">
@@ -79,11 +79,11 @@
   </div>
 
   <?php
-    // Include the graded view which handles fetching and rendering the graded submissions table
+
     require_once __DIR__ . '/graded.php';
   ?>
 
-  <!-- Grading System Info -->
+  
   <div class="mt-6 bg-gray-800 border border-gray-700 rounded-lg p-5">
     <div class="flex items-start gap-4">
       <div class="flex-shrink-0 w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">

@@ -1,5 +1,5 @@
 <?php
-// ...existing code...
+
 
 class NewsModel {
     private $db;
@@ -30,7 +30,6 @@ class NewsModel {
 
         list($whereSql, $types, $values) = $this->buildFilters($q, $cat);
 
-        // Total count (no join needed)
         $countSql = "SELECT COUNT(*) AS c FROM news" . ($whereSql ? " WHERE $whereSql" : "");
         $total = 0;
         if ($stmt = $this->db->prepare($countSql)) {
@@ -56,7 +55,6 @@ class NewsModel {
         $offset = max(0, ((int)$page - 1) * max(1, (int)$perPage));
         $limit = max(1, (int)$perPage);
 
-        // Rows query - original behavior (no author image)
         $listSql = "SELECT n.id, n.title, n.content, n.category, n.thumbnail, n.author, n.created_at
                     FROM news n"
             . ($whereSql ? " WHERE $whereSql" : "")

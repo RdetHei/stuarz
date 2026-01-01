@@ -81,7 +81,7 @@
             <?php endif; ?>
           </label>
           
-          <!-- Preview Area -->
+          
           <div id="thumbnailPreviewContainer" class="mb-3 <?= ($isEdit && !empty($newsItem['thumbnail'])) ? '' : 'hidden' ?>">
             <div class="relative w-full h-64 bg-gray-900/50 border border-gray-700 rounded-lg overflow-hidden group">
               <img 
@@ -129,7 +129,7 @@
           <p class="text-xs text-gray-500 mt-2">Upload gambar thumbnail untuk berita (Format: JPG, PNG • Max: 5MB)</p>
         </div>
 
-        <!-- Konten -->
+        
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">
             Konten Berita <span class="text-red-400">*</span>
@@ -145,7 +145,7 @@
 
         <div class="border-t border-gray-700 pt-6"></div>
 
-        <!-- Action Buttons -->
+        
         <div class="flex flex-col sm:flex-row gap-3">
           <button 
             type="submit" 
@@ -182,26 +182,23 @@
     return;
   }
 
-  // Handle file input change
   thumbnailInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     
     if (file) {
-      // Validate file size (5MB)
+
       if (file.size > 5 * 1024 * 1024) {
         alert('Ukuran file terlalu besar! Maksimal 5MB');
         thumbnailInput.value = '';
         return;
       }
-      
-      // Validate file type
+
       if (!file.type.startsWith('image/')) {
         alert('File harus berupa gambar!');
         thumbnailInput.value = '';
         return;
       }
-      
-      // Show preview
+
       const reader = new FileReader();
       reader.onload = function(event) {
         thumbnailPreview.src = event.target.result;
@@ -211,7 +208,6 @@
     }
   });
 
-  // Handle remove button
   if (removeButton) {
     removeButton.addEventListener('click', function() {
       thumbnailInput.value = '';

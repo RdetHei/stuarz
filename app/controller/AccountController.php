@@ -17,45 +17,151 @@ class AccountController
         return isset($_SESSION['user']['level']) && $_SESSION['user']['level'] === 'admin';
     }
 
-    // allow admin or the owner of the id
     private function allowAdminOrOwner(int $id): bool
     {
         if ($this->isAdmin()) return true;
         return isset($_SESSION['user']['id']) && (int)$_SESSION['user']['id'] === $id;
     }
 
-    // helper to set flash message with optional level; keeps backward compatibility
     private function setFlash(string $message, string $level = 'info'): void
     {
-        // many places in the code expect $_SESSION['flash'] to be a string,
-        // so set that for compatibility and also store a level.
         $_SESSION['flash'] = $message;
         $_SESSION['flash_level'] = $level;
     }
 
     public function account()
     {
+        if (!$this->isAdmin()) {
+            $_SESSION['flash'] = 'Akses ditolak. Hanya admin yang dapat mengakses halaman ini.';
+            header('Location: index.php?page=dashboard');
+            exit;
+        }
+
+        $search = trim((string)($_GET['q'] ?? ''));
+        $filterLevel = trim((string)($_GET['filter'] ?? ''));
+        
         $users = $this->model->getAll();
+        
+        if ($filterLevel !== '') {
+            $users = array_filter($users, function($u) use ($filterLevel) {
+                return ($u['level'] ?? '') === $filterLevel;
+            });
+            $users = array_values($users);
+        }
+        
+        if ($search !== '') {
+            $users = array_filter($users, function($u) use ($search) {
+                $username = strtolower($u['username'] ?? '');
+                $email = strtolower($u['email'] ?? '');
+                $name = strtolower($u['name'] ?? '');
+                $searchLower = strtolower($search);
+                return strpos($username, $searchLower) !== false || 
+                       strpos($email, $searchLower) !== false || 
+                       strpos($name, $searchLower) !== false;
+            });
+            $users = array_values($users);
+        }
+        
+        $ajax = false;
+        if ((isset($_GET['ajax']) && $_GET['ajax'] == '1') || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')) {
+            $ajax = true;
+        }
+        
+        $title = "Daftar Akun - Stuarz";
+        $description = "Kelola akun pengguna";
         $content = dirname(__DIR__) . '/views/pages/users/account.php';
-        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        
+        if ($ajax) {
+            include $content;
+        } else {
+            include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        }
     }
 
-    // show users with level = 'user' (students page)
     public function students()
     {
-        // Use DB-level filter for efficiency
+        if (!$this->isAdmin()) {
+            $_SESSION['flash'] = 'Akses ditolak.';
+            header('Location: index.php?page=dashboard');
+            exit;
+        }
+
+        $search = trim((string)($_GET['q'] ?? ''));
+        
         $users = $this->model->getByLevel('user');
+        if (!is_array($users)) {
+            $users = [];
+        }
+        
+        if ($search !== '') {
+            $users = array_filter($users, function($u) use ($search) {
+                $username = strtolower($u['username'] ?? '');
+                $email = strtolower($u['email'] ?? '');
+                $name = strtolower($u['name'] ?? '');
+                $searchLower = strtolower($search);
+                return strpos($username, $searchLower) !== false || 
+                       strpos($email, $searchLower) !== false || 
+                       strpos($name, $searchLower) !== false;
+            });
+            $users = array_values($users);
+        }
+        
+        $ajax = false;
+        if ((isset($_GET['ajax']) && $_GET['ajax'] == '1') || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')) {
+            $ajax = true;
+        }
+        
+        $title = "Daftar Siswa - Stuarz";
+        $description = "Kelola data siswa";
         $content = dirname(__DIR__) . '/views/pages/users/students.php';
-        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        if ($ajax) {
+            include $content;
+        } else {
+            include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        }
     }
 
-    // show users with level = 'guru' (teachers page)
     public function teachers()
     {
-        // Use DB-level filter for efficiency
+        if (!$this->isAdmin()) {
+            $_SESSION['flash'] = 'Akses ditolak.';
+            header('Location: index.php?page=dashboard');
+            exit;
+        }
+
+        $search = trim((string)($_GET['q'] ?? ''));
+        
         $users = $this->model->getByLevel('guru');
+        if (!is_array($users)) {
+            $users = [];
+        }
+        
+        if ($search !== '') {
+            $users = array_filter($users, function($u) use ($search) {
+                $username = strtolower($u['username'] ?? '');
+                $email = strtolower($u['email'] ?? '');
+                $name = strtolower($u['name'] ?? '');
+                $searchLower = strtolower($search);
+                return strpos($username, $searchLower) !== false || 
+                       strpos($email, $searchLower) !== false || 
+                       strpos($name, $searchLower) !== false;
+            });
+            $users = array_values($users);
+        }
+        
+        $ajax = false;
+        if ((isset($_GET['ajax']) && $_GET['ajax'] == '1') || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')) {
+            $ajax = true;
+        }
+        
+        $title = "Daftar Guru - Stuarz";
+        $description = "Kelola data guru";
         $content = dirname(__DIR__) . '/views/pages/users/teachers.php';
-        include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        if ($ajax) {
+            include $content;
+        } else {
+            include dirname(__DIR__) . '/views/layouts/dLayout.php';
+        }
     }
 
     public function create()
@@ -65,6 +171,8 @@ class AccountController
             header('Location: index.php?page=account');
             exit;
         }
+        $title = "Buat Akun Baru - Stuarz";
+        $description = "Buat akun pengguna baru";
         $content = dirname(__DIR__) . '/views/pages/users/create_user.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -113,13 +221,11 @@ class AccountController
             }
         }
 
-        // NEW: banner upload (same validation, different folder & column)
         $bannerUrl = 'assets/default-banner.png';
         if (isset($_FILES['banner']) && $_FILES['banner']['error'] === UPLOAD_ERR_OK) {
             $uploadB = $_FILES['banner'];
             $allowed = ['image/jpeg','image/png','image/webp'];
             if (!in_array($uploadB['type'], $allowed, true) || $uploadB['size'] > 5 * 1024 * 1024) {
-                // allow larger size for banners (5MB)
                 $this->setFlash('Banner harus berupa jpg/png/webp dan <= 5MB.', 'warning');
                 header('Location: index.php?page=create_user');
                 exit;
@@ -150,7 +256,6 @@ class AccountController
         ];
 
         $ok = $this->model->createUser($data);
-        // notify if created successfully
         if ($ok) {
             global $config;
             require_once dirname(__DIR__) . '/helpers/notifier.php';
@@ -172,7 +277,6 @@ class AccountController
             exit;
         }
 
-        // debug: tulis id yang diminta
         @file_put_contents(__DIR__ . '/../../logs/account_edit_debug.log', date('c') . " REQUEST id={$id} by_session=" . (int)($_SESSION['user']['id'] ?? 0) . PHP_EOL, FILE_APPEND);
 
         if (!$this->allowAdminOrOwner($id)) {
@@ -181,10 +285,8 @@ class AccountController
             exit;
         }
 
-        // Ambil user berdasarkan id yang diminta
         $user = $this->model->getUserById($id);
 
-        // debug: tulis hasil query (id atau null)
         @file_put_contents(__DIR__ . '/../../logs/account_edit_debug.log', date('c') . " DB returned id=" . ($user['id'] ?? 'null') . " username=" . ($user['username'] ?? 'null') . PHP_EOL, FILE_APPEND);
 
         if (!$user) {
@@ -193,15 +295,12 @@ class AccountController
             exit;
         }
 
-        // Determine a safe return target so the form can redirect back to the origin
         $returnTo = 'account';
-        // prefer explicit ?from=... param
         if (!empty($_GET['from'])) {
             $candidate = trim($_GET['from']);
             $allowed = ['profile', 'account', 'students', 'teachers'];
             if (in_array($candidate, $allowed, true)) $returnTo = $candidate;
         } elseif (!empty($_SERVER['HTTP_REFERER'])) {
-            // parse referer for a page=... query param
             $ref = $_SERVER['HTTP_REFERER'];
             $parts = parse_url($ref);
             if (!empty($parts['query'])) {
@@ -211,14 +310,13 @@ class AccountController
                 }
             }
         } else {
-            // if editing own profile, return to profile by default
             if (isset($_SESSION['user']['id']) && (int)$_SESSION['user']['id'] === (int)$id) {
                 $returnTo = 'profile';
             }
         }
 
-        // expose $returnTo to the view
-        // pastikan $user yang di-include view berasal dari sini (tidak ditimpa di view)
+        $title = "Edit Akun - Stuarz";
+        $description = "Edit data pengguna";
         $content = dirname(__DIR__) . '/views/pages/users/edit_user.php';
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
@@ -238,12 +336,24 @@ class AccountController
             exit;
         }
 
+        $existing = $this->model->getUserById($id);
+        if (!$existing) {
+            $this->setFlash('Pengguna tidak ditemukan.', 'danger');
+            header('Location: index.php?page=account');
+            exit;
+        }
+
         $username = trim($_POST['username'] ?? '');
         $name     = trim($_POST['name'] ?? '');
         $email    = trim($_POST['email'] ?? '');
-        $level    = $_POST['level'] ?? 'user';
-    $password = $_POST['password'] ?? '';
-    $role     = trim($_POST['role'] ?? '');
+
+        $level = $existing['level'] ?? 'user';
+        if ($this->isAdmin() && isset($_POST['level'])) {
+            $level = $_POST['level'] ?? 'user';
+        }
+        
+        $password = $_POST['password'] ?? '';
+        $role     = trim($_POST['role'] ?? '');
 
         $phone    = trim($_POST['phone'] ?? '');
         $address  = trim($_POST['address'] ?? '');
@@ -252,13 +362,6 @@ class AccountController
         if ($username === '' || $email === '') {
             $this->setFlash('Data tidak lengkap.', 'warning');
             header("Location: index.php?page=edit_user&id={$id}");
-            exit;
-        }
-
-        $existing = $this->model->getUserById($id);
-        if (!$existing) {
-            $this->setFlash('Pengguna tidak ditemukan.', 'danger');
-            header('Location: index.php?page=account');
             exit;
         }
 
@@ -278,7 +381,6 @@ class AccountController
             $dest = $uploadDir . $fname;
             if (move_uploaded_file($upload['tmp_name'], $dest)) {
                 $newUrl = 'uploads/avatars/' . $fname;
-                // remove old file when in uploads
                 if (!empty($avatarUrl) && (strpos($avatarUrl, 'uploads/avatars/') === 0 || strpos($avatarUrl, '/uploads/avatars/') === 0)) {
                     $oldRel = ltrim($avatarUrl, '/');
                     $oldFile = dirname(__DIR__, 2) . '/public/' . $oldRel;
@@ -292,7 +394,6 @@ class AccountController
             }
         }
 
-        // NEW: banner update handling
         $bannerUrl = $existing['banner'] ?? 'assets/default-banner.png';
         if (isset($_FILES['banner']) && $_FILES['banner']['error'] === UPLOAD_ERR_OK) {
             $uploadB = $_FILES['banner'];
@@ -309,7 +410,6 @@ class AccountController
             $destB = $uploadDirB . $fnameB;
             if (move_uploaded_file($uploadB['tmp_name'], $destB)) {
                 $newBannerRel = 'uploads/banners/' . $fnameB;
-                // remove old banner file when stored in uploads
                 if (!empty($bannerUrl) && (strpos($bannerUrl, 'uploads/banners/') === 0 || strpos($bannerUrl, '/uploads/banners/') === 0)) {
                     $oldRelB = ltrim($bannerUrl, '/');
                     $oldFileB = dirname(__DIR__, 2) . '/public/' . $oldRelB;
@@ -344,12 +444,10 @@ class AccountController
             exit;
         }
 
-        // if editing own account, refresh session user
         if (isset($_SESSION['user']['id']) && (int)$_SESSION['user']['id'] === $id) {
             $_SESSION['user'] = $this->model->getUserById($id);
         }
 
-        // notify about update (if admin performed update or others)
         global $config;
         require_once dirname(__DIR__) . '/helpers/notifier.php';
         $uid = $_SESSION['user']['id'] ?? 0;
@@ -357,7 +455,6 @@ class AccountController
 
         $this->setFlash('Akun diperbarui.', 'success');
 
-        // Respect a safe return target when present (prevent open redirect)
         $allowed = ['profile', 'account', 'students', 'teachers'];
         $returnTo = $_POST['return_to'] ?? '';
         if (in_array($returnTo, $allowed, true)) {
@@ -365,74 +462,160 @@ class AccountController
             exit;
         }
 
-        // If editing own account, default to profile
         if (isset($_SESSION['user']['id']) && (int)$_SESSION['user']['id'] === $id) {
             header('Location: index.php?page=profile');
             exit;
         }
 
-        // Fallback to account list
         header('Location: index.php?page=account');
         exit;
     }
 
     public function delete()
     {
-        // only admin can delete arbitrary users
+        header('Content-Type: application/json');
+        
         if (!$this->isAdmin()) {
-            $_SESSION['flash'] = 'Akses ditolak.';
-            header('Location: index.php?page=account');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Akses ditolak.'
+            ]);
             exit;
         }
 
-        // accept id from GET for confirmation step, POST for actual delete
-        $id = intval($_POST['id'] ?? $_GET['id'] ?? 0);
+        $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {
-            $_SESSION['flash'] = 'ID tidak valid.';
-            header('Location: index.php?page=account');
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID tidak valid.'
+            ]);
             exit;
         }
 
-        // If request is GET or confirmation not present, show confirmation card
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        if ($method === 'GET' || !isset($_POST['confirm'])) {
-            // load user to show info
-            $userToDelete = $this->model->getUserById($id);
-            if (!$userToDelete) {
-                $_SESSION['flash'] = 'Pengguna tidak ditemukan.';
-                header('Location: index.php?page=account');
-                exit;
+        $userToDelete = $this->model->getUserById($id);
+        if (!$userToDelete) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Pengguna tidak ditemukan.'
+            ]);
+            exit;
+        }
+
+        $ok = $this->model->deleteUser($id);
+
+        global $config;
+        require_once dirname(__DIR__) . '/helpers/notifier.php';
+        $uid = $_SESSION['user']['id'] ?? 0;
+        if ($ok) {
+            $username = $userToDelete['username'] ?? '';
+            notify_event($config, 'delete', 'user', $id, $uid, "Akun dihapus: {$username}", null);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Akun berhasil dihapus.'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menghapus akun.'
+            ]);
+        }
+        exit;
+    }
+
+    public function getUserProfile()
+    {
+        header('Content-Type: application/json');
+        
+        $userId = intval($_GET['id'] ?? $_POST['id'] ?? 0);
+        
+        if ($userId <= 0) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID tidak valid.'
+            ]);
+            exit;
+        }
+
+        $user = $this->model->getUserById($userId);
+        
+        if (!$user) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'User tidak ditemukan.'
+            ]);
+            exit;
+        }
+
+        $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+        if ($baseUrl === '/') $baseUrl = '';
+        $avatar = $user['avatar'] ?? '';
+        $avatarTrim = ltrim((string)$avatar, '/');
+        $isRemote = filter_var($avatarTrim, FILTER_VALIDATE_URL) !== false || preg_match('#^https?://#i', $avatarTrim);
+        $projectRoot = dirname(__DIR__, 2);
+        $fsCandidate = $projectRoot . '/public/' . $avatarTrim;
+        $imgValid = $isRemote || ($avatarTrim !== '' && is_file($fsCandidate));
+        
+        $avatarUrl = '';
+        if ($isRemote) {
+            $avatarUrl = $avatarTrim;
+        } elseif ($avatarTrim !== '' && $imgValid) {
+            $avatarUrl = ($baseUrl !== '' ? $baseUrl . '/' : '/') . $avatarTrim;
+        } else {
+            $avatarUrl = ($baseUrl !== '' ? $baseUrl . '/' : '/') . 'assets/default-avatar.png';
+        }
+
+        $banner = $user['banner'] ?? '';
+        $bannerTrim = ltrim((string)$banner, '/');
+        $bannerIsRemote = filter_var($bannerTrim, FILTER_VALIDATE_URL) !== false || preg_match('#^https?://#i', $bannerTrim);
+        $bannerFsCandidate = $projectRoot . '/public/' . $bannerTrim;
+        $bannerValid = $bannerIsRemote || ($bannerTrim !== '' && is_file($bannerFsCandidate));
+        
+        $bannerUrl = '';
+        if ($bannerIsRemote) {
+            $bannerUrl = $bannerTrim;
+        } elseif ($bannerTrim !== '' && $bannerValid) {
+            $bannerUrl = ($baseUrl !== '' ? $baseUrl . '/' : '/') . $bannerTrim;
+        }
+
+        $name = $user['name'] ?? $user['username'] ?? 'User';
+        $initials = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $name), 0, 2));
+        if (strlen($initials) < 2) {
+            $initials = strtoupper(substr($user['username'] ?? 'U', 0, 2));
+        }
+
+        $joinDate = $user['join_date'] ?? '';
+        $formattedJoinDate = '';
+        if ($joinDate) {
+            try {
+                $date = new DateTime($joinDate);
+                $formattedJoinDate = $date->format('F Y');
+            } catch (Exception $e) {
+                $formattedJoinDate = $joinDate;
             }
-            // Render confirmation card view
-            $content = dirname(__DIR__) . '/views/pages/users/confirm_delete.php';
-            include dirname(__DIR__) . '/views/layouts/dLayout.php';
-            exit;
         }
 
-        // Otherwise: POST with confirmation -> perform delete
-        // ensure confirm value is affirmative
-        if (isset($_POST['confirm']) && (string)$_POST['confirm'] === '1') {
-            // fetch user for message
-            $userToDelete = $this->model->getUserById($id);
-            $ok = $this->model->deleteUser($id);
-
-            // notify and set flash
-            global $config;
-            require_once dirname(__DIR__) . '/helpers/notifier.php';
-            $uid = $_SESSION['user']['id'] ?? 0;
-            if ($ok) {
-                $username = $userToDelete['username'] ?? '';
-                notify_event($config, 'delete', 'user', $id, $uid, "Akun dihapus: {$username}", null);
-            }
-
-            $_SESSION['flash'] = $ok ? 'Akun dihapus.' : 'Gagal menghapus akun.';
-            header('Location: index.php?page=account');
-            exit;
-        }
-
-        // fallback
-        $_SESSION['flash'] = 'Aksi dibatalkan.';
-        header('Location: index.php?page=account');
+        echo json_encode([
+            'success' => true,
+            'user' => [
+                'id' => $user['id'],
+                'name' => $user['name'] ?? '',
+                'username' => $user['username'] ?? '',
+                'email' => $user['email'] ?? '',
+                'level' => $user['level'] ?? 'user',
+                'role' => $user['role'] ?? '',
+                'bio' => $user['bio'] ?? '',
+                'phone' => $user['phone'] ?? '',
+                'address' => $user['address'] ?? '',
+                'class' => $user['class'] ?? '',
+                'avatar' => $avatarUrl,
+                'hasAvatar' => $imgValid,
+                'banner' => $bannerUrl,
+                'hasBanner' => $bannerValid,
+                'initials' => $initials,
+                'joinDate' => $formattedJoinDate,
+                'joinDateRaw' => $joinDate
+            ]
+        ]);
         exit;
     }
 }

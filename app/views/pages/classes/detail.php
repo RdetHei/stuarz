@@ -1,13 +1,12 @@
 <?php
-// Class detail page
-// Expected: $class (array), $members (array), $schedules (array), $sessionUser
+
+
 $sessionUser = $_SESSION['user'] ?? [];
 $class = $class ?? [];
 $members = $members ?? [];
 $schedules = $schedules ?? [];
 $role = $role ?? ($class['member_role'] ?? ($sessionUser['level'] ?? 'student'));
 
-// Role colors
 $roleColors = [
   'admin' => ['bg' => 'bg-red-500/10', 'border' => 'border-red-500/20', 'text' => 'text-red-400'],
   'teacher' => ['bg' => 'bg-purple-500/10', 'border' => 'border-purple-500/20', 'text' => 'text-purple-400'],
@@ -20,7 +19,7 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
 <div class="min-h-screen bg-gray-900 p-6">
   <div class="max-w-7xl mx-auto">
     
-    <!-- Header -->
+    
     <header class="mb-8">
       <div class="bg-gradient-to-br from-gray-800 to-gray-850 border border-gray-700 rounded-2xl p-8 shadow-xl">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -65,12 +64,42 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
           </div>
 
           <div class="flex gap-3">
+            <?php 
+
+              $canDelete = false;
+              $userLevel = $sessionUser['level'] ?? '';
+              $userId = intval($sessionUser['id'] ?? 0);
+              $classCreatorId = intval($class['created_by'] ?? 0);
+
+              if ($userLevel === 'admin') {
+                $canDelete = true;
+              }
+
+              if (!$canDelete && $classCreatorId === $userId) {
+                $canDelete = true;
+              }
+            ?>
+            
             <?php if ($role === 'admin' || $role === 'teacher' || $role === 'guru'): ?>
             <button id="addStudentBtn" class="px-5 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
               </svg>
               Tambah Siswa
+            </button>
+            <?php endif; ?>
+            
+            <?php if ($canDelete): ?>
+            <button type="button" 
+                    class="delete-btn px-5 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors flex items-center gap-2 shadow-lg shadow-red-500/20"
+                    data-id="<?= intval($class['id'] ?? 0) ?>"
+                    data-url="index.php?page=class_delete"
+                    data-item-name="<?= htmlspecialchars($class['name'] ?? 'Kelas', ENT_QUOTES, 'UTF-8') ?>"
+                    data-row-selector="body">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+              Hapus Kelas
             </button>
             <?php endif; ?>
             
@@ -86,7 +115,7 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
       </div>
     </header>
 
-    <!-- Add Student Modal -->
+    
     <div id="addStudentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div class="max-w-md w-full bg-gray-800 rounded-lg p-6 border border-gray-700">
         <h3 class="text-lg font-bold text-white mb-3">Tambah Siswa ke Kelas</h3>
@@ -111,7 +140,7 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
       </div>
     </div>
 
-    <!-- Tabs Navigation -->
+    
     <div class="mb-6 bg-gray-800 border border-gray-700 rounded-xl p-2 shadow-lg">
       <div class="flex flex-wrap gap-2">
         <button class="tab-btn px-4 py-2.5 rounded-lg text-sm font-medium transition-all bg-gray-700 text-white" data-tab="overview">
@@ -150,17 +179,17 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
       </div>
     </div>
 
-    <!-- Tab Contents -->
+    
     <div id="tab-contents">
       
-      <!-- Overview Tab -->
+      
       <div data-tab-content="overview">
         <div class="grid gap-6 lg:grid-cols-3">
           
-          <!-- Main Content -->
+          
           <div class="lg:col-span-2 space-y-6">
             
-            <!-- Attendance Quick Actions -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
               <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div class="flex items-center gap-3">
@@ -194,7 +223,7 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
               <div id="classAttendanceMessage" class="mt-4"></div>
             </div>
             
-            <!-- Description Card -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
               <div class="flex items-center gap-3 mb-4">
                 <div class="p-2 rounded-lg bg-blue-500/10">
@@ -207,7 +236,7 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
               <p class="text-sm text-gray-300 leading-relaxed"><?= nl2br(htmlspecialchars($class['description'] ?? 'Tidak ada deskripsi untuk kelas ini.', ENT_QUOTES, 'UTF-8')) ?></p>
             </div>
 
-            <!-- Recent Activity Card -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
@@ -235,12 +264,12 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
 
           </div>
 
-          <!-- Sidebar -->
+          
           <aside class="space-y-6">
             
             
 
-            <!-- Stats Card -->
+            
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
               <div class="flex items-center gap-3 mb-4">
                 <div class="p-2 rounded-lg bg-amber-500/10">
@@ -271,14 +300,14 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
         </div>
       </div>
 
-      <!-- Members Tab -->
+      
       <div data-tab-content="anggota" class="hidden">
         <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
           <?php $members = $members; $class_id = $class['id'] ?? 0; include __DIR__ . '/../../components/class/MemberList.php'; ?>
         </div>
       </div>
 
-      <!-- Schedule Tab -->
+      
       <div data-tab-content="jadwal" class="hidden">
         <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
           <?php $schedules = $schedules; include __DIR__ . '/../../components/class/ScheduleTable.php'; ?>
@@ -295,7 +324,7 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
         </div>
       </div>
 
-      <!-- Tasks Tab -->
+      
       <div data-tab-content="tugas" class="hidden">
         <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
           <?php 
@@ -420,7 +449,7 @@ $colors = $roleColors[$role] ?? $roleColors['student'];
 </div>
 
 <script>
-// Tab switching logic with active state
+
 document.addEventListener('DOMContentLoaded', function(){
   var tabBtns = document.querySelectorAll('.tab-btn');
   var contents = document.querySelectorAll('[data-tab-content]');
@@ -428,16 +457,14 @@ document.addEventListener('DOMContentLoaded', function(){
   tabBtns.forEach(function(btn){
     btn.addEventListener('click', function(){
       var tabId = btn.getAttribute('data-tab');
-      
-      // Update button states
+
       tabBtns.forEach(function(b){
         b.classList.remove('bg-gray-700', 'text-white');
         b.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-700/50');
       });
       btn.classList.add('bg-gray-700', 'text-white');
       btn.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-700/50');
-      
-      // Update content visibility
+
       contents.forEach(function(content){
         if (content.getAttribute('data-tab-content') === tabId) {
           content.classList.remove('hidden');
@@ -502,7 +529,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if (cancel && modal) {
     cancel.addEventListener('click', function(){ modal.classList.add('hidden'); });
   }
-  // Close modal when clicking outside the dialog
+
   if (modal) {
     modal.addEventListener('click', function(e){ if (e.target === modal) modal.classList.add('hidden'); });
   }

@@ -5,12 +5,10 @@ $canAdmin = isset($me['level']) && $me['level'] === 'admin';
 $currentScope = $_GET['scope'] ?? ($canAdmin ? 'all' : 'my');
 $isAllScope = $canAdmin && $currentScope === 'all';
 
-// Handle success/error messages
 $successMsg = $_SESSION['success'] ?? '';
 $errorMsg = $_SESSION['error'] ?? '';
 unset($_SESSION['success'], $_SESSION['error']);
 
-// Base URL
 if (!isset($baseUrl)) {
   $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
   if ($baseUrl === '/') $baseUrl = '';
@@ -19,7 +17,7 @@ if (!isset($baseUrl)) {
 
 <div class="p-6 space-y-6 bg-gray-900 min-h-screen text-gray-100">
 
-  <!-- Header -->
+  
   <div class="border border-gray-700 bg-gray-800 p-6 rounded-lg shadow-xl">
     <div class="flex items-center justify-between">
       <div>
@@ -51,7 +49,7 @@ if (!isset($baseUrl)) {
     </div>
   </div>
 
-  <!-- Alert -->
+  
   <?php if ($successMsg): ?>
     <div class="bg-gray-800 border border-green-500 text-green-400 px-4 py-3 rounded-lg flex items-center gap-3">
       <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -70,7 +68,7 @@ if (!isset($baseUrl)) {
     </div>
   <?php endif; ?>
 
-  <!-- Statistik -->
+  
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
       <div class="flex items-center justify-between">
@@ -110,7 +108,7 @@ if (!isset($baseUrl)) {
     </div>
   </div>
 
-  <!-- Grid Sertifikat -->
+  
   <?php if (count($certificates) > 0): ?>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <?php foreach ($certificates as $cert): ?>
@@ -119,16 +117,15 @@ if (!isset($baseUrl)) {
              data-cert-title="<?= htmlspecialchars($cert['title'], ENT_QUOTES, 'UTF-8') ?>" 
              data-cert-by="<?= htmlspecialchars($cert['issued_by'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
              data-cert-at="<?= $cert['issued_at'] ? date('d M Y', strtotime($cert['issued_at'])) : '' ?>">
-          <!-- Preview -->
+          
           <div class="relative h-52 bg-gray-900 flex items-center justify-center overflow-hidden cursor-pointer" 
                onclick="viewCertificate(<?= $cert['id'] ?>)" 
                aria-label="Lihat sertifikat">
             <?php
-            // Debug: tampilkan informasi path
+
             error_log("Certificate Debug - file_path from DB: " . $cert['file_path']);
-            
-            // Normalize path untuk sistem file Windows
-            // gunakan dirname(..., 4) agar naik sampai project root (sebelum folder "app")
+
+
             $publicPath = str_replace('/', DIRECTORY_SEPARATOR, dirname(__DIR__, 4) . '/public');
             $webSrc = ($baseUrl ? $baseUrl . '/' : '') . ltrim((string)$cert['file_path'], '/');
             $fsPath = $publicPath . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, ltrim((string)$cert['file_path'], '/'));
@@ -163,7 +160,7 @@ if (!isset($baseUrl)) {
               </div>
             <?php endif; ?>
 
-            <!-- Overlay -->
+            
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
               <div class="absolute right-3 bottom-3">
                 <button onclick="viewCertificate(<?= $cert['id'] ?>)" 
@@ -175,7 +172,7 @@ if (!isset($baseUrl)) {
             </div>
           </div>
 
-          <!-- Info -->
+          
           <div class="p-5">
             <div class="flex items-start justify-between mb-3">
               <h3 class="text-base font-semibold text-gray-100 line-clamp-2 group-hover:text-blue-400 transition-colors flex-1">
@@ -223,7 +220,7 @@ if (!isset($baseUrl)) {
       <?php endforeach; ?>
     </div>
   <?php else: ?>
-    <!-- Empty -->
+    
     <div class="text-center py-20 bg-gray-800 rounded-lg border border-gray-700">
       <div class="w-32 h-32 mx-auto mb-6 bg-gray-900 rounded-full flex items-center justify-center border border-gray-700">
         <span class="material-symbols-outlined text-6xl text-gray-600">workspace_premium</span>
@@ -238,7 +235,7 @@ if (!isset($baseUrl)) {
   <?php endif; ?>
 </div>
 
-<!-- Modal Upload -->
+
 <div id="uploadModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
   <div class="bg-[#161b22] border border-[#30363d] rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
     <div class="p-6 border-b border-[#30363d] flex items-center justify-between">
@@ -272,7 +269,7 @@ if (!isset($baseUrl)) {
   </div>
 </div>
 
-<!-- Modal View -->
+
 <div id="viewModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
   <div class="bg-[#161b22] border border-[#30363d] rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
     <div class="p-6 border-b border-[#30363d] flex items-center justify-between">

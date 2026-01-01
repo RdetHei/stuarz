@@ -6,3 +6,4 @@
 Thumbs.db
 .env
 ai-helper/config.local.php
+node_modules

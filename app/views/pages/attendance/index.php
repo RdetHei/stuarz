@@ -1,11 +1,10 @@
 <?php
-// Use records/classes passed from controller
+
 $records = $records ?? [];
 $classes = $classes ?? [];
 $activeClass = $activeClass ?? null;
 $activeClassId = intval($activeClass['id'] ?? 0);
 
-// Stats should be provided by controller (from DB). Provide safe fallback here.
 $stats = $stats ?? [
     'Hadir' => 0,
     'Absen' => 0,
@@ -14,7 +13,6 @@ $stats = $stats ?? [
     'Sakit' => 0
 ];
 
-// Convert to display format
 $displayStats = [
     ['title' => 'Hari Hadir', 'value' => (int)($stats['Hadir'] ?? 0), 'color' => 'success', 'icon' => 'check'],
     ['title' => 'Hari Absen',  'value' => (int)($stats['Absen'] ?? 0),  'color' => 'danger',  'icon' => 'x'],
@@ -45,7 +43,7 @@ $displayStats = [
 </style>
 
 <div class="max-w-7xl mx-auto p-6">
-    <!-- Header -->
+    
     <div class="mb-8">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
@@ -67,7 +65,7 @@ $displayStats = [
         </div>
     </div>
 
-    <!-- Clock Card -->
+    
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-8 mb-6">
         <div class="text-center">
             <div class="mb-6">
@@ -118,7 +116,7 @@ $displayStats = [
         </div>
     </div>
 
-    <!-- Stats Cards -->
+    
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <?php foreach ($displayStats as $s): ?>
         <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-all">
@@ -151,7 +149,7 @@ $displayStats = [
         <?php endforeach; ?>
     </div>
 
-    <!-- Filter Section -->
+    
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-6">
         <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,7 +180,7 @@ $displayStats = [
         </form>
     </div>
 
-    <!-- Records Table -->
+    
     <?php if (!empty($records)): ?>
     <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
         <div class="p-6 border-b border-gray-700">
@@ -257,7 +255,7 @@ $displayStats = [
 <div id="attToast" class="toast">Saved</div>
 
 <script>
-// Real-time clock
+
 function updateClock() {
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -268,7 +266,6 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Toast function
 function showToast(message, isSuccess = true) {
     const toast = document.getElementById('attToast');
     toast.textContent = message;
@@ -276,7 +273,6 @@ function showToast(message, isSuccess = true) {
     setTimeout(() => toast.classList.remove('show'), 2000);
 }
 
-// Handle check in/out
 const ACTIVE_CLASS_ID = <?= json_encode($activeClassId) ?>;
 
 async function handleAttendance(type) {

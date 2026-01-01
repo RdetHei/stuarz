@@ -59,17 +59,15 @@ class TaskController {
             $dueSoonTasks = $this->collectDueSoonTasks($tasks);
         }
 
-        // detect AJAX fragment requests (used by header live-search / page fragments)
         $ajax = false;
         if ((isset($_GET['ajax']) && $_GET['ajax'] == '1') || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')) {
             $ajax = true;
         }
 
-        // If the tasks table doesn't store schedule_id/subject_id, try to enrich tasks
-        // with a best-effort schedule lookup. Use a batched approach to avoid one DB
-        // query per task: 1) collect (class,teacher) pairs and class ids, 2) query
-        // schedules for those pairs, 3) fallback to class-only schedules for classes
-        // without a teacher-specific schedule.
+
+
+
+
         if (!empty($tasks)) {
             $pairs = [];
             $classIds = [];
@@ -86,7 +84,6 @@ class TaskController {
             $mapByPair = []; // map: "class_teacher" => schedule row
             $mapByClass = []; // map: class_id => schedule row (fallback)
 
-            // Query schedules matching specific (class, teacher) pairs
             if (!empty($pairs)) {
                 $conds = [];
                 foreach ($pairs as $p) {
@@ -104,10 +101,9 @@ class TaskController {
                 }
             }
 
-            // For classes that still lack a schedule match, query one schedule per class (fallback)
             $missingClassIds = [];
             foreach ($classIds as $cid) {
-                // check if any pair for this class has a schedule
+
                 $found = false;
                 foreach ($pairs as $p) {
                     if ($p['class'] == $cid) {
@@ -130,7 +126,6 @@ class TaskController {
                 }
             }
 
-            // Merge schedules into tasks
             foreach ($tasks as &$tk) {
                 if (!empty($tk['schedule_subject'])) continue;
                 $classId = intval($tk['class_id'] ?? 0);
@@ -154,7 +149,7 @@ class TaskController {
         }
         $content = dirname(__DIR__) . '/views/pages/tasks/index.php';
         if ($ajax) {
-            // include the page fragment directly (view checks for $ajax if needed)
+
             include $content;
             return;
         }
@@ -170,9 +165,8 @@ class TaskController {
         $userId = $_SESSION['user_id'] ?? null;
         if (!$userId) { header('Location: index.php?page=login'); exit; }
 
-        // Fetch tasks relevant to this student
         $tasks = $this->model->getByStudentClass($userId);
-        // Enrich tasks with subject name if available
+
         foreach ($tasks as &$t) {
             if (empty($t['subject_name']) && !empty($t['subject_id'])) {
                 $res = mysqli_query($this->db, "SELECT name FROM subjects WHERE id = " . intval($t['subject_id']) . " LIMIT 1");
@@ -197,13 +191,11 @@ class TaskController {
         $task = $this->model->getById($taskId);
         if (!$task) { $_SESSION['error'] = 'Task not found'; header('Location: index.php?page=student/tasks'); exit; }
 
-        // Ensure task belongs to student's class (simple check)
         $studentTasks = $this->model->getByStudentClass($userId);
         $allowed = false;
         foreach ($studentTasks as $st) if (intval($st['id']) === $taskId) { $allowed = true; break; }
         if (!$allowed) { $_SESSION['error'] = 'Anda tidak dapat melihat tugas ini.'; header('Location: index.php?page=student/tasks'); exit; }
 
-        // Get latest submission by this user for this task
         $submission = $this->submissionModel->getLatestByTaskIds([$taskId], $userId)[$taskId] ?? null;
 
         $content = dirname(__DIR__) . '/views/pages/student/task_detail.php';
@@ -222,15 +214,14 @@ class TaskController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
     public function create() {
-        // Check if user can create tasks (admin or guru only)
+
         $userLevel = $_SESSION['level'] ?? 'user';
         if ($userLevel === 'user') {
             $_SESSION['error'] = 'Anda tidak memiliki akses untuk membuat task.';
             header('Location: index.php?page=tasks');
             exit;
         }
-        
-        // Load classes and subjects for the form
+
         global $config;
         require_once dirname(__DIR__) . '/model/ClassModel.php';
         require_once dirname(__DIR__) . '/model/SubjectsModel.php';
@@ -239,17 +230,15 @@ class TaskController {
         $classes = $classModel->getAll();
         $subjects = $subjectModel->getAll();
 
-        // fetch teachers for assignment (users from users table with role guru or admin)
         $teachers = [];
         $res = mysqli_query($config, "SELECT id, name, username, `level` FROM users WHERE `level` IN ('guru','admin') ORDER BY name ASC");
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $teachers[] = $r;
         }
 
-        // fetch schedules so tasks can be linked to a schedule entry
         require_once dirname(__DIR__) . '/model/ScheduleModel.php';
         $scheduleModel = new ScheduleModel($config);
-        // if current user is guru, limit schedules to their own
+
         $schedules = [];
         if (isset($_SESSION['level']) && $_SESSION['level'] === 'guru') {
             $schedules = $scheduleModel->getAll(['teacher_id' => intval($_SESSION['user_id'] ?? 0)]);
@@ -261,17 +250,16 @@ class TaskController {
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
     public function store() {
-        // Check if user can create tasks (admin or guru only)
+
         $userLevel = $_SESSION['level'] ?? 'user';
         if ($userLevel === 'user') {
             $_SESSION['error'] = 'Anda tidak memiliki akses untuk membuat task.';
             header('Location: index.php?page=tasks');
             exit;
         }
-        
-        // Create a new task (assignment). File uploads belong to submissions.
+
         try {
-            // Determine teacher (task owner). Admins may set teacher_id in the form.
+
             $currentUserId = $_SESSION['user_id'] ?? 0;
             $currentLevel = $_SESSION['level'] ?? 'user';
             $teacherId = $currentUserId;
@@ -297,7 +285,6 @@ class TaskController {
                 'grading_rubric' => $this->prepareRubricForStorage($_POST['grading_rubric'] ?? '')
             ];
 
-            // Enhanced validation
             $errors = [];
             
             if ($data['title'] === '') {
@@ -331,8 +318,11 @@ class TaskController {
             }
 
             if (!empty($errors)) {
-                $_SESSION['error'] = implode(' ', $errors);
-                header('Location: index.php?page=tasks/create'); 
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'message' => implode(' ', $errors)
+                ]);
                 exit;
             }
 
@@ -342,15 +332,25 @@ class TaskController {
                 if ($taskId) {
                     $this->notifyClassMembers($taskId, $data);
                 }
-                $_SESSION['success'] = "Task berhasil dibuat!";
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Tugas berhasil disimpan.'
+                ]);
             } else {
-                $_SESSION['error'] = "Gagal membuat task. Silakan coba lagi.";
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Gagal menyimpan tugas.'
+                ]);
             }
         } catch (\Exception $e) {
-            $_SESSION['error'] = "Terjadi kesalahan: " . $e->getMessage();
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
         }
-
-        header('Location: index.php?page=tasks');
         exit;
     }
     /**
@@ -358,73 +358,104 @@ class TaskController {
      */
     public function storeSubmission() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        header('Content-Type: application/json');
+        
         $task_id = intval($_POST['task_id'] ?? 0);
         $user_id = intval($_SESSION['user_id'] ?? 0);
         $class_id = intval($_POST['class_id'] ?? 0);
 
         if (!$task_id || !$user_id) {
-            $_SESSION['error'] = 'Invalid submission.';
-            header('Location: index.php?page=tasks'); exit;
+            echo json_encode(['success' => false, 'message' => 'Invalid submission.']);
+            exit;
         }
 
         $task = $this->model->getById($task_id);
         if (!$task) {
-            $_SESSION['error'] = 'Task not found.';
-            header('Location: index.php?page=tasks'); exit;
+            echo json_encode(['success' => false, 'message' => 'Task not found.']);
+            exit;
         }
 
         if (!$this->canSubmitToTask($task)) {
-            $_SESSION['error'] = 'Pengumpulan belum dibuka atau sudah ditutup.';
-            header('Location: index.php?page=tasks'); exit;
+            echo json_encode(['success' => false, 'message' => 'Pengumpulan belum dibuka atau sudah ditutup.']);
+            exit;
         }
 
         $maxAttempts = intval($task['max_attempts'] ?? 1);
         $currentAttempt = $this->submissionModel->countAttempts($task_id, $user_id);
         if ($currentAttempt >= $maxAttempts) {
-            $_SESSION['error'] = 'Anda sudah mencapai batas pengumpulan.';
-            header('Location: index.php?page=tasks'); exit;
+            echo json_encode(['success' => false, 'message' => 'Anda sudah mencapai batas pengumpulan.']);
+            exit;
         }
 
         if (!$this->isWithinDeadline($task) && empty($task['allow_late'])) {
-            $_SESSION['error'] = 'Deadline sudah lewat.';
-            header('Location: index.php?page=tasks'); exit;
+            echo json_encode(['success' => false, 'message' => 'Deadline sudah lewat.']);
+            exit;
         }
 
-        // Handle file upload
-        if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
-            $_SESSION['error'] = 'No file uploaded or upload error.';
-            header('Location: index.php?page=tasks'); exit;
-        }
+        $filePath = null;
+        $fileInputName = null;
 
-        // Server-side file validation
-        $allowedExt = ['pdf','doc','docx','txt','jpg','jpeg','png'];
-        $maxSize = 5 * 1024 * 1024; // 5MB
-        $originalName = $_FILES['file']['name'];
-        $size = $_FILES['file']['size'];
-        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-        if (!in_array($ext, $allowedExt, true)) {
-            $_SESSION['error'] = 'Tipe file tidak didukung.';
-            header('Location: index.php?page=tasks'); exit;
+        if (isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] === UPLOAD_ERR_OK) {
+            $fileInputName = 'submission_file';
+        } elseif (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+            $fileInputName = 'file';
         }
-        if ($size > $maxSize) {
-            $_SESSION['error'] = 'Ukuran file melebihi batas 5MB.';
-            header('Location: index.php?page=tasks'); exit;
-        }
+        
+        if ($fileInputName) {
 
-        // Use absolute filesystem path for storing files and store a public web path in DB
-        $uploadDirFs = dirname(__DIR__, 2) . '/public/uploads/task_submissions/';
-        $uploadDirWeb = 'public/uploads/task_submissions/';
-        if (!file_exists($uploadDirFs)) mkdir($uploadDirFs, 0777, true);
-        // generate safe filename
-        $safeBase = preg_replace('/[^A-Za-z0-9_\-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
-        $fileName = time() . '_' . $safeBase . '.' . $ext;
-        $targetFsPath = $uploadDirFs . $fileName;
-        $filePath = $uploadDirWeb . $fileName; // store web-accessible path in DB
+            $allowedExt = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'];
+            $allowedMimeTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'text/plain',
+                'image/png',
+                'image/jpeg',
+                'image/jpg'
+            ];
+            $maxSize = 5 * 1024 * 1024; // 5MB
+            $originalName = $_FILES[$fileInputName]['name'];
+            $size = $_FILES[$fileInputName]['size'];
+            $mimeType = $_FILES[$fileInputName]['type'];
+            $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+            
+            if (!in_array($ext, $allowedExt, true)) {
+                echo json_encode(['success' => false, 'message' => 'Tipe file tidak didukung.']);
+                exit;
+            }
+            
+            if ($size > $maxSize) {
+                echo json_encode(['success' => false, 'message' => 'Ukuran file melebihi batas 5MB.']);
+                exit;
+            }
 
-        if (!move_uploaded_file($_FILES['file']['tmp_name'], $targetFsPath)) {
-            error_log('move_uploaded_file failed, tmp_name: ' . ($_FILES['file']['tmp_name'] ?? ''));
-            $_SESSION['error'] = 'Failed to move uploaded file.';
-            header('Location: index.php?page=tasks'); exit;
+            if (!in_array($mimeType, $allowedMimeTypes, true)) {
+                echo json_encode(['success' => false, 'message' => 'Tipe file tidak valid.']);
+                exit;
+            }
+
+            $uploadDirFs = dirname(__DIR__, 2) . '/public/uploads/submissions/';
+            $uploadDirWeb = 'uploads/submissions/';
+            if (!file_exists($uploadDirFs)) {
+                mkdir($uploadDirFs, 0777, true);
+            }
+
+            $originalName = basename($_FILES[$fileInputName]['name']);
+            $fileExtension = pathinfo($originalName, PATHINFO_EXTENSION);
+            $safeFileName = uniqid('submission_', true) . '.' . $fileExtension;
+            $uploadPath = $uploadDirFs . $safeFileName;
+
+            if (!move_uploaded_file($_FILES[$fileInputName]['tmp_name'], $uploadPath)) {
+                error_log('move_uploaded_file failed, tmp_name: ' . ($_FILES[$fileInputName]['tmp_name'] ?? ''));
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Gagal menyimpan file.'
+                ]);
+                exit;
+            }
+            
+            $filePath = $uploadDirWeb . $safeFileName;
         }
 
         $attemptNo = $currentAttempt + 1;
@@ -450,35 +481,27 @@ class TaskController {
         $studentName = $_SESSION['user']['name'] ?? 'Siswa';
         if ($ok) {
             notify_event($this->db, 'submission', 'task', $task_id, intval($task['user_id']), $studentName . " mengumpulkan tugas (percobaan #{$attemptNo}).", 'index.php?page=tasks');
-            $finalNote = $isFinal ? ' (Final)' : '';
-            $message = "Pengumpulan percobaan #{$attemptNo}{$finalNote} tersimpan.";
-        } else {
-            $message = 'Failed to save submission.';
         }
 
-        // If request is AJAX/XHR, return JSON response for the client-side JS
-        $isXhr = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-        if ($isXhr) {
-            $payload = ['success' => (bool)$ok, 'message' => $message];
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode($payload);
-            exit;
-        }
-
-        // Non-AJAX fallback: use session flash and redirect
+        header('Content-Type: application/json');
         if ($ok) {
-            $_SESSION['success'] = $message;
+            echo json_encode([
+                'success' => true,
+                'message' => 'Pengumpulan berhasil disimpan.'
+            ]);
         } else {
-            $_SESSION['error'] = $message;
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menyimpan pengumpulan.'
+            ]);
         }
-        header('Location: index.php?page=tasks'); exit;
+        exit;
     }
     
     public function submissions() {
         $taskId = intval($_GET['task_id'] ?? 0);
         $userLevel = $_SESSION['level'] ?? 'user';
-        
-        // Only admin and guru can view submissions
+
         if ($userLevel === 'user') {
             http_response_code(403);
             echo '<div class="text-center text-red-400">Access denied</div>';
@@ -489,69 +512,122 @@ class TaskController {
             echo '<div class="text-center text-red-400">Invalid task ID</div>';
             exit;
         }
-        
-        // Get task info
+
         $task = $this->model->getById($taskId);
         if (!$task) {
             echo '<div class="text-center text-red-400">Task not found</div>';
             exit;
         }
-        
-        // Check if user can view this task's submissions
+
         if ($userLevel === 'guru' && $task['user_id'] != $_SESSION['user_id']) {
             echo '<div class="text-center text-red-400">You can only view submissions for your own tasks</div>';
             exit;
         }
-        
-        // Get submissions
+
         $submissions = $this->submissionModel->getByTask($taskId);
         
         if (empty($submissions)) {
             echo '<div class="text-center text-gray-400 py-8">No submissions yet</div>';
             exit;
         }
+
+        $statusConfig = [
+            'pending' => ['label' => 'Pending', 'class' => 'bg-amber-500/10 text-amber-300 border-amber-500/20', 'icon' => 'schedule'],
+            'in_review' => ['label' => 'In Review', 'class' => 'bg-blue-500/10 text-blue-300 border-blue-500/20', 'icon' => 'visibility'],
+            'needs_revision' => ['label' => 'Needs Revision', 'class' => 'bg-rose-500/10 text-rose-300 border-rose-500/20', 'icon' => 'edit'],
+            'approved' => ['label' => 'Approved', 'class' => 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20', 'icon' => 'check_circle'],
+            'graded' => ['label' => 'Graded', 'class' => 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20', 'icon' => 'grade']
+        ];
         
         echo '<div class="space-y-4">';
         foreach ($submissions as $submission) {
-            echo '<div class="bg-gray-700 rounded-lg p-4 border border-gray-600">';
-            echo '<div class="flex items-center justify-between mb-3">';
-            echo '<div class="flex items-center gap-3">';
-            echo '<div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center">';
+            $reviewStatus = strtolower($submission['review_status'] ?? 'pending');
+            $status = $statusConfig[$reviewStatus] ?? $statusConfig['pending'];
+            $hasGrade = $submission['grade'] !== null;
+            $gradeValue = $hasGrade ? floatval($submission['grade']) : null;
+            
+            echo '<div class="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors">';
+
+            echo '<div class="p-4 bg-gray-900 border-b border-gray-700">';
+            echo '<div class="flex items-start justify-between gap-4">';
+
+            echo '<div class="flex items-center gap-3 flex-1 min-w-0">';
+            echo '<div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 ring-2 ring-gray-700">';
             echo '<span class="text-white text-sm font-bold">' . strtoupper(substr($submission['name'] ?? 'N/A', 0, 1)) . '</span>';
             echo '</div>';
-            echo '<div>';
-            echo '<div class="text-white font-medium">' . htmlspecialchars($submission['name'] ?? 'N/A') . '</div>';
-            echo '<div class="text-gray-400 text-sm">' . htmlspecialchars($submission['username'] ?? '') . '</div>';
+            echo '<div class="flex-1 min-w-0">';
+            echo '<div class="text-white font-semibold text-sm truncate">' . htmlspecialchars($submission['name'] ?? 'N/A') . '</div>';
+            echo '<div class="text-gray-400 text-xs mt-0.5 truncate">@' . htmlspecialchars($submission['username'] ?? '') . '</div>';
+            echo '<div class="flex items-center gap-2 mt-1.5">';
+            echo '<span class="text-xs text-gray-500 flex items-center gap-1">';
+            echo '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+            echo date('d M Y, H:i', strtotime($submission['submitted_at']));
+            echo '</span>';
+            if (!empty($submission['attempt_no'])) {
+                echo '<span class="text-xs text-gray-500">• Attempt #' . intval($submission['attempt_no']) . '</span>';
+            }
             echo '</div>';
             echo '</div>';
-            echo '<div class="text-gray-400 text-sm">' . date('d M Y, H:i', strtotime($submission['submitted_at'])) . '</div>';
             echo '</div>';
-            
-            echo '<div class="flex items-center gap-4">';
-            echo '<a href="' . htmlspecialchars($submission['file_path']) . '" target="_blank" class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300">';
-            echo '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
-            echo '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>';
-            echo '</svg>';
+
+            echo '<div class="flex flex-col items-end gap-2 flex-shrink-0">';
+            echo '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ' . $status['class'] . '">';
+            echo '<span class="material-symbols-outlined" style="font-size: 14px;">' . $status['icon'] . '</span>';
+            echo $status['label'];
+            echo '</span>';
+            if ($hasGrade) {
+                $gradeClass = $gradeValue >= 80 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : ($gradeValue >= 60 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/30');
+                echo '<div class="flex items-center gap-2">';
+                echo '<span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-bold ' . $gradeClass . ' border">';
+                echo '<span class="material-symbols-outlined mr-1" style="font-size: 16px;">star</span>';
+                echo number_format($gradeValue, 2);
+                echo '</span>';
+                echo '</div>';
+            } else {
+                echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-700/50 text-gray-400 border border-gray-600">Belum dinilai</span>';
+            }
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
+
+            echo '<div class="p-4 bg-gray-800 border-b border-gray-700">';
+            echo '<div class="flex items-center justify-between gap-4 flex-wrap">';
+            echo '<a href="' . htmlspecialchars($submission['file_path'] ?? '#') . '" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-md text-sm text-gray-200 transition-colors">';
+            echo '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>';
             echo 'Download File';
             echo '</a>';
-            
-            if ($submission['grade'] !== null) {
-                echo '<span class="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm">Grade: ' . $submission['grade'] . '</span>';
-            } else {
-                echo '<span class="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-sm">Pending Grade</span>';
+            echo '<div class="flex items-center gap-2">';
+            if (!empty($submission['note'])) {
+                echo '<span class="text-xs text-gray-400 flex items-center gap-1">';
+                echo '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>';
+                echo 'Ada catatan';
+                echo '</span>';
             }
             echo '</div>';
-            
-            if ($submission['feedback']) {
-                echo '<div class="mt-3 p-3 bg-gray-600 rounded-lg">';
-                echo '<div class="text-gray-300 text-sm">' . htmlspecialchars($submission['feedback']) . '</div>';
+            echo '</div>';
+            echo '</div>';
+
+            if (!empty($submission['feedback'])) {
+                echo '<div class="p-4 bg-gray-800/50 border-b border-gray-700">';
+                echo '<div class="flex items-start gap-2">';
+                echo '<svg class="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>';
+                echo '<div class="flex-1">';
+                echo '<div class="text-xs text-gray-400 mb-1 font-medium">Feedback:</div>';
+                echo '<div class="text-sm text-gray-300 leading-relaxed">' . nl2br(htmlspecialchars($submission['feedback'])) . '</div>';
+                echo '</div>';
+                echo '</div>';
                 echo '</div>';
             }
-            
+
             if ($userLevel !== 'user') {
-                echo '<form method="post" action="index.php?page=tasks/review" class="mt-4 border-t border-gray-600 pt-4 space-y-3">';
+                echo '<div class="p-4 bg-gray-900 border-t border-gray-700">';
+                echo '<form method="post" action="index.php?page=tasks/review" class="space-y-4 review-form">';
                 echo '<input type="hidden" name="submission_id" value="' . intval($submission['id']) . '">';
-                echo '<label class="text-sm text-gray-300">Status Review</label>';
+                
+                echo '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+
+                echo '<div>';
+                echo '<label class="block text-xs font-medium text-gray-300 mb-2">Status Review</label>';
                 $statuses = [
                     'pending' => 'Pending',
                     'in_review' => 'In Review',
@@ -559,21 +635,40 @@ class TaskController {
                     'approved' => 'Approved',
                     'graded' => 'Graded'
                 ];
-                echo '<select name="review_status" class="w-full bg-gray-700 border border-gray-500 rounded-lg px-3 py-2 text-white">';
+                echo '<select name="review_status" class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">';
                 foreach ($statuses as $key => $label) {
-                    $selected = ($submission['review_status'] ?? '') === $key ? 'selected' : '';
+                    $selected = $reviewStatus === $key ? 'selected' : '';
                     echo '<option value="'.$key.'" '.$selected.'>'.$label.'</option>';
                 }
                 echo '</select>';
-                echo '<label class="text-sm text-gray-300">Nilai</label>';
-                $gradeVal = $submission['grade'] !== null ? floatval($submission['grade']) : '';
-                echo '<input type="number" name="grade" step="0.01" value="'.$gradeVal.'" class="w-full bg-gray-700 border border-gray-500 rounded-lg px-3 py-2 text-white">';
-                echo '<label class="text-sm text-gray-300">Feedback</label>';
-                echo '<textarea name="feedback" rows="3" class="w-full bg-gray-700 border border-gray-500 rounded-lg px-3 py-2 text-white">'.htmlspecialchars($submission['feedback'] ?? '').'</textarea>';
-                echo '<label class="text-sm text-gray-300">Rubric Breakdown (JSON atau format Kriteria:Skor per baris)</label>';
-                echo '<textarea name="rubric_breakdown" rows="3" class="w-full bg-gray-700 border border-gray-500 rounded-lg px-3 py-2 text-white"></textarea>';
-                echo '<button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg">Update Review</button>';
+                echo '</div>';
+
+                echo '<div>';
+                echo '<label class="block text-xs font-medium text-gray-300 mb-2">Nilai (0-100)</label>';
+                $gradeVal = $gradeValue !== null ? number_format($gradeValue, 2) : '';
+                echo '<div class="relative">';
+                echo '<input type="number" name="grade" min="0" max="100" step="0.01" value="'.$gradeVal.'" placeholder="Masukkan nilai" class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">';
+                if ($hasGrade) {
+                    echo '<div class="absolute right-3 top-2 text-xs text-gray-500">/ 100</div>';
+                }
+                echo '</div>';
+                echo '</div>';
+                echo '</div>';
+
+                echo '<div>';
+                echo '<label class="block text-xs font-medium text-gray-300 mb-2">Feedback untuk Siswa</label>';
+                echo '<textarea name="feedback" rows="4" placeholder="Berikan feedback yang konstruktif..." class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none">'.htmlspecialchars($submission['feedback'] ?? '').'</textarea>';
+                echo '</div>';
+
+                echo '<div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-700">';
+                echo '<button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors">';
+                echo '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                echo 'Simpan Nilai & Feedback';
+                echo '</button>';
+                echo '</div>';
+                
                 echo '</form>';
+                echo '</div>';
             }
             
             echo '</div>';
@@ -584,20 +679,41 @@ class TaskController {
 
     public function reviewSubmission() {
         $this->ensureTeacher();
+
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+        
         $submissionId = intval($_POST['submission_id'] ?? 0);
         if (!$submissionId) {
-            $_SESSION['error'] = 'Submission tidak valid.';
-            header('Location: index.php?page=tasks'); exit;
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Submission tidak valid.']);
+            } else {
+                $_SESSION['error'] = 'Submission tidak valid.';
+                header('Location: index.php?page=tasks');
+            }
+            exit;
         }
         $submission = $this->submissionModel->getById($submissionId);
         if (!$submission) {
-            $_SESSION['error'] = 'Submission tidak ditemukan.';
-            header('Location: index.php?page=tasks'); exit;
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Submission tidak ditemukan.']);
+            } else {
+                $_SESSION['error'] = 'Submission tidak ditemukan.';
+                header('Location: index.php?page=tasks');
+            }
+            exit;
         }
         $task = $this->model->getById($submission['task_id']);
         if (!$task) {
-            $_SESSION['error'] = 'Task tidak ditemukan.';
-            header('Location: index.php?page=tasks'); exit;
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Task tidak ditemukan.']);
+            } else {
+                $_SESSION['error'] = 'Task tidak ditemukan.';
+                header('Location: index.php?page=tasks');
+            }
+            exit;
         }
         $this->authorizeTaskOwnership($task);
 
@@ -620,18 +736,56 @@ class TaskController {
             $update['grade_breakdown'] = json_encode($this->parseRubricInput($rubricRaw));
         }
 
-        $ok = $this->submissionModel->updateReview($submissionId, $update);
+        $this->db->begin_transaction();
+        $ok = false;
+        try {
+            $reviewOk = $this->submissionModel->updateReview($submissionId, $update);
+            if (!$reviewOk) {
+                throw new Exception("Failed to update submission review.");
+            }
 
-        if ($ok && $reviewStatus === 'graded' && $grade !== null) {
-            $this->recordGrade($submission, $task, $grade);
+            if ($reviewStatus === 'graded' && $grade !== null) {
+                $gradeOk = $this->recordGrade($submission, $task, $grade);
+                if (!$gradeOk) {
+                    throw new Exception("Failed to record grade.");
+                }
+            }
+
+            $this->db->commit();
+            $ok = true;
+        } catch (Exception $e) {
+            $this->db->rollback();
+            error_log('Grading transaction failed: ' . $e->getMessage());
         }
 
-        $message = $reviewStatus === 'graded' ? 'Nilai tugas Anda sudah tersedia.' : 'Status tugas Anda telah diperbarui.';
-        $redirect = $reviewStatus === 'graded' ? 'index.php?page=grades' : 'index.php?page=tasks';
-        notify_event($this->db, 'review', 'task', $submission['task_id'], intval($submission['user_id']), $message, $redirect);
+        if ($ok) {
+            $message = $reviewStatus === 'graded' ? 'Nilai tugas Anda sudah tersedia.' : 'Status tugas Anda telah diperbarui.';
+            $redirect = $reviewStatus === 'graded' ? 'index.php?page=grades' : 'index.php?page=tasks';
+            notify_event($this->db, 'review', 'task', $submission['task_id'], intval($submission['user_id']), $message, $redirect);
+        }
 
-        $_SESSION['success'] = $ok ? 'Review submission diperbarui.' : 'Gagal memperbarui review.';
-        header('Location: index.php?page=tasks'); exit;
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            if ($ok) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Review berhasil disimpan.'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Gagal memperbarui review. Terjadi kesalahan database.'
+                ]);
+            }
+        } else {
+            if ($ok) {
+                $_SESSION['success'] = 'Review berhasil disimpan.';
+            } else {
+                $_SESSION['error'] = 'Gagal memperbarui review. Terjadi kesalahan database.';
+            }
+            header('Location: index.php?page=tasks');
+        }
+        exit;
     }
 
     public function sendReminders() {
@@ -657,7 +811,7 @@ class TaskController {
     public function edit() {
         $id = intval($_GET['id'] ?? 0);
         $task = $this->model->getById($id);
-        // Load classes and subjects for the form
+
         global $config;
         require_once dirname(__DIR__) . '/model/ClassModel.php';
         require_once dirname(__DIR__) . '/model/SubjectsModel.php';
@@ -666,14 +820,12 @@ class TaskController {
         $classes = $classModel->getAll();
         $subjects = $subjectModel->getAll();
 
-        // fetch teachers for assignment (users from users table with role guru or admin)
         $teachers = [];
         $res = mysqli_query($config, "SELECT id, name, username, `level` FROM users WHERE `level` IN ('guru','admin') ORDER BY name ASC");
         if ($res) {
             while ($r = mysqli_fetch_assoc($res)) $teachers[] = $r;
         }
 
-        // fetch schedules for edit form as well
         require_once dirname(__DIR__) . '/model/ScheduleModel.php';
         $scheduleModel = new ScheduleModel($config);
         if (isset($_SESSION['level']) && $_SESSION['level'] === 'guru') {
@@ -703,32 +855,76 @@ class TaskController {
             'workflow_state' => $_POST['workflow_state'] ?? 'published',
             'grading_rubric' => $this->prepareRubricForStorage($_POST['grading_rubric'] ?? '')
         ];
-        // allow admin to reassign teacher
+
         $currentLevel = $_SESSION['level'] ?? 'user';
         if ($currentLevel === 'admin' && !empty($_POST['teacher_id'])) {
             $data['user_id'] = intval($_POST['teacher_id']);
         }
+
+        $errors = [];
         if ($data['title'] === '' || $data['description'] === '' || $data['status'] === '' || $data['deadline'] === '' || !$data['class_id'] || !$data['subject_id']) {
-            $_SESSION['flash'] = 'Semua field wajib diisi!';
-            header('Location: index.php?page=tasks/edit&id='.$id); exit;
+            $errors[] = 'Semua field wajib diisi!';
         }
         if (!empty($data['allow_late']) && !empty($data['late_deadline']) && $data['late_deadline'] < $data['deadline']) {
-            $_SESSION['flash'] = 'Late deadline harus setelah deadline utama.';
-            header('Location: index.php?page=tasks/edit&id='.$id); exit;
+            $errors[] = 'Late deadline harus setelah deadline utama.';
         }
+        
+        if (!empty($errors)) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => implode(' ', $errors)
+            ]);
+            exit;
+        }
+        
         $allowedStates = ['draft','published','in_review','closed'];
         if (!in_array($data['workflow_state'], $allowedStates, true)) {
             $data['workflow_state'] = 'published';
         }
         $ok = $this->model->update($id, $data);
-        $_SESSION['flash'] = $ok ? 'Tugas berhasil diupdate.' : 'Gagal update tugas.';
-        header('Location: index.php?page=tasks'); exit;
+        
+        header('Content-Type: application/json');
+        if ($ok) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Tugas berhasil disimpan.'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menyimpan tugas.'
+            ]);
+        }
+        exit;
     }
     public function delete() {
+        header('Content-Type: application/json');
+        
         $id = intval($_POST['id'] ?? 0);
+        
+        if ($id <= 0) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID tidak valid.'
+            ]);
+            exit;
+        }
+        
         $ok = $this->model->delete($id);
-        $_SESSION['flash'] = $ok ? 'Tugas dihapus.' : 'Gagal hapus tugas.';
-        header('Location: index.php?page=tasks'); exit;
+        
+        if ($ok) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Tugas berhasil dihapus.'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menghapus tugas.'
+            ]);
+        }
+        exit;
     }
 
     private function compileStudentProgress(array &$tasks, $userId) {
@@ -812,16 +1008,8 @@ class TaskController {
             'task_id' => intval($submission['task_id']),
             'score' => floatval($grade)
         ];
-        $this->gradesModel->saveOrUpdate($payload);
-        notify_event(
-            $this->db,
-            'grade',
-            'task',
-            $payload['task_id'],
-            $payload['user_id'],
-            'Nilai untuk "' . ($task['title'] ?? 'Tugas') . '" sudah tersedia.',
-            'index.php?page=grades'
-        );
+        $ok = $this->gradesModel->saveOrUpdate($payload);
+        return $ok;
     }
 
     private function collectDueSoonTasks(array $tasks, int $days = 3) {

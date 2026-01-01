@@ -14,7 +14,7 @@ class SettingsController
         }
 
         global $config;
-        $stmt = mysqli_prepare($config, "SELECT * FROM users WHERE id = ?");
+        $stmt = mysqli_prepare($config, "SELECT *, COALESCE(ai_shorekeeper_enabled, 1) AS ai_shorekeeper_enabled FROM users WHERE id = ?");
         mysqli_stmt_bind_param($stmt, "i", $userId);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
@@ -25,7 +25,6 @@ class SettingsController
             $_SESSION['user'] = $user;
         }
 
-        // Load settings view with separate layout (not dLayout)
         include dirname(__DIR__) . '/views/pages/settings/index.php';
     }
 
@@ -41,13 +40,11 @@ class SettingsController
 
         global $config;
 
-        // Handle different setting updates
         if (isset($_POST['update_profile'])) {
             $name = trim($_POST['name'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $username = trim($_POST['username'] ?? '');
 
-            // Basic validation
             if ($name === '' || $email === '' || $username === '') {
                 $_SESSION['error'] = 'Nama, email, dan username wajib diisi.';
                 header("Location: index.php?page=settings");
@@ -59,7 +56,6 @@ class SettingsController
                 exit;
             }
 
-            // Ensure email/username are unique (exclude current user)
             $checkStmt = mysqli_prepare($config, "SELECT id FROM users WHERE (email = ? OR username = ?) AND id != ? LIMIT 1");
             mysqli_stmt_bind_param($checkStmt, "ssi", $email, $username, $userId);
             mysqli_stmt_execute($checkStmt);
@@ -78,8 +74,7 @@ class SettingsController
             mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
 
-            // Refresh session user data
-            $stmt = mysqli_prepare($config, "SELECT id, username, name, email, `level`, COALESCE(role,'') AS role, avatar, banner, join_date, phone, address, `class`, bio FROM users WHERE id = ? LIMIT 1");
+            $stmt = mysqli_prepare($config, "SELECT id, username, name, email, `level`, COALESCE(role,'') AS role, avatar, banner, join_date, phone, address, `class`, bio, COALESCE(ai_shorekeeper_enabled, 1) AS ai_shorekeeper_enabled FROM users WHERE id = ? LIMIT 1");
             mysqli_stmt_bind_param($stmt, "i", $userId);
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
@@ -93,7 +88,6 @@ class SettingsController
             $newPassword = $_POST['new_password'] ?? '';
             $confirmPassword = $_POST['confirm_password'] ?? '';
 
-            // Verify current password
             $stmt = mysqli_prepare($config, "SELECT password FROM users WHERE id = ?");
             mysqli_stmt_bind_param($stmt, "i", $userId);
             mysqli_stmt_execute($stmt);
@@ -113,7 +107,6 @@ class SettingsController
                 exit;
             }
 
-            // No minimum length requirement enforced here (handled by policy if needed)
 
             $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
             $stmt = mysqli_prepare($config, "UPDATE users SET password = ? WHERE id = ?");
@@ -122,6 +115,24 @@ class SettingsController
             mysqli_stmt_close($stmt);
 
             $_SESSION['flash'] = 'Password berhasil diperbarui';
+        } elseif (isset($_POST['update_ai_preference'])) {
+
+            $aiEnabled = isset($_POST['ai_shorekeeper_enabled']) && $_POST['ai_shorekeeper_enabled'] == '1' ? 1 : 0;
+            
+            $stmt = mysqli_prepare($config, "UPDATE users SET ai_shorekeeper_enabled = ? WHERE id = ?");
+            mysqli_stmt_bind_param($stmt, "ii", $aiEnabled, $userId);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+
+            $stmt = mysqli_prepare($config, "SELECT id, username, name, email, `level`, COALESCE(role,'') AS role, avatar, banner, join_date, phone, address, `class`, bio, COALESCE(ai_shorekeeper_enabled, 1) AS ai_shorekeeper_enabled FROM users WHERE id = ? LIMIT 1");
+            mysqli_stmt_bind_param($stmt, "i", $userId);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $updatedUser = mysqli_fetch_assoc($result);
+            mysqli_stmt_close($stmt);
+            if ($updatedUser) $_SESSION['user'] = $updatedUser;
+
+            $_SESSION['flash'] = 'Preferensi AI Shorekeeper berhasil diperbarui';
         }
 
         header("Location: index.php?page=settings");

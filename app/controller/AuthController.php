@@ -12,7 +12,6 @@ class AuthController
             $username = trim($_POST['username'] ?? '');
             $password = trim($_POST['password'] ?? '');
 
-            // Ambil semua field user
             $stmt = mysqli_prepare($config, "SELECT * FROM users WHERE username = ?");
             mysqli_stmt_bind_param($stmt, "s", $username);
             mysqli_stmt_execute($stmt);
@@ -21,34 +20,28 @@ class AuthController
             if ($result && mysqli_num_rows($result) > 0) {
                 $user = mysqli_fetch_assoc($result);
 
-                // Verifikasi password
                 if (password_verify($password, $user['password'])) {
                     if (session_status() === PHP_SESSION_NONE) session_start();
 
-
-                    // Simpan semua data user di session
                     $_SESSION['user'] = $user;
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
                     $_SESSION['level'] = $user['level'];
-                    // Simpan timezone aplikasi di session dan set timezone untuk proses saat ini
+
                     $_SESSION['timezone'] = $GLOBALS['app_timezone'] ?? 'Asia/Jakarta';
                     if (!ini_get('date.timezone')) {
                         date_default_timezone_set($_SESSION['timezone']);
                     }
 
-                    // Set cookie login untuk 1 jam
                     setcookie('user_id', $user['id'], time() + 3600, '/');
                     setcookie('username', $user['username'], time() + 3600, '/');
                     setcookie('level', $user['level'], time() + 3600, '/');
 
-                    // Check if profile is complete
                     if (!$this->isProfileComplete($user)) {
                         header('Location: index.php?page=setup-profile');
                         exit;
                     }
 
-                    // Redirect sesuai level
                     switch ($user['level']) {
                         case 'admin':
                             header('Location: index.php?page=dashboard-admin');
@@ -69,7 +62,6 @@ class AuthController
             }
         }
 
-        // Panggil view login
         $view = dirname(__DIR__) . '/views/pages/auth/login.php';
         if (!is_file($view)) {
             echo 'View tidak ditemukan di: ' . $view;
@@ -82,22 +74,19 @@ class AuthController
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-    // Hapus semua session
     session_unset();
     session_destroy();
 
-    // Hapus cookie login
     setcookie('user_id', '', time() - 3600, '/');
     setcookie('username', '', time() - 3600, '/');
     setcookie('level', '', time() - 3600, '/');
 
-    // Redirect ke halaman login
     header("Location: index.php?page=login");
     exit;
     }
     
     private function isProfileComplete($user) {
-        // Check if essential fields are filled
+
         $requiredFields = ['name', 'phone', 'address', 'class'];
         
         foreach ($requiredFields as $field) {

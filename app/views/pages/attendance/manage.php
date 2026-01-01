@@ -23,7 +23,7 @@ $classes = $classes ?? [];
         </div>
     </div>
 
-    <!-- Records Table -->
+    
     <?php if (!empty($records)): ?>
     <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
         <div class="p-6 border-b border-gray-700">

@@ -13,7 +13,8 @@ class DashboardAdminController
 
     public function dashboardAdmin()
     {
-        // Cek apakah user adalah admin
+        require_once __DIR__ . '/../core/Cache.php';
+
         if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'admin') {
             header('Location: index.php?page=dashboard-admin');
             exit;
@@ -21,23 +22,30 @@ class DashboardAdminController
 
         $title = "Admin Dashboard - Stuarz";
         $description = "Welcome to your dashboard";
+        $cacheKey = 'admin_dashboard_data';
 
-        // Ambil data untuk stats cards
-        $stats = $this->getStats();
-        
-        // Ambil data untuk grafik
-        $data = [
-            'attendance' => $this->getAttendanceData(),
-            'grades' => $this->getGradesData(),
-            'tasks' => $this->getTasksData(),
-            'students' => $this->getStudentsPerClass(),
-            'teaching' => $this->getTeachingSchedules(),
-            'newStudents' => $this->getNewStudents(),
-            'certificates' => $this->getCertificatesData(),
-            'documentation' => $this->getDocumentationData()
-        ];
+        $cachedData = Cache::get($cacheKey);
 
-        // Ambil pengumuman terbaru untuk card di dashboard admin
+        if ($cachedData !== null) {
+            $stats = $cachedData['stats'];
+            $data = $cachedData['data'];
+        } else {
+            $stats = $this->getStats();
+            
+            $data = [
+                'attendance' => $this->getAttendanceData(),
+                'grades' => $this->getGradesData(),
+                'tasks' => $this->getTasksData(),
+                'students' => $this->getStudentsPerClass(),
+                'teaching' => $this->getTeachingSchedules(),
+                'newStudents' => $this->getNewStudents(),
+                'certificates' => $this->getCertificatesData(),
+                'documentation' => $this->getDocumentationData()
+            ];
+
+            Cache::set($cacheKey, ['stats' => $stats, 'data' => $data], 3600);
+        }
+
         $latestAnnouncements = [];
         try {
             require_once __DIR__ . '/../model/AnnouncementModel.php';
@@ -47,11 +55,9 @@ class DashboardAdminController
                 $latestAnnouncements = array_slice($allAnnouncements, 0, 3);
             }
         } catch (\Throwable $e) {
-            // jangan hentikan halaman jika ada error; biarkan $latestAnnouncements kosong
             $latestAnnouncements = [];
         }
 
-        // Tentukan file view utama
         $content = dirname(__DIR__) . '/views/pages/dashboard/admin.php';
 
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
@@ -65,25 +71,21 @@ class DashboardAdminController
             'average_grade' => 0
         ];
 
-        // Total Users
         $result = $this->db->query("SELECT COUNT(*) as total FROM users WHERE level = 'user'");
         if ($result && $row = $result->fetch_assoc()) {
             $stats['total_users'] = $row['total'];
         }
 
-        // Total Teachers (count users with level = 'guru')
         $result = $this->db->query("SELECT COUNT(*) as total FROM users WHERE level = 'guru'");
         if ($result && $row = $result->fetch_assoc()) {
             $stats['total_teachers'] = $row['total'];
         }
 
-        // Total Certificates
         $result = $this->db->query("SELECT COUNT(*) as total FROM certificates");
         if ($result && $row = $result->fetch_assoc()) {
             $stats['total_certificates'] = $row['total'];
         }
 
-        // Average Grade
         $result = $this->db->query("SELECT COUNT(*) as total FROM classes");
         if ($result && $row = $result->fetch_assoc()) {
             $stats['total_classes'] = $row['total'];
@@ -93,7 +95,6 @@ class DashboardAdminController
     }
 
     private function getAttendanceData() {
-        // Ambil data kehadiran 7 hari terakhir
         $data = [
             'labels' => [],
             'hadir' => [],
@@ -101,11 +102,22 @@ class DashboardAdminController
             'terlambat' => []
         ];
 
+        $last7Days = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $last7Days[$date] = [
+                'label' => date('d M', strtotime($date)),
+                'hadir' => 0,
+                'absen' => 0,
+                'terlambat' => 0
+            ];
+        }
+
         $sql = "SELECT 
                     DATE(date) as tanggal,
-                    SUM(CASE WHEN status = 'hadir' THEN 1 ELSE 0 END) as hadir,
-                    SUM(CASE WHEN status = 'absen' THEN 1 ELSE 0 END) as absen,
-                    SUM(CASE WHEN status = 'terlambat' THEN 1 ELSE 0 END) as terlambat
+                    SUM(CASE WHEN status = 'hadir' OR status = 'present' THEN 1 ELSE 0 END) as hadir,
+                    SUM(CASE WHEN status = 'absen' OR status = 'absent' THEN 1 ELSE 0 END) as absen,
+                    SUM(CASE WHEN status = 'terlambat' OR status = 'late' THEN 1 ELSE 0 END) as terlambat
                 FROM attendance 
                 WHERE date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
                 GROUP BY DATE(date)
@@ -114,11 +126,20 @@ class DashboardAdminController
         $result = $this->db->query($sql);
         if ($result) {
             while ($row = $result->fetch_assoc()) {
-                $data['labels'][] = date('d M', strtotime($row['tanggal']));
-                $data['hadir'][] = (int)$row['hadir'];
-                $data['absen'][] = (int)$row['absen'];
-                $data['terlambat'][] = (int)$row['terlambat'];
+                $tanggal = $row['tanggal'];
+                if (isset($last7Days[$tanggal])) {
+                    $last7Days[$tanggal]['hadir'] = (int)$row['hadir'];
+                    $last7Days[$tanggal]['absen'] = (int)$row['absen'];
+                    $last7Days[$tanggal]['terlambat'] = (int)$row['terlambat'];
+                }
             }
+        }
+
+        foreach ($last7Days as $dayData) {
+            $data['labels'][] = $dayData['label'];
+            $data['hadir'][] = $dayData['hadir'];
+            $data['absen'][] = $dayData['absen'];
+            $data['terlambat'][] = $dayData['terlambat'];
         }
 
         return $data;
@@ -130,9 +151,10 @@ class DashboardAdminController
             'values' => []
         ];
 
-        $sql = "SELECT subject, AVG(grade) as average_grade 
-                FROM average_grade 
-                GROUP BY subject 
+        $sql = "SELECT s.name as subject, AVG(g.score) as average_grade 
+                FROM grades g
+                JOIN subjects s ON g.subject_id = s.id
+                GROUP BY s.name 
                 ORDER BY average_grade DESC";
 
         $result = $this->db->query($sql);
@@ -175,36 +197,70 @@ class DashboardAdminController
             'values' => []
         ];
 
-        // Primary method: count members from class_members table (only students)
-        $sql = "SELECT c.id, c.name as class, SUM(CASE WHEN cm.role IN ('student','user') THEN 1 ELSE 0 END) as total
+        $sql = "SELECT 
+                    c.id, 
+                    c.name as class, 
+                    COUNT(DISTINCT cm.user_id) as total
                 FROM classes c
                 LEFT JOIN class_members cm ON c.id = cm.class_id
-                GROUP BY c.id
+                LEFT JOIN users u ON cm.user_id = u.id
+                WHERE (u.level IN ('user', 'siswa', 'student') 
+                       OR cm.role IN ('student', 'user', 'siswa') 
+                       OR (cm.role IS NULL AND u.level IS NOT NULL AND u.level NOT IN ('admin', 'guru', 'teacher')))
+                GROUP BY c.id, c.name
+                HAVING total > 0
                 ORDER BY c.name";
 
         $result = $this->db->query($sql);
-        $rowsFound = 0;
         if ($result) {
             while ($row = $result->fetch_assoc()) {
-                $rowsFound++;
-                $data['labels'][] = $row['class'];
-                $data['values'][] = (int)$row['total'];
+                if (!empty($row['class'])) {
+                    $data['labels'][] = $row['class'];
+                    $data['values'][] = (int)$row['total'];
+                }
             }
         }
 
-        // Fallback: some installations may not populate class_members. Try users.class column.
-        if ($rowsFound === 0 || array_sum($data['values']) === 0) {
+        if (empty($data['labels']) || array_sum($data['values']) === 0) {
             $data = ['labels' => [], 'values' => []];
-            $sql2 = "SELECT c.id, c.name as class, COUNT(u.id) as total
+            $sql2 = "SELECT 
+                        c.id, 
+                        c.name as class, 
+                        COUNT(DISTINCT cm.user_id) as total
                      FROM classes c
-                     LEFT JOIN users u ON (u.class = c.id AND (u.level = 'user' OR u.level = 'student'))
-                     GROUP BY c.id
+                     INNER JOIN class_members cm ON c.id = cm.class_id
+                     LEFT JOIN users u ON cm.user_id = u.id
+                     WHERE u.level IS NOT NULL 
+                       AND u.level NOT IN ('admin', 'guru', 'teacher')
+                     GROUP BY c.id, c.name
                      ORDER BY c.name";
             $res2 = $this->db->query($sql2);
             if ($res2) {
                 while ($r = $res2->fetch_assoc()) {
-                    $data['labels'][] = $r['class'];
-                    $data['values'][] = (int)$r['total'];
+                    if (!empty($r['class']) && (int)$r['total'] > 0) {
+                        $data['labels'][] = $r['class'];
+                        $data['values'][] = (int)$r['total'];
+                    }
+                }
+            }
+        }
+
+        if (empty($data['labels'])) {
+            $sql3 = "SELECT 
+                        c.id, 
+                        c.name as class, 
+                        COUNT(DISTINCT cm.user_id) as total
+                     FROM classes c
+                     INNER JOIN class_members cm ON c.id = cm.class_id
+                     GROUP BY c.id, c.name
+                     ORDER BY c.name";
+            $res3 = $this->db->query($sql3);
+            if ($res3) {
+                while ($r3 = $res3->fetch_assoc()) {
+                    if (!empty($r3['class']) && (int)$r3['total'] > 0) {
+                        $data['labels'][] = $r3['class'];
+                        $data['values'][] = (int)$r3['total'];
+                    }
                 }
             }
         }
@@ -245,21 +301,38 @@ class DashboardAdminController
             'values' => []
         ];
 
-        // New students per month - use users table's join_date and filter by student level
+        $last6Months = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = date('Y-m', strtotime("-$i months"));
+            $monthName = date('M', strtotime("-$i months"));
+            $last6Months[$date] = [
+                'label' => $monthName,
+                'total' => 0
+            ];
+        }
+
         $sql = "SELECT 
+                    DATE_FORMAT(join_date, '%Y-%m') as month_key,
                     DATE_FORMAT(join_date, '%b') as month,
                     COUNT(*) as total
                 FROM users
                 WHERE `level` = 'user' AND join_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
                 GROUP BY YEAR(join_date), MONTH(join_date)
-                ORDER BY join_date";
+                ORDER BY month_key";
 
         $result = $this->db->query($sql);
         if ($result) {
             while ($row = $result->fetch_assoc()) {
-                $data['labels'][] = $row['month'];
-                $data['values'][] = (int)$row['total'];
+                $monthKey = $row['month_key'];
+                if (isset($last6Months[$monthKey])) {
+                    $last6Months[$monthKey]['total'] = (int)$row['total'];
+                }
             }
+        }
+
+        foreach ($last6Months as $monthData) {
+            $data['labels'][] = $monthData['label'];
+            $data['values'][] = $monthData['total'];
         }
 
         return $data;
@@ -271,20 +344,38 @@ class DashboardAdminController
             'values' => []
         ];
 
+        $last6Months = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = date('Y-m', strtotime("-$i months"));
+            $monthName = date('M', strtotime("-$i months"));
+            $last6Months[$date] = [
+                'label' => $monthName,
+                'total' => 0
+            ];
+        }
+
         $sql = "SELECT 
+                    DATE_FORMAT(issued_at, '%Y-%m') as month_key,
                     DATE_FORMAT(issued_at, '%b') as month,
                     COUNT(*) as total
                 FROM certificates
                 WHERE issued_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
                 GROUP BY YEAR(issued_at), MONTH(issued_at)
-                ORDER BY issued_at";
+                ORDER BY month_key";
 
         $result = $this->db->query($sql);
         if ($result) {
             while ($row = $result->fetch_assoc()) {
-                $data['labels'][] = $row['month'];
-                $data['values'][] = (int)$row['total'];
+                $monthKey = $row['month_key'];
+                if (isset($last6Months[$monthKey])) {
+                    $last6Months[$monthKey]['total'] = (int)$row['total'];
+                }
             }
+        }
+
+        foreach ($last6Months as $monthData) {
+            $data['labels'][] = $monthData['label'];
+            $data['values'][] = $monthData['total'];
         }
 
         return $data;
@@ -320,15 +411,12 @@ class DashboardAdminController
         $title = "Docs — Admin";
         $description = "Kelola dokumentasi";
 
-        // Pagination and search parameters
         $limit = (int)($_GET['limit'] ?? 10);
         if ($limit <= 0) $limit = 10;
 
-        // Accept either 'p' or 'page_num' for compatibility with view links
         $page = isset($_GET['p']) ? (int)$_GET['p'] : (isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1);
         if ($page <= 0) $page = 1;
 
-        // Normalize for view which reads page_num
         $_GET['page_num'] = $page;
 
         $q = trim($_GET['q'] ?? '');
@@ -340,14 +428,12 @@ class DashboardAdminController
             $where = "WHERE section LIKE '%{$esc}%' OR title LIKE '%{$esc}%' OR description LIKE '%{$esc}%'";
         }
 
-        // Total count for pagination
         $total = 0;
         $resTotal = mysqli_query($config, "SELECT COUNT(*) as total FROM documentation {$where}");
         if ($resTotal && $row = mysqli_fetch_assoc($resTotal)) {
             $total = (int)$row['total'];
         }
 
-        // Fetch paginated rows
         $docs = [];
         $sql = "SELECT * FROM documentation {$where} ORDER BY section, title LIMIT {$offset}, {$limit}";
         $res = mysqli_query($config, $sql);
@@ -356,10 +442,8 @@ class DashboardAdminController
             mysqli_free_result($res);
         }
 
-        // Expose variables used by the view: $docs, $total, $limit, $q
         $content = dirname(__DIR__) . '/views/pages/admin/admin_docs_list.php';
 
-        // support AJAX fragment for live admin search
         $isAjax = !empty($_GET['ajax']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
         if ($isAjax) {
             $ajax = true;
@@ -392,7 +476,7 @@ class DashboardAdminController
             $slug = trim($slug, '-');
         }
         $stmt = mysqli_prepare($config, "INSERT INTO documentation (section, title, slug, description, content) VALUES (?, ?, ?, ?, ?)");
-        mysqli_stmt_bind_param($stmt, "sssss", $section, $title, $slug, $description, $contentText);
+        mysqli_stmt_bind_param($stmt, "ssssss", $section, $title, $slug, $description, $contentText);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
         $_SESSION['flash'] = 'Dokumentasi dibuat';
@@ -438,7 +522,7 @@ class DashboardAdminController
             $slug = trim($slug, '-');
         }
         $stmt = mysqli_prepare($config, "UPDATE documentation SET section = ?, title = ?, slug = ?, description = ?, content = ? WHERE id = ?");
-        mysqli_stmt_bind_param($stmt, "sssssi", $section, $title, $slug, $description, $contentText, $id);
+        mysqli_stmt_bind_param($stmt, "ssssssi", $section, $title, $slug, $description, $contentText, $id);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
         $_SESSION['flash'] = 'Dokumentasi diupdate';
@@ -448,36 +532,49 @@ class DashboardAdminController
 
     public function docsDelete()
     {
+        header('Content-Type: application/json');
+        
         global $config;
         require_once __DIR__ . '/../model/documentation.php';
         $id = (int)($_POST['id'] ?? 0);
-        $model = new Documentation($config);
-        if ($id > 0) {
-            $ok = $model->delete($id);
-            $_SESSION['flash'] = $ok ? 'Dokumentasi dihapus' : 'Gagal menghapus dokumentasi';
-        } else {
-            $_SESSION['flash'] = 'ID tidak valid.';
+        
+        if ($id <= 0) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID tidak valid.'
+            ]);
+            exit;
         }
-        header('Location: index.php?page=dashboard-admin-docs');
+        
+        $model = new Documentation($config);
+        $ok = $model->delete($id);
+        
+        if ($ok) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Dokumentasi berhasil dihapus'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menghapus dokumentasi. Silakan coba lagi.'
+            ]);
+        }
         exit;
     }
 
-    // News CRUD
     public function news()
     {
         global $config;
         $title = "News — Admin";
         $description = "Kelola berita";
 
-        // Pagination and search parameters
         $limit = (int)($_GET['limit'] ?? 10);
         if ($limit <= 0) $limit = 10;
 
-        // Accept either 'p' or 'page_num' for compatibility with view links
         $page = isset($_GET['p']) ? (int)$_GET['p'] : (isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1);
         if ($page <= 0) $page = 1;
 
-        // Normalize for view which reads page_num
         $_GET['page_num'] = $page;
 
         $q = trim($_GET['q'] ?? '');
@@ -489,14 +586,12 @@ class DashboardAdminController
             $where = "WHERE title LIKE '%{$esc}%' OR content LIKE '%{$esc}%' OR category LIKE '%{$esc}%' OR author LIKE '%{$esc}%'";
         }
 
-        // Total count for pagination
         $total = 0;
         $resTotal = mysqli_query($config, "SELECT COUNT(*) as total FROM news {$where}");
         if ($resTotal && $row = mysqli_fetch_assoc($resTotal)) {
             $total = (int)$row['total'];
         }
 
-        // Fetch paginated rows
         $news = [];
         $sql = "SELECT * FROM news {$where} ORDER BY created_at DESC, id DESC LIMIT {$offset}, {$limit}";
         $res = mysqli_query($config, $sql);
@@ -505,10 +600,8 @@ class DashboardAdminController
             mysqli_free_result($res);
         }
 
-        // Expose variables used by the view: $news, $total, $limit, $q
         $content = dirname(__DIR__) . '/views/pages/admin/admin_news_list.php';
 
-        // support AJAX fragment for live admin search
         $isAjax = !empty($_GET['ajax']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
         if ($isAjax) {
             $ajax = true;
@@ -537,7 +630,6 @@ class DashboardAdminController
         $author = trim($_POST['author'] ?? 'Admin');
         $createdAt = trim($_POST['created_at'] ?? date('Y-m-d H:i:s'));
 
-        // Handle thumbnail upload (optional)
         $thumbnailPath = '';
         if (!empty($_FILES['thumbnail']['name'] ?? '')) {
             $uploadDir = __DIR__ . '/../../public/uploads/news/';
@@ -586,26 +678,17 @@ class DashboardAdminController
             header('Location: index.php?page=dashboard-admin-news');
             exit;
         }
-        $titleField = trim($_POST['title'] ?? '');
-        $contentField = trim($_POST['content'] ?? '');
-        $category = trim($_POST['category'] ?? 'Umum');
-        $author = trim($_POST['author'] ?? 'Admin');
-        $createdAt = trim($_POST['created_at'] ?? date('Y-m-d H:i:s'));
-
-        // Thumbnail update optional
-        $thumbnailPath = trim($_POST['thumbnail_existing'] ?? '');
-        if (!empty($_FILES['thumbnail']['name'] ?? '')) {
-            $uploadDir = __DIR__ . '/../../public/uploads/news/';
-            if (!is_dir($uploadDir)) @mkdir($uploadDir, 0777, true);
-            $fname = time() . '_' . preg_replace('/[^a-zA-Z0-9_.-]/', '_', $_FILES['thumbnail']['name']);
-            $dest = $uploadDir . $fname;
-            if (move_uploaded_file($_FILES['thumbnail']['tmp_name'], $dest)) {
-                $thumbnailPath = 'uploads/news/' . $fname;
-            }
+        $section = trim($_POST['section'] ?? 'General');
+        $title = trim($_POST['title'] ?? '');
+        $slug = trim($_POST['slug'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $contentText = trim($_POST['content'] ?? '');
+        if ($slug === '' && $title !== '') {
+            $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $title));
+            $slug = trim($slug, '-');
         }
-
-        $stmt = mysqli_prepare($config, "UPDATE news SET title = ?, content = ?, category = ?, thumbnail = ?, author = ?, created_at = ? WHERE id = ?");
-        mysqli_stmt_bind_param($stmt, "ssssssi", $titleField, $contentField, $category, $thumbnailPath, $author, $createdAt, $id);
+        $stmt = mysqli_prepare($config, "UPDATE documentation SET section = ?, title = ?, slug = ?, description = ?, content = ? WHERE id = ?");
+        mysqli_stmt_bind_param($stmt, "ssssssi", $section, $title, $slug, $description, $contentText, $id);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
         $_SESSION['flash'] = 'Berita diupdate';

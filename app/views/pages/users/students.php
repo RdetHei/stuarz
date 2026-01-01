@@ -7,17 +7,19 @@ $canAdmin = isset($me['level']) && $me['level'] === 'admin';
 $rows = [];
 $errorMsg = '';
 
-if (isset($users) && is_array($users)) {
-  $rows = array_filter($users, fn($u) => ($u['level'] ?? '') === 'user');
-} else if (isset($config) && $config instanceof mysqli) {
-  $sql = "SELECT id, username, email, level, avatar, join_date FROM users WHERE level = 'user' ORDER BY join_date DESC";
-  $res = mysqli_query($config, $sql);
-  if ($res) {
-    while ($r = mysqli_fetch_assoc($res)) $rows[] = $r;
-    mysqli_free_result($res);
-  }
-} else {
-  $errorMsg = "Database connection not available. Pastikan controller mengirim $users atau global $config tersedia.";
+if (!isset($users) || !is_array($users)) {
+    $users = [];
+}
+
+$rows = $users;
+
+if (empty($rows) && isset($config) && $config instanceof mysqli) {
+    $sql = "SELECT id, username, email, level, avatar, join_date FROM users WHERE level = 'user' ORDER BY join_date DESC";
+    $res = mysqli_query($config, $sql);
+    if ($res) {
+        while ($r = mysqli_fetch_assoc($res)) $rows[] = $r;
+        mysqli_free_result($res);
+    }
 }
 
 if (!isset($baseUrl)) {
@@ -28,19 +30,50 @@ if (!isset($baseUrl)) {
 
 <div class="bg-gray-900 min-h-screen">
   <div class="max-w-7xl mx-auto px-6 py-8">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-100">Daftar Siswa</h1>
         <p class="text-sm text-gray-400 mt-1">Manage student accounts</p>
       </div>
       <a href="index.php?page=create_user" 
-         class="bg-amber-600 hover:bg-amber-700 text-white rounded-md px-4 py-2 text-sm font-medium transition-colors inline-flex items-center gap-2">
+         class="bg-amber-600 hover:bg-amber-700 text-white rounded-md px-4 py-2 text-sm font-medium transition-colors inline-flex items-center gap-2 whitespace-nowrap">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
         Tambah Siswa
       </a>
+    </div>
+
+    <div class="mb-6 bg-gray-800 border border-gray-700 rounded-lg p-4">
+      <form method="GET" action="index.php" id="studentSearchForm" class="flex flex-col sm:flex-row gap-3">
+        <input type="hidden" name="page" value="students">
+        
+        <div class="flex-1 relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <input type="text" 
+                 name="q" 
+                 id="studentSearchInput"
+                 placeholder="Search by name, username, or email..." 
+                 value="<?= htmlspecialchars($_GET['q'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+                 class="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 text-sm text-gray-200 rounded-md focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none transition-colors placeholder-gray-500">
+        </div>
+
+        <button type="submit" 
+                class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap">
+          Search
+        </button>
+        
+        <?php if (!empty($_GET['q'])): ?>
+        <a href="index.php?page=students" 
+           class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap">
+          Clear
+        </a>
+        <?php endif; ?>
+      </form>
     </div>
 
     <?php if (!empty($errorMsg)): ?>
@@ -54,7 +87,6 @@ if (!isset($baseUrl)) {
     </div>
     <?php endif; ?>
 
-    <!-- Stats Summary -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
       <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-4">
         <div class="flex items-center gap-3">
@@ -85,7 +117,6 @@ if (!isset($baseUrl)) {
       </div>
     </div>
 
-    <!-- Students Table -->
     <?php if (count($rows) > 0): ?>
     <div class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden">
       <div class="overflow-x-auto">
@@ -102,7 +133,6 @@ if (!isset($baseUrl)) {
           <tbody class="divide-y divide-gray-700">
             <?php foreach ($rows as $row): ?>
             <tr class="hover:bg-gray-800 transition-colors">
-              <!-- User Info -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center gap-3">
                   <?php
@@ -111,9 +141,9 @@ if (!isset($baseUrl)) {
                   $username = $row['username'] ?? '';
                   $initial = strtoupper(substr($username, 0, 1));
                   ?>
-                  <div class="relative flex-shrink-0">
+                  <div class="relative flex-shrink-0 cursor-pointer" data-view-profile="<?= (int)($row['id'] ?? 0) ?>" title="View Profile">
                     <img src="<?= htmlspecialchars($avatarSrc) ?>"
-                         class="w-10 h-10 rounded-full object-cover border-2 border-amber-700" 
+                         class="w-10 h-10 rounded-full object-cover border-2 border-amber-700 hover:border-amber-500 transition-colors" 
                          alt="<?= htmlspecialchars($username) ?>"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center hidden">
@@ -121,13 +151,12 @@ if (!isset($baseUrl)) {
                     </div>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-200"><?= htmlspecialchars($username) ?></p>
+                    <p class="text-sm font-medium text-gray-200 cursor-pointer hover:text-amber-400 transition-colors" data-view-profile="<?= (int)($row['id'] ?? 0) ?>" title="View Profile"><?= htmlspecialchars($username) ?></p>
                     <p class="text-xs text-gray-500">ID: <?= htmlspecialchars($row['id'] ?? '') ?></p>
                   </div>
                 </div>
               </td>
 
-              <!-- Email -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center gap-2">
                   <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +166,6 @@ if (!isset($baseUrl)) {
                 </div>
               </td>
 
-              <!-- Status -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border bg-amber-500/10 text-amber-400 border-amber-500/20">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +175,6 @@ if (!isset($baseUrl)) {
                 </span>
               </td>
 
-              <!-- Join Date -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center gap-2">
                   <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +184,6 @@ if (!isset($baseUrl)) {
                 </div>
               </td>
 
-              <!-- Actions -->
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
                   <a href="index.php?page=edit_user&id=<?= (int)($row['id'] ?? 0) ?>" 
@@ -167,16 +193,17 @@ if (!isset($baseUrl)) {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
                   </a>
-                  <form method="post" action="index.php?page=delete_user" class="inline">
-                    <input type="hidden" name="id" value="<?= (int)($row['id'] ?? 0) ?>">
-                    <button type="submit" 
-                            class="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
-                            title="Delete">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                      </svg>
-                    </button>
-                  </form>
+                  <button type="button" 
+                          class="delete-btn p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                          title="Delete"
+                          data-id="<?= (int)($row['id'] ?? 0) ?>"
+                          data-url="index.php?page=delete_user"
+                          data-item-name="<?= htmlspecialchars($row['username'] ?? 'User', ENT_QUOTES, 'UTF-8') ?>"
+                          data-row-selector="tr">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -206,3 +233,60 @@ if (!isset($baseUrl)) {
     <?php endif; ?>
   </div>
 </div>
+
+<script>
+(function() {
+  const form = document.getElementById('studentSearchForm');
+  const input = document.getElementById('studentSearchInput');
+  let timer = null;
+
+  if (form && input) {
+    function performSearch() {
+      const formData = new FormData(form);
+      const params = new URLSearchParams();
+      params.set('page', 'students');
+      if (formData.get('q')) params.set('q', formData.get('q'));
+      params.set('ajax', '1');
+
+      fetch('index.php?' + params.toString(), { 
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newContent = doc.querySelector('.max-w-7xl');
+        if (newContent) {
+          const currentContent = document.querySelector('.max-w-7xl');
+          if (currentContent) {
+            currentContent.innerHTML = newContent.innerHTML;
+            const scripts = doc.querySelectorAll('script');
+            scripts.forEach(s => {
+              const ns = document.createElement('script');
+              if (s.src) ns.src = s.src;
+              else ns.textContent = s.textContent;
+              document.body.appendChild(ns);
+            });
+          }
+        }
+        const friendlyUrl = 'index.php?page=students' + 
+          (params.get('q') ? '&q=' + encodeURIComponent(params.get('q')) : '');
+        try { history.pushState({}, '', friendlyUrl); } catch (e) {}
+      })
+      .catch(err => console.error('Search error:', err));
+    }
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      clearTimeout(timer);
+      performSearch();
+    });
+
+    input.addEventListener('input', function() {
+      clearTimeout(timer);
+      timer = setTimeout(performSearch, 300);
+    }, { passive: true });
+  }
+})();
+</script>

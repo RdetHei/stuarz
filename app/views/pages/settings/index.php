@@ -106,9 +106,9 @@ if ($userLevel === 'admin') {
                 </div>
             </div>
 
-            <!-- Main Content Area -->
+            
             <div class="lg:col-span-2 space-y-6">
-                <!-- Profile Settings -->
+                
                 <div id="profile" class="bg-[#1f2937] border border-gray-700 rounded-lg p-6">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center">
@@ -161,7 +161,7 @@ if ($userLevel === 'admin') {
                     </form>
                 </div>
 
-                <!-- Password Settings -->
+                
                 <div id="password" class="bg-[#1f2937] border border-gray-700 rounded-lg p-6">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center">
@@ -211,7 +211,7 @@ if ($userLevel === 'admin') {
                     </form>
                 </div>
 
-                <!-- Preferences Settings -->
+                
                 <div id="preferences" class="bg-[#1f2937] border border-gray-700 rounded-lg p-6">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center">
@@ -249,31 +249,53 @@ if ($userLevel === 'admin') {
                             </label>
                         </div>
 
-                        <!-- Dark mode preference removed (feature rolled back) -->
+                        <div class="flex items-center justify-between py-3 border-b border-gray-700">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-200">AI Shorekeeper</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">Aktifkan asisten AI Shorekeeper</p>
+                            </div>
+                            <form method="post" action="index.php?page=settings" class="inline">
+                                <input type="hidden" name="update_ai_preference" value="1">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" 
+                                           name="ai_shorekeeper_enabled" 
+                                           value="1"
+                                           class="sr-only peer ai-shorekeeper-toggle"
+                                           <?= (!isset($user['ai_shorekeeper_enabled']) || $user['ai_shorekeeper_enabled'] == 1) ? 'checked' : '' ?>
+                                           onchange="this.form.submit()">
+                                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#5865F2] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5865F2]"></div>
+                                </label>
+                            </form>
+                        </div>
+
+                        
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Include AI Helper -->
+    
     <?php 
-    if (!defined('BASEPATH')) {
-        define('BASEPATH', true);
+
+    $aiEnabled = isset($user['ai_shorekeeper_enabled']) ? (int)$user['ai_shorekeeper_enabled'] : 1;
+    if ($aiEnabled == 1) {
+        if (!defined('BASEPATH')) {
+            define('BASEPATH', true);
+        }
+        include __DIR__ . '/../../components/ai-helper/chat-modal.php';
     }
-    include __DIR__ . '/../../components/ai-helper/chat-modal.php'; 
     ?>
 
     <script>
-        // Smooth scroll for navigation
+
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    
-                    // Update active state
+
                     document.querySelectorAll('nav a').forEach(link => {
                         link.classList.remove('text-gray-200', 'bg-[#5865F2]/10', 'border', 'border-[#5865F2]/20');
                         link.classList.add('text-gray-400', 'hover:text-gray-200', 'hover:bg-gray-800');

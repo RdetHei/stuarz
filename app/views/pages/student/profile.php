@@ -1,6 +1,6 @@
 <?php
-// Student: Profile
-// Expects: $user array
+
+
 $user = $user ?? ($_SESSION['user'] ?? []);
 ?>
 <div class="max-w-3xl mx-auto p-6">

@@ -11,7 +11,7 @@ $offset = ($page - 1) * $limit;
 ?>
 
 <div class="max-w-7xl mx-auto p-6 pr-20">
-    <!-- Header -->
+    
     <div class="mb-8">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-4">
@@ -37,10 +37,10 @@ $offset = ($page - 1) * $limit;
     </div>
 
 <?php if (!$ajax): ?>
-    <!-- Filter & Search Bar -->
+    
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-6">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <!-- Show Entries -->
+            
             <form method="get" class="flex items-center gap-3">
                 <input type="hidden" name="page" value="dashboard-admin-docs">
                 <label class="text-sm font-medium text-gray-400">Show</label>
@@ -54,7 +54,7 @@ $offset = ($page - 1) * $limit;
                 <label class="text-sm font-medium text-gray-400">entries</label>
             </form>
 
-            <!-- Search Form -->
+            
             <form method="get" class="flex items-center gap-2">
                 <input type="hidden" name="page" value="dashboard-admin-docs">
                 <input type="hidden" name="limit" value="<?= htmlspecialchars($limit ?? 10) ?>">
@@ -84,7 +84,7 @@ $offset = ($page - 1) * $limit;
 
     <div id="adminDocsContent">
 
-    <!-- Table -->
+    
     <?php if (!empty($docs)): ?>
     <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
         <div class="overflow-x-auto" style="max-width: 100%;">
@@ -137,21 +137,18 @@ $offset = ($page - 1) * $limit;
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </a>
-                                <form method="post" 
-                                      action="index.php?page=dashboard-admin-docs-delete" 
-                                      class="inline-block m-0 p-0" 
-                                      onsubmit="return confirm('Hapus dokumen ini?')"
-                                      style="flex-shrink: 0; margin: 0; padding: 0; display: inline-block; box-sizing: border-box;">
-                                    <input type="hidden" name="id" value="<?= (int)$d['id'] ?>">
-                                    <button type="submit" 
-                                            class="p-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 rounded-lg transition-all duration-200" 
-                                            title="Delete"
-                                            style="flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-sizing: border-box;">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                        class="delete-btn p-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 rounded-lg transition-all duration-200" 
+                                        title="Delete"
+                                        data-id="<?= (int)$d['id'] ?>"
+                                        data-url="index.php?page=dashboard-admin-docs-delete"
+                                        data-item-name="<?= htmlspecialchars($d['title'], ENT_QUOTES, 'UTF-8') ?>"
+                                        data-row-selector="tr"
+                                        style="flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-sizing: border-box;">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -160,7 +157,7 @@ $offset = ($page - 1) * $limit;
             </table>
         </div>
 
-        <!-- Pagination Footer -->
+        
         <div class="px-6 py-4 bg-gray-900 border-t border-gray-700">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="text-sm text-gray-400">
@@ -181,7 +178,7 @@ $offset = ($page - 1) * $limit;
                     
                     <div class="flex items-center gap-1 flex-wrap">
                         <?php
-                        // Always show first page
+
                         if ((int)$page > 3): ?>
                             <a href="?page=dashboard-admin-docs&limit=<?= $limit ?>&p=1&q=<?= urlencode($q ?? '') ?>" 
                                class="px-4 py-2 rounded-lg font-medium transition-all bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">
@@ -192,11 +189,9 @@ $offset = ($page - 1) * $limit;
                             <?php endif; 
                         endif;
 
-                        // Calculate range of pages to show
                         $start = max(1, (int)$page - 2);
                         $end = min($totalPages, (int)$page + 2);
 
-                        // Show page numbers
                         for ($i = $start; $i <= $end; $i++): ?>
                             <a href="?page=dashboard-admin-docs&limit=<?= $limit ?>&p=<?= $i ?>&q=<?= urlencode($q ?? '') ?>" 
                                class="px-4 py-2 rounded-lg font-medium transition-all <?= (int)$i === (int)$page ? 'bg-indigo-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700' ?>">
@@ -204,7 +199,6 @@ $offset = ($page - 1) * $limit;
                             </a>
                         <?php endfor;
 
-                        // Show last page if needed
                         if ($end < $totalPages): ?>
                             <?php if ($end < $totalPages - 1): ?>
                                 <span class="px-2 text-gray-500">...</span>
@@ -232,7 +226,7 @@ $offset = ($page - 1) * $limit;
     </div>
 
     <?php else: ?>
-    <!-- Empty State -->
+    
     <div class="bg-gray-800 border border-gray-700 rounded-xl p-12 text-center">
         <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-indigo-600/20 flex items-center justify-center">
             <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,7 +260,7 @@ $offset = ($page - 1) * $limit;
 
 <?php if (!$ajax): ?>
 <script>
-// Live search for Admin Docs (targets admin docs search form)
+
 (function(){
     const pageInput = document.querySelector('input[name="page"][value="dashboard-admin-docs"]');
     const form = pageInput ? pageInput.closest('form') : null;

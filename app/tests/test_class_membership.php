@@ -25,14 +25,13 @@ class ClassMembershipTest {
     private ClassService $service;
     private $mysqli;
     private ClassModel $model;
-    
-    // Test IDs (adjust based on your test data)
+
     private int $testUserId = 999; // Use a test user ID that exists
     private int $testClassId1 = 1;
     private int $testClassId2 = 2;
     
     public function __construct() {
-        // PDO Connection
+
         try {
             $this->pdo = new PDO('mysql:host=localhost;dbname=stuarz;charset=utf8mb4', 'root', '');
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -40,12 +39,10 @@ class ClassMembershipTest {
             $this->error("PDO Connection failed: " . $e->getMessage());
             exit(1);
         }
-        
-        // MySQLi for ClassModel
+
         global $config;
         $this->mysqli = $config;
-        
-        // Initialize services
+
         $this->service = new ClassService($this->pdo);
         $this->model = new ClassModel($this->mysqli);
     }
@@ -92,10 +89,9 @@ class ClassMembershipTest {
         $test = ['name' => 'Join Class', 'pass' => false, 'message' => ''];
         
         try {
-            // Clean up first
+
             $this->service->leaveClass($this->testUserId, $this->testClassId1);
-            
-            // Join class
+
             $result = $this->service->joinClass($this->testUserId, $this->testClassId1, 'student');
             
             if ($result && $this->service->isUserMember($this->testUserId, $this->testClassId1)) {
@@ -115,13 +111,11 @@ class ClassMembershipTest {
         $test = ['name' => 'Join Idempotency (ON DUPLICATE KEY UPDATE)', 'pass' => false, 'message' => ''];
         
         try {
-            // Join once with role 'student'
+
             $this->service->joinClass($this->testUserId, $this->testClassId1, 'student');
-            
-            // Join again with role 'teacher'
+
             $result = $this->service->joinClass($this->testUserId, $this->testClassId1, 'teacher');
-            
-            // Check: should have 1 row, role should be 'teacher'
+
             $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM class_members WHERE user_id = ? AND class_id = ?');
             $stmt->execute([$this->testUserId, $this->testClassId1]);
             $count = $stmt->fetchColumn();
@@ -145,15 +139,13 @@ class ClassMembershipTest {
         $test = ['name' => 'getAllClassesWithUserStatus (CRITICAL)', 'pass' => false, 'message' => ''];
         
         try {
-            // Setup: user joined to testClassId1 only
+
             $this->service->leaveClass($this->testUserId, $this->testClassId1);
             $this->service->leaveClass($this->testUserId, $this->testClassId2);
             $this->service->joinClass($this->testUserId, $this->testClassId1, 'student');
-            
-            // Get all classes with status
+
             $classes = $this->service->getAllClassesWithUserStatus($this->testUserId);
-            
-            // Verify
+
             $class1 = array_filter($classes, fn($c) => $c['id'] == $this->testClassId1);
             $class2 = array_filter($classes, fn($c) => $c['id'] == $this->testClassId2);
             
@@ -201,7 +193,7 @@ class ClassMembershipTest {
         $test = ['name' => 'Leave Class', 'pass' => false, 'message' => ''];
         
         try {
-            // User already in testClassId1, leave it
+
             $result = $this->service->leaveClass($this->testUserId, $this->testClassId1);
             $isMember = $this->service->isUserMember($this->testUserId, $this->testClassId1);
             
@@ -222,12 +214,11 @@ class ClassMembershipTest {
         $test = ['name' => 'ClassModel::getAllClassesWithUserStatus', 'pass' => false, 'message' => ''];
         
         try {
-            // Setup: user joined testClassId1 only
+
             $this->service->leaveClass($this->testUserId, $this->testClassId1);
             $this->service->leaveClass($this->testUserId, $this->testClassId2);
             $this->service->joinClass($this->testUserId, $this->testClassId1, 'student');
-            
-            // Get via ClassModel
+
             $classes = $this->model->getAllClassesWithUserStatus($this->testUserId);
             
             $class1 = array_filter($classes, fn($c) => $c['id'] == $this->testClassId1);
@@ -288,7 +279,6 @@ class ClassMembershipTest {
     }
 }
 
-// Run tests
 try {
     $tester = new ClassMembershipTest();
     $results = $tester->runAllTests();

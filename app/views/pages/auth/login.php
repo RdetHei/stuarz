@@ -10,16 +10,16 @@
 </head>
 <body class="bg-gray-900 min-h-screen">
     <div class="flex min-h-screen">
-        <!--left pannel branding -->
+        
 <div class="hidden lg:flex lg:w-1/2 bg-[#1f2937] p-12 flex-col justify-center relative overflow-hidden">
-    <!-- Background Pattern -->
+    
     <div class="absolute inset-0 opacity-30">
         <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(88, 101, 242, 0.1) 1px, transparent 0); background-size: 40px 40px;"></div>
     </div>
 
 
             <div class="max-w-md mx-auto relative z-10">
-                <!-- Logo -->
+                
                 <div class="flex justify-center mb-10">
                     <div class="w-20 h-20 rounded-2xl bg-[#5865F2] flex items-center justify-center shadow-2xl">
                         <svg fill="#ffffff" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 293.538 293.538" class="h-12 w-12">
@@ -40,7 +40,7 @@
                     <p class="text-gray-400 text-lg">Your gateway to educational excellence</p>
                 </div>
                 
-                <!-- Features -->
+                
                 <div class="space-y-4">
                     <div class="flex items-start gap-4 p-4 bg-[#111827] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
                         <div class="w-10 h-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center border border-[#5865F2]/20 flex-shrink-0">
@@ -81,10 +81,10 @@
             </div>
         </div>
 
-        <!-- Right Panel - Login Form -->
+        
         <div class="w-full lg:w-1/2 bg-gray-900 p-8 lg:p-12 flex flex-col justify-center">
             <div class="max-w-md mx-auto w-full">
-                <!-- Mobile Logo -->
+                
                 <div class="flex justify-center mb-8 lg:hidden">
                     <div class="w-16 h-16 rounded-xl bg-[#5865F2] flex items-center justify-center shadow-lg">
                         <svg fill="#ffffff" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 293.538 293.538" class="h-10 w-10">
@@ -100,17 +100,17 @@
                     </div>
                 </div>
 
-                <!-- Login Card -->
+                
                 <div class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden">
-                    <!-- Card Header -->
+                    
                     <div class="px-6 py-5 border-b border-gray-700">
                         <h2 class="text-2xl font-bold text-gray-100">Sign in</h2>
                         <p class="text-sm text-gray-400 mt-1">Enter your credentials to access your account</p>
                     </div>
 
-                    <!-- Form -->
+                    
                     <form action="index.php?page=login" method="POST" class="px-6 py-6 space-y-5">
-                        <!-- Username Field -->
+                        
                         <div>
                             <label for="username" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                                 Username <span class="text-red-400">*</span>
@@ -126,7 +126,7 @@
                             />
                         </div>
 
-                        <!-- Password Field -->
+                        
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <label for="password" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -163,7 +163,7 @@
                             </div>
                         </div>
 
-                        <!-- Remember Me -->
+                        
                         <div class="flex items-center">
                             <input 
                                 id="remember" 
@@ -175,7 +175,7 @@
                             </label>
                         </div>
 
-                        <!-- Submit Button -->
+                        
                         <button 
                             type="submit"
                             class="w-full px-4 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium rounded-md transition-colors flex items-center justify-center gap-2"
@@ -187,7 +187,7 @@
                         </button>
                     </form>
 
-                    <!-- Card Footer -->
+                    
                     <div class="px-6 py-4 border-t border-gray-700 bg-[#111827]">
                         <p class="text-center text-sm text-gray-400">
                             Don't have an account?
@@ -198,7 +198,7 @@
                     </div>
                 </div>
 
-                <!-- Footer -->
+                
                 <div class="mt-8 flex items-center justify-between text-xs text-gray-500">
                     <span>© 2024 Stuarz</span>
                     <div class="flex items-center gap-2">
@@ -210,7 +210,7 @@
         </div>
     </div>
     <script>
-        // Password visibility toggle
+
         const passwordInput = document.getElementById('password');
         const togglePassword = document.getElementById('togglePassword');
         const eyeIcon = document.getElementById('eyeIcon');

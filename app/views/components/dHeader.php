@@ -147,7 +147,6 @@ if ($currentPage === 'dashboard' && $currentSub) {
         });
     })();
 
-    // Print button now links directly to print_table; no dropdown required.
 </script>
 
 <script>

@@ -1,6 +1,6 @@
 <?php
-// JoinClassForm component
-// Expects: $action (default index.php?page=join_class), optional $error
+
+
 $action = $action ?? 'index.php?page=join_class';
 $error = $error ?? null;
 ?>

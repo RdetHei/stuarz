@@ -1,6 +1,6 @@
 <?php
-// Student: Attendance
-// Expects: $attendances (array), summary counts: $presentCount, $lateCount, $leaveCount, $sickCount
+
+
 $attendances = $attendances ?? [];
 $presentCount = $presentCount ?? 0;
 $lateCount = $lateCount ?? 0;

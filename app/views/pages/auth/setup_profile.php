@@ -6,11 +6,27 @@
     <title>Setup Profile - Stuarz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/x-icon" href="public/assets/diamond.ico">
+    <style>
+        body {
+            overflow: auto !important;
+            padding-right: 0 !important;
+        }
+        .fixed.inset-0[style*="z-index"]:not(#setup-profile-backdrop),
+        .fixed.inset-0[class*="z-"]:not(#setup-profile-backdrop) {
+            display: none !important;
+        }
+        [id*="backdrop"]:not(#setup-profile-backdrop),
+        [id*="Backdrop"]:not(#setup-profile-backdrop),
+        [id*="modal"]:not(.setup-profile-modal),
+        [id*="Modal"]:not(.setup-profile-modal) {
+            display: none !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
     
     <div class="max-w-3xl w-full">
-        <!-- Header -->
+        
         <div class="text-center mb-8">
             <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-[#5865F2] flex items-center justify-center shadow-lg">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +37,7 @@
             <p class="text-gray-400">Lengkapi informasi profile Anda untuk melanjutkan</p>
         </div>
 
-        <!-- Flash Messages -->
+        
         <?php if (isset($_SESSION['setup_errors'])): ?>
             <div class="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
                 <div class="flex items-start gap-3">
@@ -38,11 +54,11 @@
             <?php unset($_SESSION['setup_errors']); ?>
         <?php endif; ?>
 
-        <!-- Setup Form -->
+        
         <div class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden">
             <form method="post" action="index.php?page=setup-profile/store" enctype="multipart/form-data" id="setupForm">
                 
-                <!-- Personal Information Section -->
+                
                 <div class="px-6 py-5 border-b border-gray-700 bg-[#111827]">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center border border-[#5865F2]/20">
@@ -58,7 +74,7 @@
                 </div>
 
                 <div class="px-6 py-6 space-y-5">
-                    <!-- Name -->
+                    
                     <div>
                         <label for="name" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                             Nama Lengkap <span class="text-red-400">*</span>
@@ -71,7 +87,7 @@
                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" />
                     </div>
 
-                    <!-- Phone -->
+                    
                     <div>
                         <label for="phone" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                             Nomor Telepon <span class="text-red-400">*</span>
@@ -84,7 +100,7 @@
                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" />
                     </div>
 
-                    <!-- Address -->
+                    
                     <div>
                         <label for="address" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                             Alamat <span class="text-red-400">*</span>
@@ -97,7 +113,7 @@
                                   class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors resize-none"></textarea>
                     </div>
 
-                    <!-- Class Code -->
+                    
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <label for="class" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -108,16 +124,12 @@
                         <input type="text" 
                                id="class"
                                name="class" 
-<<<<<<< HEAD
                                placeholder="Contoh: ABC123"
-=======
-                               placeholder="Contoh: ABCD😂1"
->>>>>>> 9b9b02c (dadidudedo)
                                maxlength="12"
                                class="w-full px-3 py-2.5 bg-[#111827] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors" />
                     </div>
 
-                    <!-- Bio -->
+                    
                     <div>
                         <label for="bio" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                             Bio
@@ -130,7 +142,7 @@
                     </div>
                 </div>
 
-                <!-- Profile Images Section -->
+                
                 <div class="px-6 py-5 border-t border-gray-700 bg-[#111827]">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
@@ -147,7 +159,7 @@
 
                 <div class="px-6 py-6 space-y-5">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <!-- Avatar -->
+                        
                         <div>
                             <label for="avatar" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                                 Avatar
@@ -166,7 +178,7 @@
                             </label>
                         </div>
 
-                        <!-- Banner -->
+                        
                         <div>
                             <label for="banner" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                                 Banner
@@ -187,7 +199,7 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
+                
                 <div class="px-6 py-5 border-t border-gray-700 bg-[#111827]">
                     <button type="submit" 
                             class="w-full px-6 py-3 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md font-medium transition-colors flex items-center justify-center gap-2">
@@ -200,7 +212,7 @@
             </form>
         </div>
 
-        <!-- Info Card -->
+        
         <div class="mt-6 bg-[#1f2937] border border-gray-700 rounded-lg p-6">
             <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-[#5865F2]/10 rounded-lg flex items-center justify-center border border-[#5865F2]/20">
@@ -236,12 +248,56 @@
     </div>
 
     <script>
+    (function() {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        function removeOverlays() {
+            const selectors = [
+                '[id*="backdrop"]:not(#setup-profile-backdrop)',
+                '[id*="Backdrop"]:not(#setup-profile-backdrop)',
+                '[id*="modal"]:not(.setup-profile-modal)',
+                '[id*="Modal"]:not(.setup-profile-modal)',
+                '.fixed.inset-0.bg-black',
+                '.fixed.inset-0[class*="bg-black"]',
+                '.fixed.inset-0[class*="backdrop"]'
+            ];
+            
+            selectors.forEach(selector => {
+                try {
+                    document.querySelectorAll(selector).forEach(el => {
+                        const zIndex = parseInt(window.getComputedStyle(el).zIndex) || 0;
+                        if (zIndex >= 9999 || el.classList.contains('hidden')) {
+                            el.remove();
+                        }
+                    });
+                } catch(e) {}
+            });
+            
+            const allFixed = document.querySelectorAll('.fixed.inset-0');
+            allFixed.forEach(el => {
+                const zIndex = parseInt(window.getComputedStyle(el).zIndex) || 0;
+                if (zIndex >= 9999 && !el.closest('form')) {
+                    el.remove();
+                }
+            });
+        }
+        
+        removeOverlays();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            removeOverlays();
+            setTimeout(removeOverlays, 100);
+            setTimeout(removeOverlays, 500);
+        });
+    })();
+    
     document.addEventListener('DOMContentLoaded', function() {
+        
         const form = document.getElementById('setupForm');
         const avatarInput = document.getElementById('avatar');
         const bannerInput = document.getElementById('banner');
-        
-        // File input preview with better feedback
+
         function setupFilePreview(input) {
             input.addEventListener('change', function(e) {
                 const file = e.target.files[0];
@@ -250,15 +306,13 @@
                 if (file) {
                     const fileName = file.name;
                     const fileSize = (file.size / 1024 / 1024).toFixed(2);
-                    
-                    // Check file size (max 5MB)
+
                     if (file.size > 5 * 1024 * 1024) {
                         alert('File terlalu besar. Maksimal 5MB.');
                         input.value = '';
                         return;
                     }
-                    
-                    // Update label with filename
+
                     const textSpan = label.querySelector('span.text-sm');
                     if (textSpan) {
                         textSpan.textContent = `${fileName} (${fileSize}MB)`;
@@ -270,8 +324,7 @@
         
         if (avatarInput) setupFilePreview(avatarInput);
         if (bannerInput) setupFilePreview(bannerInput);
-        
-        // Form validation
+
         if (form) {
             form.addEventListener('submit', function(e) {
                 const name = document.getElementById('name').value.trim();

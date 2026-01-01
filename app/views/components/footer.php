@@ -97,7 +97,7 @@
                 </ul>
             </div>
 
-            <!-- Legal (tetap area legal) -->
+            
             <div>
                 <h3 class="text-sm font-semibold text-white mb-4">Legal</h3>
                 <ul class="space-y-2 text-sm">
@@ -108,7 +108,7 @@
             </div>
         </div>
 
-        <!-- Newsletter / kontak singkat -->
+        
         <div class="mt-8 sm:flex sm:items-center sm:justify-between">
             <p class="text-sm text-gray-400 mb-4 sm:mb-0">
                 Ingin update materi atau pengumuman? Daftar newsletter kami.
@@ -125,7 +125,7 @@
             </form>
         </div>
 
-        <!-- Garis pemisah dan copyright dinamis -->
+        
         <div class="mt-10 border-t border-gray-700 pt-6 text-sm text-gray-400 text-center">
             &copy; <?php echo date('Y'); ?> Stuarz. All rights reserved.
         </div>

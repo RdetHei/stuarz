@@ -230,7 +230,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: `question=${encodeURIComponent(question)}`
             });
 
-            // Remove typing indicator
             document.getElementById('typing-indicator')?.remove();
 
             if (!response.ok) {
@@ -251,7 +250,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Function to add a message to the chat
     function addMessage(content, isUser = false) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'flex items-start gap-2.5 ' + (isUser ? 'justify-end' : '');

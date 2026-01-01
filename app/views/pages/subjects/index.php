@@ -5,8 +5,15 @@
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-100">Subjects</h1>
-        <p class="text-sm text-gray-400 mt-1">Manage all subjects and teachers</p>
+        <p class="text-sm text-gray-400 mt-1">
+          <?php if (isset($_SESSION['level']) && ($_SESSION['level'] === 'admin' || $_SESSION['level'] === 'guru')): ?>
+          Manage all subjects and teachers
+          <?php else: ?>
+          View all available subjects
+          <?php endif; ?>
+        </p>
       </div>
+      <?php if (isset($_SESSION['level']) && ($_SESSION['level'] === 'admin' || $_SESSION['level'] === 'guru')): ?>
       <a href="index.php?page=subjects/create" 
          class="bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md px-4 py-2 text-sm font-medium transition-colors inline-flex items-center gap-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,6 +21,40 @@
         </svg>
         Add Subject
       </a>
+      <?php endif; ?>
+    </div>
+
+    
+    <div class="mb-6 bg-[#1f2937] border border-gray-700 rounded-lg p-4">
+      <form method="GET" action="index.php" id="subjectSearchForm" class="flex flex-col sm:flex-row gap-3">
+        <input type="hidden" name="page" value="subjects">
+        
+        <div class="flex-1 relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <input type="text" 
+                 name="q" 
+                 id="subjectSearchInput"
+                 placeholder="Search subjects, teacher..." 
+                 value="<?= htmlspecialchars($_GET['q'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+                 class="w-full pl-10 pr-4 py-2 bg-[#111827] border border-gray-700 text-sm text-gray-200 rounded-md focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] focus:outline-none transition-colors placeholder-gray-500">
+        </div>
+
+        <button type="submit" 
+                class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap">
+          Search
+        </button>
+        
+        <?php if (!empty($_GET['q'])): ?>
+        <a href="index.php?page=subjects" 
+           class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap">
+          Clear
+        </a>
+        <?php endif; ?>
+      </form>
     </div>
 
     
@@ -88,13 +129,15 @@
               <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Description</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Guru Pengajar</th>
+              <?php if (isset($_SESSION['level']) && ($_SESSION['level'] === 'admin' || $_SESSION['level'] === 'guru')): ?>
               <th class="px-6 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</th>
+              <?php endif; ?>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-700">
             <?php if (empty($subjects ?? [])): ?>
             <tr>
-              <td colspan="4" class="px-6 py-12 text-center">
+              <td colspan="<?= (isset($_SESSION['level']) && ($_SESSION['level'] === 'admin' || $_SESSION['level'] === 'guru')) ? '4' : '3' ?>" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center justify-center">
                   <div class="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center mb-3">
                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,6 +145,7 @@
                     </svg>
                   </div>
                   <p class="text-gray-400 text-sm mb-3">No subjects found</p>
+                  <?php if (isset($_SESSION['level']) && ($_SESSION['level'] === 'admin' || $_SESSION['level'] === 'guru')): ?>
                   <a href="index.php?page=subjects/create" 
                      class="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md text-sm font-medium transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,6 +153,7 @@
                     </svg>
                     Create First Subject
                   </a>
+                  <?php endif; ?>
                 </div>
               </td>
             </tr>
@@ -142,6 +187,7 @@
                 <span class="text-sm text-gray-500 italic">Belum ditentukan</span>
                 <?php endif; ?>
               </td>
+              <?php if (isset($_SESSION['level']) && ($_SESSION['level'] === 'admin' || $_SESSION['level'] === 'guru')): ?>
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
                   <a href="index.php?page=subjects/edit&id=<?= $s['id'] ?>" 
@@ -151,18 +197,20 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
                   </a>
-                  <form method="post" action="index.php?page=subjects/delete" class="inline" onsubmit="return confirm('Delete this subject?')">
-                    <input type="hidden" name="id" value="<?= $s['id'] ?>">
-                    <button type="submit" 
-                            class="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors" 
-                            title="Delete">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                      </svg>
-                    </button>
-                  </form>
+                  <button type="button" 
+                          class="delete-btn p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors" 
+                          title="Delete"
+                          data-id="<?= $s['id'] ?>"
+                          data-url="index.php?page=subjects/delete"
+                          data-item-name="<?= htmlspecialchars($s['name'] ?? 'Subject', ENT_QUOTES, 'UTF-8') ?>"
+                          data-row-selector="tr">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
                 </div>
               </td>
+              <?php endif; ?>
             </tr>
             <?php endforeach; ?>
             <?php endif; ?>
@@ -172,3 +220,62 @@
     </div>
   </div>
 </div>
+
+<script>
+
+(function() {
+  const form = document.getElementById('subjectSearchForm');
+  const input = document.getElementById('subjectSearchInput');
+  let timer = null;
+
+  if (form && input) {
+    function performSearch() {
+      const formData = new FormData(form);
+      const params = new URLSearchParams();
+      params.set('page', 'subjects');
+      if (formData.get('q')) params.set('q', formData.get('q'));
+      params.set('ajax', '1');
+
+      fetch('index.php?' + params.toString(), { 
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newContent = doc.querySelector('.bg-gray-900');
+        if (newContent) {
+          const currentContent = document.querySelector('.bg-gray-900');
+          if (currentContent) {
+            currentContent.innerHTML = newContent.innerHTML;
+
+            const scripts = doc.querySelectorAll('script');
+            scripts.forEach(s => {
+              const ns = document.createElement('script');
+              if (s.src) ns.src = s.src;
+              else ns.textContent = s.textContent;
+              document.body.appendChild(ns);
+            });
+          }
+        }
+        const friendlyUrl = 'index.php?page=subjects' + 
+          (params.get('q') ? '&q=' + encodeURIComponent(params.get('q')) : '');
+        try { history.pushState({}, '', friendlyUrl); } catch (e) {}
+      })
+      .catch(err => console.error('Search error:', err));
+    }
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      clearTimeout(timer);
+      performSearch();
+    });
+
+    input.addEventListener('input', function() {
+      clearTimeout(timer);
+      timer = setTimeout(performSearch, 300);
+    }, { passive: true });
+  }
+})();
+</script>

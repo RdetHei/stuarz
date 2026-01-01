@@ -5,7 +5,7 @@ $user = $_SESSION['user'] ?? null;
 
 <div id="notificationsPage" class="bg-gray-900 min-h-screen notifications-page">
     <div class="max-w-5xl mx-auto px-6 py-8">
-        <!-- Header -->
+        
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-gray-100">Notifikasi</h1>
@@ -36,10 +36,10 @@ $user = $_SESSION['user'] ?? null;
 
         </div>
 
-        <!-- Notifications List -->
+        
         <div class="space-y-3">
             <?php if (empty($notifications)): ?>
-                <!-- Empty State -->
+                
                 <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-12 text-center">
                     <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-800 flex items-center justify-center">
                         <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@ $user = $_SESSION['user'] ?? null;
                 </div>
             <?php else: ?>
                 <?php
-                // Separate notifications that reference localhost so we can show them as popups
+
                 $localNotifications = [];
                 $normalNotifications = [];
                 foreach ($notifications as $n) {
@@ -75,18 +75,18 @@ $user = $_SESSION['user'] ?? null;
                     ?>
 
                     <?php if ($isDelete): ?>
-                        <!-- Delete Notification -->
+                        
                         <div class="bg-[#1f2937] border-l-4 border-red-500 rounded-lg overflow-hidden hover:bg-gray-800 transition-colors">
                             <div class="p-4">
                                 <div class="flex items-start gap-4">
-                                    <!-- Icon -->
+                                    
                                     <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center border border-red-500/20">
                                         <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
                                     </div>
 
-                                    <!-- Content -->
+                                    
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-start justify-between gap-3 mb-2">
                                             <div>
@@ -125,7 +125,7 @@ $user = $_SESSION['user'] ?? null;
                         </div>
 
                     <?php else: ?>
-                        <!-- Regular Notification -->
+                        
                         <?php
                         $iconBg = 'bg-[#5865F2]/10';
                         $iconBorder = 'border-[#5865F2]/20';
@@ -169,14 +169,14 @@ $user = $_SESSION['user'] ?? null;
                         <div id="notif-<?= (int)$n['id'] ?>" class="bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors <?= $isUnread ? 'ring-1 ring-[#5865F2]/20' : '' ?>">
                             <div class="p-4">
                                 <div class="flex items-start gap-4">
-                                    <!-- Icon -->
+                                    
                                     <div class="flex-shrink-0 w-10 h-10 rounded-lg <?= $iconBg ?> flex items-center justify-center border <?= $iconBorder ?>">
                                         <svg class="w-5 h-5 <?= $iconColor ?>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<?= $icon ?>"/>
                                         </svg>
                                     </div>
 
-                                    <!-- Content -->
+                                    
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-start justify-between gap-3 mb-2">
                                             <div class="flex items-center gap-2">
@@ -229,7 +229,7 @@ $user = $_SESSION['user'] ?? null;
                     <?php endif; ?>
                 <?php endforeach; ?>
                 <?php if (!empty($localNotifications)): ?>
-                    <!-- Localhost popups: render toasts via JS -->
+                    
                     <div id="local-notif-container" aria-live="polite" class="fixed top-4 right-4 z-50 space-y-3"></div>
                     <script>
                         (function(){
@@ -262,7 +262,7 @@ $user = $_SESSION['user'] ?? null;
                                     try{
                                         const toast = createToast(n);
                                         container.appendChild(toast);
-                                        // Auto-mark read after 10s if unread
+
                                         if (n.is_read === 0 || n.is_read === '0' || n.is_read === false) {
                                             setTimeout(function(){
                                                 try { window.NotificationsUI.markReadUI(Number(n.id)); } catch(e){}
@@ -271,7 +271,6 @@ $user = $_SESSION['user'] ?? null;
                                     }catch(e){console.error(e)}
                                 });
 
-                                // Delegate close buttons
                                 container.addEventListener('click', function(e){
                                     const btn = e.target.closest && e.target.closest('.local-notif-close');
                                     if (!btn) return;
@@ -291,7 +290,7 @@ $user = $_SESSION['user'] ?? null;
 
 <script>
 function markAllAsRead() {
-    // Implement mark all as read functionality
+
     fetch('index.php?page=notifications/mark-all-read', {
         method: 'POST',
         headers: {

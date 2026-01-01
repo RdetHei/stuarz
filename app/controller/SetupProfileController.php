@@ -12,13 +12,11 @@ class SetupProfileController {
     }
     
     public function index() {
-        // Check if user is logged in
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
             exit;
         }
         
-        // Check if profile is already complete
         if ($this->isProfileComplete($_SESSION['user_id'])) {
             header('Location: index.php?page=dashboard');
             exit;
@@ -29,7 +27,6 @@ class SetupProfileController {
     }
     
     public function store() {
-        // Check if user is logged in
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
             exit;
@@ -37,7 +34,6 @@ class SetupProfileController {
         
         $userId = $_SESSION['user_id'];
         
-        // Validate required fields
         $errors = [];
         
         $name = trim($_POST['name'] ?? '');
@@ -60,11 +56,9 @@ class SetupProfileController {
             $errors[] = 'Alamat wajib diisi';
         }
         
-        // Handle file uploads
         $avatarPath = null;
         $bannerPath = null;
         
-        // Upload avatar
         if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
             $avatarPath = $this->uploadFile($_FILES['avatar'], 'avatars');
             if (!$avatarPath) {
@@ -72,7 +66,6 @@ class SetupProfileController {
             }
         }
         
-        // Upload banner
         if (isset($_FILES['banner']) && $_FILES['banner']['error'] === UPLOAD_ERR_OK) {
             $bannerPath = $this->uploadFile($_FILES['banner'], 'banners');
             if (!$bannerPath) {
@@ -86,7 +79,6 @@ class SetupProfileController {
             exit;
         }
         
-        // Update user profile
         $updateData = [
             'name' => $name,
             'phone' => $phone,
@@ -106,7 +98,6 @@ class SetupProfileController {
         $success = $this->model->updateProfile($userId, $updateData);
         
         if ($success) {
-            // Update session with new data
             $_SESSION['user']['name'] = $name;
             $_SESSION['user']['phone'] = $phone;
             $_SESSION['user']['address'] = $address;
@@ -116,7 +107,6 @@ class SetupProfileController {
             if ($bannerPath) $_SESSION['user']['banner'] = $bannerPath;
             
             $_SESSION['success'] = 'Profile berhasil diselesaikan!';
-            // Redirect user to appropriate dashboard based on their level
             $level = $_SESSION['user']['level'] ?? '';
             if ($level === 'admin') {
                 header('Location: index.php?page=dashboard-admin');
@@ -138,7 +128,6 @@ class SetupProfileController {
         
         if (!$user) return false;
         
-        // Check if essential fields are filled
         $requiredFields = ['name', 'phone', 'address'];
         
         foreach ($requiredFields as $field) {
@@ -151,9 +140,7 @@ class SetupProfileController {
     }
     
     private function uploadFile($file, $folder) {
-        // Filesystem path to uploads directory
         $uploadDirFs = dirname(__DIR__, 2) . "/public/uploads/{$folder}/";
-        // Public path returned to be saved in DB and used in <img src>
         $publicBase = "uploads/{$folder}/";
 
         if (!is_dir($uploadDirFs)) {
@@ -161,7 +148,7 @@ class SetupProfileController {
         }
 
         $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-        $maxSize = 5 * 1024 * 1024; // 5MB
+        $maxSize = 5 * 1024 * 1024;
 
         if (!in_array($file['type'], $allowedTypes, true)) {
             return false;
@@ -182,4 +169,3 @@ class SetupProfileController {
         return false;
     }
 }
-

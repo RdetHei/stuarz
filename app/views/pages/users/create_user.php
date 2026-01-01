@@ -4,7 +4,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
 
-//
 $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 if ($baseUrl === '/') $baseUrl = '';
 $prefix = ($baseUrl ? $baseUrl . '/' : '');
@@ -68,7 +67,7 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                 </div>
             </div>
 
-            <!-- Form Section -->
+            
             <div class="p-6 bg-gray-800">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-white">Buat Akun Baru</h2>
@@ -79,7 +78,7 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                     <input name="avatar" id="avatarInput" type="file" accept="image/*" class="hidden">
                     <input name="banner" id="bannerInput" type="file" accept="image/*" class="hidden">
 
-                    <!-- Username & Name -->
+                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">
@@ -100,7 +99,7 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                         </div>
                     </div>
 
-                    <!-- Email & Phone -->
+                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">
@@ -122,7 +121,7 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                         </div>
                     </div>
 
-                    <!-- Address -->
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Alamat</label>
                         <input 
@@ -131,7 +130,7 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                             placeholder="Jl. Contoh No. 123">
                     </div>
 
-                    <!-- Bio -->
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Bio</label>
                         <textarea 
@@ -143,7 +142,7 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
 
                     <div class="border-t border-gray-700 pt-6"></div>
 
-                    <!-- Password & Level -->
+                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">
@@ -178,7 +177,7 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
+                    
                     <div class="flex flex-col sm:flex-row gap-3 pt-4">
                         <button 
                             type="submit" 
@@ -207,14 +206,12 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
 (function() {
     function readPreview(file, previewEl) {
         if (!file) return;
-        
-        // Validate file size (5MB)
+
         if (file.size > 5 * 1024 * 1024) {
             alert('Ukuran file terlalu besar! Maksimal 5MB');
             return;
         }
-        
-        // Validate file type
+
         if (!file.type.startsWith('image/')) {
             alert('File harus berupa gambar!');
             return;
@@ -223,7 +220,6 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
         previewEl.src = URL.createObjectURL(file);
     }
 
-    // Avatar upload
     const avatarInput = document.getElementById('avatarInput');
     const avatarContainer = document.getElementById('avatarContainer');
     const avatarPreview = document.getElementById('avatarPreview');
@@ -255,7 +251,6 @@ $prefix = ($baseUrl ? $baseUrl . '/' : '');
         }
     });
 
-    // Banner upload
     const bannerInput = document.getElementById('bannerInput');
     const bannerContainer = document.getElementById('bannerContainer');
     const bannerPreview = document.getElementById('bannerPreview');

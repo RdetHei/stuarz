@@ -9,7 +9,7 @@ class GradeController
 
     public function __construct()
     {
-        global $config; // Use the global database connection
+        global $config;
         $this->db = $config;
         $this->model = new GradesModel($config);
     }
@@ -50,7 +50,6 @@ class GradeController
 
     public function print()
     {
-        // Reuse same data gathering as index but render print view
         if (session_status() === PHP_SESSION_NONE) session_start();
         $user = $this->requireUser();
         $level = $_SESSION['level'] ?? 'user';
@@ -135,16 +134,12 @@ class GradeController
         exit;
     }
 
-    /**
-     * Halaman grading untuk melihat dan memberikan nilai pada task submissions
-     */
     public function grading() {
         $this->ensureCanManage();
         $user = $this->requireUser();
         $level = $_SESSION['level'] ?? 'user';
         $userId = intval($user['id'] ?? 0);
 
-        // Load models
         require_once dirname(__DIR__) . '/model/TaskSubmissionsModel.php';
         require_once dirname(__DIR__) . '/model/TasksCompletedModel.php';
         require_once dirname(__DIR__) . '/model/ClassModel.php';
@@ -155,24 +150,19 @@ class GradeController
         $classModel = new ClassModel($this->db);
         $subjectModel = new SubjectsModel($this->db);
 
-        // Get filter parameters
         $filterTask = isset($_GET['task_id']) ? intval($_GET['task_id']) : null;
         $filterStatus = isset($_GET['status']) ? $_GET['status'] : 'pending';
         $filterClass = isset($_GET['class_id']) ? intval($_GET['class_id']) : null;
 
-        // Fetch submissions that need grading
         $submissions = $this->fetchSubmissionsForGrading($userId, $level, $filterTask, $filterStatus, $filterClass);
 
-        // Get related data for filters
         $tasks = [];
         $classes = $classModel->getAll();
         $subjects = $subjectModel->getAll();
 
         if ($level === 'guru') {
-            // Guru hanya melihat tugas mereka sendiri
             $tasks = $taskModel->getByTeacherId($userId);
         } else {
-            // Admin melihat semua
             $tasks = $taskModel->getAll();
         }
 
@@ -180,9 +170,6 @@ class GradeController
         include dirname(__DIR__) . '/views/layouts/dLayout.php';
     }
 
-    /**
-     * Simpan nilai dari grading submission
-     */
     public function gradeSubmission() {
         $this->ensureCanManage();
         if (session_status() === PHP_SESSION_NONE) session_start();
@@ -208,7 +195,6 @@ class GradeController
             exit;
         }
 
-        // Update submission with grade
         $updateData = [
             'review_status' => $reviewStatus,
             'feedback' => $feedback !== '' ? $feedback : null,
@@ -221,10 +207,8 @@ class GradeController
             $updateData['status'] = 'graded';
         }
 
-        // Update review
         $ok = $submissionModel->updateReview($submissionId, $updateData);
 
-        // If graded, also save to grades table
         if ($ok && $score !== null) {
             require_once dirname(__DIR__) . '/model/TasksCompletedModel.php';
             $taskModel = new TasksCompletedModel($this->db);
@@ -241,7 +225,6 @@ class GradeController
                 $this->model->saveOrUpdate($gradeData);
             }
 
-            // Send notification
             require_once dirname(__DIR__) . '/helpers/notifier.php';
             notify_event(
                 $this->db,
@@ -265,7 +248,6 @@ class GradeController
         $submissionModel = new TaskSubmissionsModel($this->db);
         $taskModel = new TasksCompletedModel($this->db);
 
-        // Build query to get submissions with task info
         $sql = "SELECT ts.*, 
                 u.username, u.name AS student_name, 
                 t.title AS task_title, t.class_id AS task_class_id, t.subject_id, t.user_id AS task_teacher_id,

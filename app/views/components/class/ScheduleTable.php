@@ -1,9 +1,8 @@
 <?php
-// ScheduleTable component
-// Expects: $schedules (array of ['day','start_time','end_time','subject','teacher_name'])
+
+
 $schedules = $schedules ?? [];
 
-// Group schedules by day
 $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 $groupedSchedules = [];
 foreach ($schedules as $s) {
@@ -14,7 +13,6 @@ foreach ($schedules as $s) {
   $groupedSchedules[$day][] = $s;
 }
 
-// Sort by day order
 uksort($groupedSchedules, function($a, $b) use ($dayOrder) {
   $posA = array_search($a, $dayOrder);
   $posB = array_search($b, $dayOrder);
@@ -23,7 +21,6 @@ uksort($groupedSchedules, function($a, $b) use ($dayOrder) {
   return $posA <=> $posB;
 });
 
-// Day colors for visual differentiation
 $dayColors = [
   'Senin' => ['bg' => 'bg-blue-500/10', 'border' => 'border-blue-500/20', 'text' => 'text-blue-400'],
   'Monday' => ['bg' => 'bg-blue-500/10', 'border' => 'border-blue-500/20', 'text' => 'text-blue-400'],
@@ -43,7 +40,7 @@ $dayColors = [
 ?>
 
 <?php if (empty($schedules)): ?>
-  <!-- Empty State -->
+  
   <div class="text-center py-12">
     <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-700/50 flex items-center justify-center">
       <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,7 +52,7 @@ $dayColors = [
   </div>
 <?php else: ?>
   
-  <!-- Schedule Summary -->
+  
   <div class="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
     <div class="bg-gray-750 border border-gray-700 rounded-lg p-4">
       <div class="text-sm text-gray-400 mb-1">Total Jadwal</div>
@@ -78,7 +75,7 @@ $dayColors = [
     </div>
   </div>
 
-  <!-- Schedule by Day -->
+  
   <div class="space-y-6">
     <?php foreach ($groupedSchedules as $day => $daySchedules): ?>
       <?php 
@@ -86,7 +83,7 @@ $dayColors = [
       ?>
       
       <div class="space-y-3">
-        <!-- Day Header -->
+        
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-2 px-4 py-2 <?= $colors['bg'] ?> <?= $colors['border'] ?> border rounded-lg">
             <svg class="w-5 h-5 <?= $colors['text'] ?>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,12 +97,12 @@ $dayColors = [
           <div class="flex-1 h-px bg-gray-700"></div>
         </div>
 
-        <!-- Schedule Cards for this day -->
+        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <?php foreach ($daySchedules as $s): ?>
             <div class="bg-gray-750 border border-gray-700 hover:border-gray-600 rounded-lg p-4 transition-all group">
               
-              <!-- Time Badge -->
+              
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-700 rounded-lg">
                   <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,12 +118,12 @@ $dayColors = [
                 </span>
               </div>
 
-              <!-- Subject -->
+              
               <h4 class="text-base font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                 <?= htmlspecialchars($s['subject'] ?? '-') ?>
               </h4>
 
-              <!-- Teacher -->
+              
               <?php if (!empty($s['teacher_name'])): ?>
               <div class="flex items-center gap-2 text-sm text-gray-400">
                 <div class="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
@@ -154,7 +151,7 @@ $dayColors = [
     <?php endforeach; ?>
   </div>
 
-  <!-- Alternative: Table View Toggle -->
+  
   <div class="mt-8">
     <button onclick="toggleTableView()" class="px-4 py-2 bg-gray-750 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm font-medium text-gray-300 transition-colors inline-flex items-center gap-2">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

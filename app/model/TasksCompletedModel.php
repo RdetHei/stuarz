@@ -39,9 +39,8 @@ class TasksCompletedModel {
         $hasReminder = $this->hasColumn('tasks_completed', 'reminder_at');
         $hasLatePolicy = $this->hasColumn('tasks_completed', 'allow_late');
         $hasWorkflow = $this->hasColumn('tasks_completed', 'workflow_state');
-        
-        // Base query with teacher information
-    // Build base select with optional joins for subject and schedule
+
+
     $selects = "t.*, c.name AS class_name, u.name AS teacher_name, u.level AS teacher_level";
     if ($hasSubject) $selects .= ", s.name AS subject_name";
     if ($hasSchedule) $selects .= ", sch.subject AS schedule_subject, sch.day AS schedule_day, sch.start_time AS schedule_start, sch.end_time AS schedule_end";
@@ -57,8 +56,7 @@ class TasksCompletedModel {
             LEFT JOIN users u ON t.user_id = u.id";
     if ($hasSubject) $sql .= " LEFT JOIN subjects s ON t.subject_id = s.id";
     if ($hasSchedule) $sql .= " LEFT JOIN schedule sch ON t.schedule_id = sch.id";
-        
-        // Add filters
+
         $whereConditions = [];
         $params = [];
         $paramTypes = '';
@@ -103,7 +101,7 @@ class TasksCompletedModel {
         
         if ($result) {
             while ($row = $result->fetch_assoc()) {
-                // Normalize status to capitalized for view
+
                 if (isset($row['status'])) $row['status'] = ucfirst($row['status']);
                 if (!$hasSubject) $row['subject_name'] = '';
                 if (!$hasSchedule) {
@@ -138,7 +136,7 @@ class TasksCompletedModel {
     }
     
     public function getByStudentClass($studentId) {
-        // Get all classes the student is a member of from class_members table
+
         $stmt = $this->db->prepare("SELECT class_id FROM class_members WHERE user_id = ? AND role = 'user'");
         $stmt->bind_param('i', $studentId);
         $stmt->execute();
@@ -149,10 +147,9 @@ class TasksCompletedModel {
             $classIds[] = intval($row['class_id']);
         }
         $stmt->close();
-        
-        // If student is not a member of any class, try fallback method for backward compatibility
+
         if (empty($classIds)) {
-            // Fallback: try old method (users.class column) for backward compatibility
+
             $stmt = $this->db->prepare("SELECT class FROM users WHERE id = ?");
             $stmt->bind_param('i', $studentId);
             $stmt->execute();
@@ -177,16 +174,14 @@ class TasksCompletedModel {
                 return [];
             }
         }
-        
-        // Use getAll method with multiple class_ids filter
-        // Build filter with multiple class_ids
+
+
         $allTasks = [];
         foreach ($classIds as $classId) {
             $tasks = $this->getAll(['class_id' => $classId]);
             $allTasks = array_merge($allTasks, $tasks);
         }
-        
-        // Remove duplicates (in case there are any)
+
         $uniqueTasks = [];
         $seenIds = [];
         foreach ($allTasks as $task) {
@@ -196,8 +191,7 @@ class TasksCompletedModel {
                 $uniqueTasks[] = $task;
             }
         }
-        
-        // Sort by deadline DESC
+
         usort($uniqueTasks, function($a, $b) {
             $deadlineA = $a['deadline'] ?? '';
             $deadlineB = $b['deadline'] ?? '';
@@ -265,7 +259,7 @@ class TasksCompletedModel {
             $hasReminder = $this->hasColumn('tasks_completed', 'reminder_at');
             $hasLatePolicy = $this->hasColumn('tasks_completed', 'allow_late');
             $hasWorkflow = $this->hasColumn('tasks_completed', 'workflow_state');
-            // Build insert with optional subject_id and schedule_id
+
             $cols = ['user_id','title','description','status','deadline','class_id'];
             $placeholders = ['?','?','?','?','?','?'];
             $types = 'issssi';
@@ -310,7 +304,7 @@ class TasksCompletedModel {
         $hasReminder = $this->hasColumn('tasks_completed', 'reminder_at');
         $hasLatePolicy = $this->hasColumn('tasks_completed', 'allow_late');
         $hasWorkflow = $this->hasColumn('tasks_completed', 'workflow_state');
-        // Build UPDATE dynamically to include optional subject_id, schedule_id, and user_id
+
         $setParts = [];
         $types = '';
         $values = [];
@@ -342,7 +336,7 @@ class TasksCompletedModel {
         $sql = "UPDATE tasks_completed SET " . implode(', ', $setParts) . " WHERE id = ?";
         $types .= 'i'; $values[] = $id;
         $stmt = $this->db->prepare($sql);
-        // bind params dynamically
+
         $stmt->bind_param($types, ...$values);
         $ok = $stmt->execute();
         $stmt->close();

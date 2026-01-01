@@ -57,11 +57,13 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-3">
-                                    <form method="post" action="index.php?page=class_remove_member" style="display:inline" onsubmit="return confirm('Hapus anggota ini?')">
-                                        <input type="hidden" name="class_id" value="<?= (int)$class['id'] ?>">
-                                        <input type="hidden" name="user_id" value="<?= (int)$m['user_id'] ?>">
-                                        <button type="submit" class="px-3 py-1 bg-red-600/80 text-white text-xs rounded-md hover:bg-red-500 border border-red-500/30">Hapus</button>
-                                    </form>
+                                    <button type="button" 
+                                            class="delete-btn px-3 py-1 bg-red-600/80 text-white text-xs rounded-md hover:bg-red-500 border border-red-500/30"
+                                            data-id="<?= (int)$m['user_id'] ?>"
+                                            data-class-id="<?= (int)$class['id'] ?>"
+                                            data-url="index.php?page=class_remove_member"
+                                            data-item-name="<?= htmlspecialchars($m['name'] ?? 'Anggota', ENT_QUOTES, 'UTF-8') ?>"
+                                            data-row-selector="tr">Hapus</button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

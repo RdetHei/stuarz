@@ -1,6 +1,6 @@
 <div class="bg-gray-900 min-h-screen">
     <div class="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-        <!-- Header -->
+        
         <div class="mb-8">
             <div class="flex items-center gap-3 mb-2">
                 <div class="w-10 h-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center border border-[#5865F2]/20">
@@ -13,7 +13,7 @@
             <p class="text-gray-400">Pilih tabel yang ingin di-print atau export ke PDF</p>
         </div>
 
-        <!-- Search & Filter -->
+        
         <div class="mb-6">
             <div class="relative max-w-md">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <!-- Tables Grid -->
+        
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8" id="tablesGrid">
             <?php
             global $config;
@@ -56,7 +56,7 @@
             ?>
                 <div class="table-card bg-[#1f2937] border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors" 
                      data-table-name="<?= htmlspecialchars(strtolower($tableName)) ?>">
-                    <!-- Card Header -->
+                    
                     <div class="px-5 py-4 border-b border-gray-700 bg-[#111827]">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
@@ -73,7 +73,7 @@
                         </div>
                     </div>
 
-                    <!-- Card Body -->
+                    
                     <div class="px-5 py-4">
                         <div class="mb-4">
                             <div class="flex items-center gap-2 text-xs text-gray-500">
@@ -84,7 +84,7 @@
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
+                        
                         <div class="flex flex-col gap-2">
                             <a href="index.php?page=print_table&table=<?= urlencode($table) ?>" 
                                class="flex items-center justify-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-md transition-colors text-sm font-medium">
@@ -103,7 +103,7 @@
                         </div>
                     </div>
 
-                    <!-- Card Footer -->
+                    
                     <div class="px-5 py-3 bg-[#111827] border-t border-gray-700">
                         <div class="flex items-center justify-between text-xs text-gray-500">
                             <span><?= $count ?> record<?= $count != 1 ? 's' : '' ?></span>
@@ -120,12 +120,12 @@
             <?php endforeach; ?>
         </div>
 
-        <!-- Batch/Print-All functionality removed from UI -->
+        
     </div>
 </div>
 
 <script>
-// Search functionality
+
 document.getElementById('searchTable').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
     const cards = document.querySelectorAll('.table-card');
@@ -140,12 +140,10 @@ document.getElementById('searchTable').addEventListener('input', function(e) {
     });
 });
 
-// Export single table
 function exportTable(tableName) {
     window.location.href = `index.php?page=export_table&table=${encodeURIComponent(tableName)}&format=csv`;
 }
 
-// Export all tables
 function exportAllTables() {
     if (confirm('Export semua tabel ke CSV? Ini mungkin memakan waktu beberapa saat.')) {
         window.location.href = 'index.php?page=export_all_tables&format=csv';

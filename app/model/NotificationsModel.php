@@ -84,11 +84,9 @@ class NotificationsModel
             return $row;
         }
 
-        // legacy columns: user_id, type (entity), reference_id, message, is_read, created_at
         $row['entity'] = $row['type'] ?? 'general';
         $row['entity_id'] = $row['reference_id'] ?? null;
 
-        // reuse message/created_at as is. Provide synthetic event type
         $row['event_type'] = $row['event_type'] ?? 'info';
         if (!isset($row['type']) || in_array($row['type'], ['announcement', 'task', 'message'], true)) {
             $row['type'] = 'info';
@@ -127,7 +125,6 @@ class NotificationsModel
         $rows = [];
         $limit = (int)$limit;
 
-        // Basic fetch
         $sql = "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         if (!$stmt) return $rows;
@@ -145,7 +142,6 @@ class NotificationsModel
         }
         mysqli_stmt_close($stmt);
 
-        // If notifications table doesn't have is_read, consult notification_reads
         if (!$this->columnExists('is_read') && !empty($ids)) {
             $this->ensureReadTrackingTable();
             $ids = array_filter(array_map('intval', $ids));
@@ -165,7 +161,7 @@ class NotificationsModel
                         mysqli_free_result($res2);
                     }
                     mysqli_stmt_close($stmt2);
-                    // annotate rows
+
                     foreach ($rows as &$r) {
                         $nid = intval($r['id'] ?? 0);
                         $r['is_read'] = !empty($readMap[$nid]) ? 1 : 0;
@@ -215,7 +211,7 @@ class NotificationsModel
 
     public function setReadStatus(int $id, bool $read = true): bool
     {
-        // If notifications table supports is_read, update it directly
+
         if ($this->columnExists('is_read')) {
             $val = $read ? 1 : 0;
             $stmt = mysqli_prepare($this->conn, "UPDATE notifications SET is_read = ? WHERE id = ?");
@@ -226,14 +222,13 @@ class NotificationsModel
             return (bool)$ok;
         }
 
-        // Fallback: use per-user read tracking table
         $this->ensureReadTrackingTable();
-        // Need current user to record per-user reads
+
         $userId = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
         if ($userId === null) return false;
 
         if ($read) {
-            // insert if not exists
+
             $stmt = mysqli_prepare($this->conn, "INSERT INTO notification_reads (notification_id, user_id, read_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE read_at = NOW()");
             if (!$stmt) return false;
             mysqli_stmt_bind_param($stmt, 'ii', $id, $userId);
@@ -241,7 +236,7 @@ class NotificationsModel
             mysqli_stmt_close($stmt);
             return (bool)$ok;
         } else {
-            // delete record
+
             $stmt = mysqli_prepare($this->conn, "DELETE FROM notification_reads WHERE notification_id = ? AND user_id = ?");
             if (!$stmt) return false;
             mysqli_stmt_bind_param($stmt, 'ii', $id, $userId);
@@ -253,7 +248,7 @@ class NotificationsModel
 
     public function markAllRead(?int $userId = null): bool
     {
-        // If table has is_read, update directly
+
         if ($this->columnExists('is_read')) {
             if ($userId !== null) {
                 $stmt = mysqli_prepare($this->conn, "UPDATE notifications SET is_read = 1 WHERE user_id = ?");
@@ -268,10 +263,9 @@ class NotificationsModel
             return (bool)$ok;
         }
 
-        // Fallback: insert entries into notification_reads for all notifications for this user
         if ($userId === null) return false;
         $this->ensureReadTrackingTable();
-        // fetch notification ids for this user
+
         $ids = [];
         $sql = "SELECT id FROM notifications WHERE user_id = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -285,7 +279,7 @@ class NotificationsModel
         }
         mysqli_stmt_close($stmt);
         if (empty($ids)) return true;
-        // batch insert using prepared statement
+
         $okAll = true;
         $ins = mysqli_prepare($this->conn, "INSERT INTO notification_reads (notification_id, user_id, read_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE read_at = NOW()");
         if (!$ins) return false;
@@ -309,7 +303,7 @@ class NotificationsModel
 
     public function countUnread(?int $userId = null): int
     {
-        // If notifications table supports is_read, use it
+
         if ($this->columnExists('is_read')) {
             if ($userId !== null) {
                 $stmt = mysqli_prepare($this->conn, "SELECT COUNT(*) AS c FROM notifications WHERE is_read = 0 AND user_id = ?");
@@ -331,9 +325,8 @@ class NotificationsModel
             return $count;
         }
 
-        // Fallback: count notifications for user minus those present in notification_reads
         if ($userId === null) {
-            // count all notifications not tracked as read by any user is ambiguous; return total notifications
+
             $res = mysqli_query($this->conn, "SELECT COUNT(*) AS c FROM notifications");
             if ($res && $res instanceof mysqli_result) {
                 $row = mysqli_fetch_assoc($res);
@@ -342,7 +335,7 @@ class NotificationsModel
             }
             return 0;
         }
-        // count notifications for user
+
         $stmt = mysqli_prepare($this->conn, "SELECT id FROM notifications WHERE user_id = ?");
         if (!$stmt) return 0;
         mysqli_stmt_bind_param($stmt, 'i', $userId);
@@ -391,9 +384,6 @@ public function clearByUser(int $userId): bool
 
 
 
-    // ------------------------
-    // Automatic source scanning
-    // ------------------------
     private function tableHasColumn($table, $column)
     {
         $t = mysqli_real_escape_string($this->conn, $table);
@@ -422,7 +412,7 @@ public function clearByUser(int $userId): bool
             mysqli_stmt_close($stmt);
             return $exists;
         }
-        // legacy
+
         $stmt = mysqli_prepare($this->conn, "SELECT id FROM notifications WHERE type = ? AND reference_id = ? LIMIT 1");
         if (!$stmt) return false;
         mysqli_stmt_bind_param($stmt, 'si', $entity, $entityId);
@@ -448,7 +438,7 @@ public function clearByUser(int $userId): bool
         $tables = ['announcements', 'task_submissions', 'tasks_completed', 'attendance', 'schedule', 'news'];
 
         foreach ($tables as $table) {
-            // Find an appropriate timestamp column
+
             $candidates = ['updated_at', 'modified_at', 'created_at', 'submitted_at', 'date', 'deadline'];
             $tsCol = null;
             foreach ($candidates as $cand) {
@@ -456,7 +446,6 @@ public function clearByUser(int $userId): bool
             }
             if ($tsCol === null) continue;
 
-            // Build query safely
             $t = mysqli_real_escape_string($this->conn, $table);
             $sql = "SELECT * FROM `" . $t . "` WHERE `" . $tsCol . "` >= ? ORDER BY `" . $tsCol . "` DESC LIMIT 50";
             $stmt = mysqli_prepare($this->conn, $sql);
@@ -471,12 +460,10 @@ public function clearByUser(int $userId): bool
                 if ($id <= 0) continue;
                 if ($this->notificationExists($table, $id)) continue;
 
-                // Determine target user if possible
                 $targetUser = 0;
                 if (isset($row['user_id']) && intval($row['user_id']) > 0) $targetUser = intval($row['user_id']);
                 if (isset($row['created_by']) && intval($row['created_by']) > 0) $targetUser = intval($row['created_by']);
 
-                // Construct a friendly message where possible
                 $title = $row['title'] ?? $row['name'] ?? null;
                 if ($title) {
                     $message = ucfirst($table) . ': ' . $title;

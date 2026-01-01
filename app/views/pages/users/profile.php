@@ -37,7 +37,6 @@ $avatarSrc = $prefix . ltrim($avatarVal ?: '/assets/default-avatar.png', '/');
 $bannerVal = $user['banner'] ?? '';
 $bannerSrc = $prefix . ltrim($bannerVal ?: '/assets/default-banner.png', '/');
 
-// Determine if the user is a member of any class; if so, build a link to the first class detail
 $profileClassLink = null;
 $profileClassText = $user['class'] ?? $defaultUser['class'];
 if (!empty($user['id'])) {

@@ -1,4 +1,4 @@
-<!-- Hero Section with Discord & GitHub Theme -->
+
 <div class="relative bg-gray-900 overflow-hidden min-h-screen flex items-center">
   <div>
     <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/default-banner.png', ENT_QUOTES, 'UTF-8') ?>" alt="Background Hero" class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none select-none" />
@@ -34,14 +34,14 @@
     
 <div class="bg-gray-900 min-h-screen">
   <div class="relative isolate overflow-hidden">
-    <!-- Background Pattern -->
+    
     <div class="absolute inset-0 -z-10">
       <div class="absolute inset-0 bg-gradient-to-b from-[#5865F2]/5 via-transparent to-transparent"></div>
       <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(88, 101, 242, 0.05) 1px, transparent 0); background-size: 40px 40px;"></div>
     </div>
 
     <div class="w-full px-6 py-16 sm:py-24 lg:px-8">
-      <!-- Hero Section -->
+      
       <div class="text-center mb-16">
         <div class="mb-6">
           <span class="inline-block px-4 py-2 bg-[#5865F2]/10 text-[#5865F2] border border-[#5865F2]/20 rounded-full text-sm font-semibold uppercase tracking-wider">
@@ -56,7 +56,7 @@
         </p>
       </div>
 
-      <!-- App Screenshot -->
+      
       <div class="w-full mb-24">
         <div class="relative group">
           <div class="absolute -inset-4 bg-gradient-to-r from-[#5865F2]/20 to-[#4752C4]/20 rounded-2xl blur-2xl group-hover:blur-3xl transition-all duration-500 opacity-50"></div>
@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <!-- Features Section -->
+      
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24">
         <div class="bg-[#1f2937] border border-gray-700 rounded-xl p-8 hover:border-gray-600 transition-colors">
           <h2 class="text-3xl font-bold text-gray-100 mb-6">Kenapa Stuarz?</h2>
@@ -140,7 +140,7 @@
         </div>
       </div>
 
-    <!-- Hero Illustration -->
+    
      
 <div class="bg-gray-900 py-24">
   <div class="text-center w-full px-6">
@@ -152,13 +152,13 @@
 
   <div class="mt-16 w-full overflow-hidden relative">
 
-    <!-- Container yang bisa pause -->
+    
     <div id="slider-container" class="overflow-hidden">
 
-      <!-- Track bergerak -->
+      
       <div id="slider-track" class="flex gap-8 animate-slide">
 
-        <!-- SET 1 -->
+        
         <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
              class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
     <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
@@ -167,7 +167,7 @@
         <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
              class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
 
-        <!-- SET 2 (CLONE untuk infinite loop) -->
+        
         <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/apps.png', ENT_QUOTES) ?>"
              class="w-[420px] h-[280px] object-cover rounded-2xl border border-gray-700 shadow-lg">
 
@@ -203,12 +203,10 @@
 const sliderTrack = document.getElementById("slider-track");
 const sliderContainer = document.getElementById("slider-container");
 
-// Pause ketika hover
 sliderContainer.addEventListener("mouseenter", () => {
   sliderTrack.classList.add("paused");
 });
 
-// Resume ketika kursor keluar
 sliderContainer.addEventListener("mouseleave", () => {
   sliderTrack.classList.remove("paused");
 });
@@ -218,10 +216,10 @@ sliderContainer.addEventListener("mouseleave", () => {
 
 
  
-<!-- Divider -->
+
 <div class="h-px bg-gray-700"></div>
 
-<!-- Features Section -->
+
 <div class="relative bg-gray-900 py-24 sm:py-32">
   <div class="w-full px-6 lg:px-8">
     <div class="text-center">
@@ -231,7 +229,7 @@ sliderContainer.addEventListener("mouseleave", () => {
       </p>
     </div>
     <div class="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      <!-- Feature 1 -->
+      
       <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-all">
         <div class="w-14 h-14 bg-indigo-600/20 rounded-xl flex items-center justify-center mb-4">
           <svg class="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +240,7 @@ sliderContainer.addEventListener("mouseleave", () => {
         <p class="text-gray-400">Stuarz dapat diakses dari perangkat apapun, memudahkan siswa dan guru belajar dan mengajar di mana saja.</p>
       </div>
       
-      <!-- Feature 2 -->
+      
       <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-all">
         <div class="w-14 h-14 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
           <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +251,7 @@ sliderContainer.addEventListener("mouseleave", () => {
         <p class="text-gray-400">Proses belajar, pengiriman tugas, dan absensi berlangsung cepat dan efisien.</p>
       </div>
       
-      <!-- Feature 3 -->
+      
       <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-all">
         <div class="w-14 h-14 bg-yellow-500/20 rounded-xl flex items-center justify-center mb-4">
           <svg class="w-7 h-7 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,7 +262,7 @@ sliderContainer.addEventListener("mouseleave", () => {
         <p class="text-gray-400">Data siswa, guru, dan sekolah terlindungi dengan sistem keamanan Stuarz.</p>
       </div>
       
-      <!-- Feature 4 -->
+      
       <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-all">
         <div class="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4">
           <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -275,7 +273,7 @@ sliderContainer.addEventListener("mouseleave", () => {
         <p class="text-gray-400">Stuarz menyediakan API untuk integrasi dengan sistem sekolah dan aplikasi lain.</p>
       </div>
       
-      <!-- Feature 5 -->
+      
       <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-all">
         <div class="w-14 h-14 bg-red-500/20 rounded-xl flex items-center justify-center mb-4">
           <svg class="w-7 h-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,7 +284,7 @@ sliderContainer.addEventListener("mouseleave", () => {
         <p class="text-gray-400">Sekolah dapat memberikan sertifikat digital kepada siswa yang telah menyelesaikan tugas.</p>
       </div>
       
-      <!-- Feature 6 -->
+      
       <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-gray-600 transition-all">
         <div class="w-14 h-14 bg-indigo-600/20 rounded-xl flex items-center justify-center mb-4">
           <svg class="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,10 +298,10 @@ sliderContainer.addEventListener("mouseleave", () => {
   </div>
 </div>
 
-<!-- Divider -->
+
 <div class="h-px bg-gray-700"></div>
 
-<!-- How It Works Section -->
+
 <div class="relative bg-gray-900 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center">
@@ -317,7 +315,7 @@ sliderContainer.addEventListener("mouseleave", () => {
     </div>
     <div class="w-full mt-16 sm:mt-20 lg:mt-24">
       <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-        <!-- Step 1 -->
+        
         <div class="relative pl-16 group">
           <dt class="text-base font-semibold text-white">
             <div class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-lg bg-indigo-600 shadow-lg">
@@ -331,7 +329,7 @@ sliderContainer.addEventListener("mouseleave", () => {
             Siswa dapat mengirim tugas langsung melalui aplikasi, guru dapat memeriksa dan memberi nilai secara digital.
           </dd>
         </div>
-        <!-- Step 2 -->
+        
         <div class="relative pl-16 group">
           <dt class="text-base font-semibold text-white">
             <div class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-lg bg-indigo-600 shadow-lg">
@@ -345,7 +343,7 @@ sliderContainer.addEventListener("mouseleave", () => {
             Sekolah dapat memberikan sertifikat digital kepada siswa yang telah menyelesaikan tugas dan absensi dengan baik.
           </dd>
         </div>
-        <!-- Step 3 -->
+        
         <div class="relative pl-16 group">
           <dt class="text-base font-semibold text-white">
             <div class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-lg bg-indigo-600 shadow-lg">
@@ -359,7 +357,7 @@ sliderContainer.addEventListener("mouseleave", () => {
             Siswa dan guru dapat melakukan absensi secara otomatis dan terintegrasi dengan sistem sekolah.
           </dd>
         </div>
-        <!-- Step 4 -->
+        
         <div class="relative pl-16 group">
           <dt class="text-base font-semibold text-white">
             <div class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-lg bg-indigo-600 shadow-lg">
@@ -378,19 +376,19 @@ sliderContainer.addEventListener("mouseleave", () => {
   </div>
 </div>
 
-<!-- Divider -->
+
 <div class="h-px bg-gray-700"></div>
 
-<!-- Stats Section -->
+
 <div class="relative bg-gray-800 py-24 sm:py-32 overflow-hidden">
-  <!-- Background Image -->
+  
   <div class="absolute inset-0">
     <img src="<?= htmlspecialchars(($prefix ?? '') . 'assets/default-banner.png', ENT_QUOTES, 'UTF-8') ?>" alt="" class="h-full w-full object-cover opacity-20" />
   </div>
-  <!-- Overlay untuk readability -->
+  
   <div class="absolute inset-0 bg-gray-900/60"></div>
   
-  <!-- Content -->
+  
   <div class="relative w-full px-6 lg:px-8">
     <div class="w-full lg:mx-0">
       <h2 class="text-5xl font-semibold tracking-tight text-white sm:text-6xl">Bergabung bersama Stuarz</h2>
@@ -419,10 +417,10 @@ sliderContainer.addEventListener("mouseleave", () => {
   </div>
 </div>
 
-<!-- Divider -->
+
 <div class="h-px bg-gray-700"></div>
 
-<!-- CTA Section -->
+
 <div class="relative bg-gray-900 py-24 sm:py-32">
   <div class="w-full px-6 lg:px-8">
     <div class="w-full text-center">

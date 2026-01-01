@@ -45,9 +45,9 @@
     </div>
   </header>
 
-  <!-- Main Content -->
+  
   <main class="max-w-5xl mx-auto px-6 py-8">
-    <!-- Article Header -->
+    
     <article>
       <div class="mb-8" id="articleTop">
         <div class="mb-4">
@@ -104,7 +104,7 @@
       </div>
       <?php endif; ?>
 
-      <!-- Article Content -->
+      
       <div class="prose prose-invert prose-lg max-w-none">
         <div class="bg-[#1f2937] border border-gray-700 rounded-lg p-8 md:p-12">
           <div class="text-gray-300 leading-relaxed text-base md:text-lg space-y-6" style="white-space: pre-wrap;">
@@ -113,7 +113,7 @@
         </div>
       </div>
 
-      <!-- Article Footer -->
+      
       <div class="mt-8 pt-6 border-t border-gray-700">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div class="flex items-center gap-3">
@@ -151,7 +151,7 @@
 </div>
 
 <script>
-// Sticky header title reveal on scroll
+
 const header = document.getElementById('stickyHeader');
 const headerTitle = document.getElementById('headerTitle');
 const articleTop = document.getElementById('articleTop');
@@ -174,7 +174,6 @@ function onScroll() {
 
 window.addEventListener('scroll', onScroll, { passive: true });
 
-// Share functionality
 document.getElementById('shareBtn')?.addEventListener('click', function() {
   if (navigator.share) {
     navigator.share({
@@ -183,7 +182,7 @@ document.getElementById('shareBtn')?.addEventListener('click', function() {
       url: window.location.href
     }).catch(err => console.log('Error sharing', err));
   } else {
-    // Fallback: copy to clipboard
+
     navigator.clipboard.writeText(window.location.href).then(() => {
       const originalHTML = this.innerHTML;
       this.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
@@ -196,7 +195,6 @@ document.getElementById('shareBtn')?.addEventListener('click', function() {
   }
 });
 
-// Bookmark functionality
 let isBookmarked = localStorage.getItem('bookmark_<?= $newsItem['id'] ?>') === 'true';
 const bookmarkBtn = document.getElementById('bookmarkBtn');
 if (bookmarkBtn) {
@@ -219,12 +217,10 @@ if (bookmarkBtn) {
   });
 }
 
-// Print functionality
 document.getElementById('printBtn')?.addEventListener('click', function() {
   window.print();
 });
 
-// Share functionality for footer buttons
 document.querySelectorAll('button[title^="Share"]').forEach(button => {
   button.addEventListener('click', function() {
     const title = this.getAttribute('title');

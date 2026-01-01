@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Core;
+use Throwable;
 
 class Router
 {
@@ -10,27 +11,21 @@ class Router
         'POST' => [],
     ];
 
-    /**
-     * Register a GET route.
-     */
+  
     public function get(string $path, $handler): self
     {
         $this->addRoute('GET', $path, $handler);
         return $this;
     }
 
-    /**
-     * Register a POST route.
-     */
+  
     public function post(string $path, $handler): self
     {
         $this->addRoute('POST', $path, $handler);
         return $this;
     }
 
-    /**
-     * Dispatch the current request. Returns true if matched, false otherwise.
-     */
+   
     public function dispatch(string $method, string $uri): bool
     {
         $method = strtoupper($method);
@@ -61,21 +56,16 @@ class Router
 
     private function compilePathToRegex(string $path): string
     {
-        // Convert simple tokens like /users/{id} to a regex. Keep it minimal.
-        $regex = preg_replace('#\{[^/]+\}#', '([^/]+)', $path);
+
+
+        $regex = preg_replace('#\{[^}]+\}#', '([^/]+)', $path);
         if ($regex === null) {
             $regex = $path;
         }
         return '#^' . str_replace('#', '\#', $regex) . '$#';
     }
 
-    /**
-     * Invoke a handler definition.
-     * Supported forms:
-     *  - callable
-     *  - "Controller@method"
-     *  - [ControllerClass::class, 'method']
-     */
+   
     private function invoke($handler, array $params): bool
     {
         if (is_callable($handler)) {
@@ -95,7 +85,6 @@ class Router
             return true;
         }
 
-        // Fallback: string like "Controller::method"
         if (is_string($handler) && strpos($handler, '::') !== false) {
             [$class, $method] = explode('::', $handler, 2);
             $instance = class_exists($class) ? new $class() : null;
@@ -110,23 +99,33 @@ class Router
 
     private function invokeController(string $controller, string $method, array $params): bool
     {
-        // Allow both short name (e.g., 'AuthController') and FQCN.
+
+
         if (!class_exists($controller)) {
-            $controller = 'App\\Controller\\' . $controller;
+
+            $controllerFile = __DIR__ . '/../../app/controller/' . $controller . '.php';
+            if (file_exists($controllerFile)) {
+                require_once $controllerFile;
+            }
         }
 
         if (!class_exists($controller)) {
+            error_log("Router: Controller class not found: {$controller}");
             return false;
         }
 
-        $instance = new $controller();
-        if (!method_exists($instance, $method)) {
+        try {
+            $instance = new $controller();
+            if (!method_exists($instance, $method)) {
+                error_log("Router: Method not found: {$controller}::{$method}");
+                return false;
+            }
+
+            call_user_func_array([$instance, $method], $params);
+            return true;
+        } catch (Throwable $e) {
+            error_log('Router error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
             return false;
         }
-
-        call_user_func_array([$instance, $method], $params);
-        return true;
     }
 }
-
-

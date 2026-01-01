@@ -1,6 +1,6 @@
 <div class="bg-gray-900 min-h-screen">
   <div class="relative isolate overflow-hidden">
-    <!-- Background Pattern -->
+    
     <div class="absolute inset-0 -z-10">
       <div class="absolute inset-0 bg-gradient-to-b from-[#11862]/5 via-transparent to-transparent"></div>
       <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(88, 101, 242, 0.05) 1px, transparent 0); background-size: 40px 40px;"></div>
@@ -8,7 +8,7 @@
 
     <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8">
 
-      <!-- Owner Card Section -->
+      
       <div class="max-w-3xl mx-auto">
         <div class="text-center mb-8">
           <h2 class="text-3xl font-bold text-gray-100 mb-2">Meet the Creator</h2>
@@ -21,7 +21,7 @@
           </div>
 
           <div class="relative px-6 pb-8">
-            <!-- Avatar -->
+            
             <div class="flex justify-center -mt-16 mb-4">
               <div class="relative">
                 <div class="w-32 h-32 rounded-full bg-gradient-to-br from-[#5865F2] to-[#4752C4] p-1">
@@ -33,7 +33,7 @@
               </div>
             </div>
 
-            <!-- Name & Role -->
+            
             <div class="text-center mb-6">
               <h3 class="text-2xl font-bold text-gray-100 mb-1">Rdet.hei</h3>
               <p class="text-sm text-gray-400 mb-3">Creator & Developer of Stuarz</p>
@@ -45,7 +45,7 @@
               </div>
             </div>
 
-            <!-- Description -->
+            
             <div class="mb-6">
               <p class="text-sm text-gray-400 text-center leading-relaxed max-w-xl mx-auto">
                 Passionate developer focused on creating intuitive and powerful educational platforms. 
@@ -53,7 +53,7 @@
               </p>
             </div>
 
-            <!-- Stats -->
+            
             <div class="grid grid-cols-3 gap-4 mb-6 pb-6 border-b border-gray-700">
               <div class="text-center">
                 <div class="text-2xl font-bold text-gray-100">5+</div>
@@ -69,11 +69,11 @@
               </div>
             </div>
 
-            <!-- Social Links -->
+            
             <div>
               <h4 class="text-sm font-semibold text-gray-300 mb-4 text-center">Connect with me</h4>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <!-- GitHub -->
+                
                 <a href="https://github.com/rdet" target="_blank" rel="noopener noreferrer"
                    class="flex items-center gap-3 p-3 bg-[#111827] hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors group">
                   <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-gray-700 transition-colors">
@@ -87,7 +87,7 @@
                   </div>
                 </a>
 
-                <!-- LinkedIn -->
+                
                 <a href="https://linkedin.com/in/rdet" target="_blank" rel="noopener noreferrer"
                    class="flex items-center gap-3 p-3 bg-[#111827] hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors group">
                   <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-[#0077B5] transition-colors">
@@ -101,7 +101,7 @@
                   </div>
                 </a>
 
-                <!-- Twitter/X -->
+                
                 <a href="https://twitter.com/rdet" target="_blank" rel="noopener noreferrer"
                    class="flex items-center gap-3 p-3 bg-[#111827] hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors group">
                   <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-black transition-colors">
@@ -115,7 +115,7 @@
                   </div>
                 </a>
 
-                <!-- Facebook -->
+                
                 <a href="https://facebook.com/rdet" target="_blank" rel="noopener noreferrer"
                    class="flex items-center gap-3 p-3 bg-[#111827] hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors group">
                   <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-[#1877F2] transition-colors">
@@ -129,7 +129,7 @@
                   </div>
                 </a>
 
-                <!-- YouTube -->
+                
                 <a href="https://youtube.com/@rdet" target="_blank" rel="noopener noreferrer"
                    class="flex items-center gap-3 p-3 bg-[#111827] hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors group">
                   <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-[#FF0000] transition-colors">
@@ -143,7 +143,7 @@
                   </div>
                 </a>
 
-                <!-- Email -->
+                
                 <a href="mailto:rdet@example.com"
                    class="flex items-center gap-3 p-3 bg-[#111827] hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors group">
                   <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-[#5865F2] transition-colors">

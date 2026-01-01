@@ -1,6 +1,6 @@
 <?php
-// Student: Task List
-// Expects: $tasks (array of tasks_completed or tasks with user_id filter), $filter
+
+
 $filter = $_GET['filter'] ?? 'all';
 ?>
 <div class="max-w-4xl mx-auto p-6">
@@ -21,7 +21,7 @@ $filter = $_GET['filter'] ?? 'all';
       <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 text-gray-400">Belum ada tugas.</div>
     <?php else: ?>
       <?php foreach ($tasks as $t): 
-        // minimal filtering if controller didn't
+
         if ($filter==='pending' && strtolower($t['status'])==='completed') continue;
         if ($filter==='completed' && strtolower($t['status'])!=='completed') continue;
       ?>

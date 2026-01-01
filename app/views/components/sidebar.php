@@ -86,6 +86,17 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : '';
   .sidebar-floating-children-panel .group-children > a { display: block; padding-left: 18px; color: #d1d5db; }
   .sidebar-popup-card { position: absolute; z-index: 80; background: rgba(15,23,42,0.98); color: #e5e7eb; padding: 8px 10px; border-radius: 8px; box-shadow: 0 8px 24px rgba(2,6,23,0.6); transform-origin: left top; opacity: 0; transform: scale(.96) translateY(-6px); transition: opacity 180ms ease, transform 180ms cubic-bezier(.2,.8,.2,1); pointer-events: auto; min-width: 180px; max-width: 360px; }
   .sidebar-popup-card.show { opacity: 1; transform: scale(1) translateY(0); } .sidebar-popup-card .sidebar-popup-list { display: flex; flex-direction: column; gap: 6px; } .sidebar-popup-card .sidebar-popup-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; color: #e5e7eb; text-decoration: none; } .sidebar-popup-card .sidebar-popup-item:hover { background: rgba(255,255,255,0.03); } .sidebar-popup-card .sidebar-popup-item .menu-text { display: inline-block; opacity: 1; }
+  #profileModal { transform-origin: bottom left; opacity: 0; transform: scale(0.96) translateY(4px); transition: opacity 150ms cubic-bezier(.2,.8,.2,1), transform 150ms cubic-bezier(.2,.8,.2,1); }
+  #profileModal:not(.hidden) { opacity: 1; transform: scale(1) translateY(0); }
+  #profileModalBackdrop { opacity: 0; transition: opacity 150ms ease; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(0, 0, 0, 0.01) !important; cursor: pointer; }
+  #profileModalBackdrop:not(.hidden) { opacity: 1; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(0, 0, 0, 0.01) !important; cursor: pointer; }
+  @media (max-width: 1023.98px) {
+    #profileModal { transform-origin: bottom center; max-width: calc(100vw - 2rem); width: 90vw !important; max-width: 320px !important; max-height: calc(100vh - 8rem); overflow-y: auto; }
+    #profileModalBackdrop:not(.hidden) { opacity: 1; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: transparent !important; }
+  }
+  @media (max-width: 640px) {
+    #profileModal { width: calc(100vw - 1rem) !important; max-width: calc(100vw - 1rem) !important; }
+  }
   #sidebar nav.sidebar-scroll { scrollbar-width: none; -ms-overflow-style: none; } #sidebar nav.sidebar-scroll::-webkit-scrollbar { display: none; }
   #sidebar .hamburger { position: relative; width: 20px; height: 20px; } #sidebar .hamburger-line { position: absolute; left: 2px; right: 2px; height: 2px; background-color: currentColor; border-radius: 2px; transition: transform 520ms cubic-bezier(.2,.8,.2,1), opacity 520ms ease, top 520ms ease; }
   #sidebar .hamburger-line-1 { top: 9px; transform: rotate(45deg); } #sidebar .hamburger-line-2 { top: 9px; opacity: 0; transform: scaleX(0.4); } #sidebar .hamburger-line-3 { top: 9px; transform: rotate(-45deg); }
@@ -172,23 +183,23 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : '';
           <span class="menu-text">Kelas Saya</span>
         </a>
             <?php
-            // Kondisi tampilan link 'Gabung Kelas' atau daftar kelas user.
-            // Cek apakah user tergabung di minimal satu kelas; jika ya, sembunyikan
-            // tautan 'Gabung Kelas'. Jika belum tergabung, tampilkan tautan 'Gabung Kelas'.
+
+
+
             $hasClasses = false;
             if (!empty($sessionUser) && isset($sessionUser['id'])) {
-                // Muat model ClassModel jika tersedia
+
                 $classModelPath = dirname(__DIR__, 2) . '/model/ClassModel.php';
                 if (is_file($classModelPath)) {
                     require_once $classModelPath;
                     try {
-                        // Use global $config (mysqli) as other controllers do
+
                         global $config;
                         $cm = new ClassModel($config);
                         $userClasses = $cm->getAll((int)$sessionUser['id']);
                         $hasClasses = !empty($userClasses);
                     } catch (Throwable $e) {
-                        // Jika ada error, fallback ke false
+
                         $hasClasses = false;
                     }
                 }
@@ -228,6 +239,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : '';
       </div>
     </details>
 
+    <?php if (($sessionUser['level'] ?? '') === 'admin' || ($sessionUser['level'] ?? '') === 'guru'): ?>
     <details class="sidebar-group" <?= in_array($page, $informasiPages, true) ? 'open' : '' ?>>
       <summary class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-200">
         <span class="material-symbols-outlined mr-3">info</span>
@@ -245,6 +257,7 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : '';
         </a>
       </div>
     </details>
+    <?php endif; ?>
 
 <?php if (($sessionUser['level'] ?? '') === 'admin'): ?>
     <details class="sidebar-group" <?= in_array($page, $adminPages, true) ? 'open' : '' ?>>
@@ -297,14 +310,57 @@ $imgPath = $avatarSrc ? $baseUrl . '/' . ltrim($avatarSrc, '/') : '';
 
       <div class="ml-1 text-left menu-text"><p class="text-sm font-medium"><?= htmlspecialchars($userLocal['username'] ?? '') ?></p><p class="text-xs text-gray-400"><?= htmlspecialchars($userLocal['level'] ?? '') ?></p></div>
 
-      <div id="profileModal" class="hidden z-[9999] w-60 bg-[#1f2937] dark:bg-[#1f2937] bg-white rounded-t-xl shadow-xl border border-gray-700 dark:border-gray-700 border-gray-200">
-        <div class="px-2 py-2 text-sm text-gray-200 dark:text-gray-200 text-gray-900 border-b border-gray-600 dark:border-gray-600 border-gray-200"><?= htmlspecialchars($userLocal['email'], ENT_QUOTES, 'UTF-8'); ?></div>
-        <nav class="flex flex-col text-sm text-gray-200 dark:text-gray-200 text-gray-900">
-          <a href="index.php?page=profile" class="flex items-center px-4 py-2 hover:bg-gray-700 dark:hover:bg-gray-700 hover:bg-gray-100 transition-colors"><span class="material-symbols-outlined mr-3">account_circle</span>Profil Saya</a>
-          <a href="index.php?page=settings" class="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"><span class="material-symbols-outlined mr-3">settings</span>Pengaturan</a>
-          <hr class="my-1 border-gray-600" />
-          <a href="index.php?page=docs" target="_blank" class="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"><span class="material-symbols-outlined mr-3">help</span>Bantuan</a>
-          <a href="index.php?page=logout" class="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors text-red-400"><span class="material-symbols-outlined mr-3">logout</span>Keluar</a>
+      
+      <div id="profileModalBackdrop" class="hidden fixed inset-0 z-[99998] transition-opacity duration-200 pointer-events-auto" style="backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(0, 0, 0, 0.01) !important;"></div>
+      
+      
+      <div id="profileModal" class="hidden z-[99999] w-64 sm:w-60 bg-gray-900 rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.5)] border border-gray-700 overflow-hidden">
+        
+        <div class="px-3 py-3 bg-gray-800 border-b border-gray-700">
+          <div class="flex items-center gap-2.5">
+            <?php if ($imgValid): ?>
+              <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-gray-700">
+                <img src="<?= htmlspecialchars($imgSrc, ENT_QUOTES, 'UTF-8') ?>" alt="User Avatar" class="w-full h-full object-cover" />
+              </div>
+            <?php else: ?>
+              <div class="w-10 h-10 rounded-full bg-indigo-600 text-white font-semibold flex items-center justify-center flex-shrink-0 text-sm ring-1 ring-gray-700">
+                <?= htmlspecialchars(initialsFromName($userLocal['username'] ?? ($userLocal['name'] ?? 'User'), 2), ENT_QUOTES, 'UTF-8') ?>
+              </div>
+            <?php endif; ?>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-100 truncate leading-tight"><?= htmlspecialchars($userLocal['name'] ?? ($userLocal['username'] ?? 'User'), ENT_QUOTES, 'UTF-8') ?></p>
+              <p class="text-xs text-gray-400 truncate leading-tight mt-0.5"><?= htmlspecialchars($userLocal['email'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 mt-2">
+            <span class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-800 text-indigo-400 border border-gray-700">
+              <?= htmlspecialchars(ucfirst($userLocal['level'] ?? 'user'), ENT_QUOTES, 'UTF-8') ?>
+            </span>
+          </div>
+        </div>
+        
+        
+        <nav class="flex flex-col py-1 text-sm bg-gray-900">
+          <a href="index.php?page=profile" class="flex items-center gap-2.5 px-3 py-2 text-gray-200 hover:bg-gray-800 transition-colors duration-75 group">
+            <span class="material-symbols-outlined text-base text-gray-400 group-hover:text-blue-400 transition-colors" style="font-size: 18px;">person</span>
+            <span class="flex-1 text-sm">Profil Saya</span>
+          </a>
+          <a href="index.php?page=settings" class="flex items-center gap-2.5 px-3 py-2 text-gray-200 hover:bg-gray-800 transition-colors duration-75 group">
+            <span class="material-symbols-outlined text-base text-gray-400 group-hover:text-blue-400 transition-colors" style="font-size: 18px;">settings</span>
+            <span class="flex-1 text-sm">Pengaturan</span>
+          </a>
+          
+          <div class="my-0.5 border-t border-gray-700"></div>
+          
+          <a href="index.php?page=docs" target="_blank" class="flex items-center gap-2.5 px-3 py-2 text-gray-200 hover:bg-gray-800 transition-colors duration-75 group">
+            <span class="material-symbols-outlined text-base text-gray-400 group-hover:text-blue-400 transition-colors" style="font-size: 18px;">help_outline</span>
+            <span class="flex-1 text-sm">Bantuan</span>
+            <span class="material-symbols-outlined text-xs text-gray-500 opacity-60" style="font-size: 14px;">open_in_new</span>
+          </a>
+          <a href="index.php?page=logout" class="flex items-center gap-2.5 px-3 py-2 text-red-400 hover:bg-gray-800 transition-colors duration-75 group">
+            <span class="material-symbols-outlined text-base text-red-400 transition-colors" style="font-size: 18px;">logout</span>
+            <span class="flex-1 text-sm font-medium">Keluar</span>
+          </a>
         </nav>
       </div>
     </button>

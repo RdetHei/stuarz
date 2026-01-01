@@ -113,7 +113,7 @@ $teachers = $teachers ?? [];
         </div>
       </div>
 
-      <!-- Form Actions -->
+      
       <div class="flex items-center gap-3 pt-6 border-t border-gray-700">
         <button 
           type="submit" 
@@ -136,7 +136,7 @@ $teachers = $teachers ?? [];
     </form>
   </div>
 
-  <!-- Info Card -->
+  
   <div class="mt-6 bg-gray-800 border border-gray-700 rounded-xl p-6">
     <div class="flex items-start gap-4">
       <div class="flex-shrink-0 w-12 h-12 bg-indigo-600/20 rounded-xl flex items-center justify-center">

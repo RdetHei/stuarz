@@ -1,6 +1,6 @@
 <?php
-// Join class form view
-// Requires: $classes (array), $_SESSION['user'] available
+
+
 $user = $_SESSION['user'] ?? null;
 $level = $user['level'] ?? 'user';
 $hasClasses = $hasClasses ?? false;
@@ -91,7 +91,7 @@ $hasClasses = $hasClasses ?? false;
 </div>
 
 <script>
-// Join form handling (AJAX)
+
 document.addEventListener('DOMContentLoaded', function(){
   var joinForm = document.getElementById('joinClassForm');
   if (joinForm){

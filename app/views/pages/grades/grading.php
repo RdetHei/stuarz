@@ -1,16 +1,11 @@
 <?php
-$submissions = $submissions ?? [];
-$tasks = $tasks ?? [];
-$classes = $classes ?? [];
-$subjects = $subjects ?? [];
 $filterTask = $_GET['task_id'] ?? null;
 $filterStatus = $_GET['status'] ?? 'pending';
 $filterClass = $_GET['class_id'] ?? null;
 ?>
 
 <div class="max-w-7xl mx-auto p-6">
-  <!-- Header -->
-  <div class="mb-8">
+  <div>
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-4">
         <div class="w-14 h-14 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg">
@@ -26,7 +21,6 @@ $filterClass = $_GET['class_id'] ?? null;
         <script src="<?= base_url('js/grades.js') ?>"></script>
     </div>
 
-    <!-- Filters -->
     <div class="mt-6 bg-gray-800 border border-gray-700 rounded-lg p-4">
       <form method="get" action="index.php" class="flex flex-wrap gap-3">
         <input type="hidden" name="page" value="grades/grading">
@@ -36,7 +30,7 @@ $filterClass = $_GET['class_id'] ?? null;
           <select name="task_id" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
             <option value="">Semua Tugas</option>
             <?php foreach ($tasks as $t): ?>
-              <option value="<?= $t['id'] ?>" <?= ($filterTask == $t['id']) ? 'selected' : '' ?>>
+              <option value="<?= $t['id'] ?>" <?= ($filterTask == $t['id']) ? 'selected' : '' ?> >
                 <?= htmlspecialchars($t['title'] ?? '') ?>
               </option>
             <?php endforeach; ?>
@@ -59,7 +53,7 @@ $filterClass = $_GET['class_id'] ?? null;
           <select name="class_id" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:border-indigo-600 focus:outline-none transition-all">
             <option value="">Semua Kelas</option>
             <?php foreach ($classes as $c): ?>
-              <option value="<?= $c['id'] ?>" <?= ($filterClass == $c['id']) ? 'selected' : '' ?>>
+              <option value="<?= $c['id'] ?>" <?= ($filterClass == $c['id']) ? 'selected' : '' ?> >
                 <?= htmlspecialchars($c['name'] ?? '') ?>
               </option>
             <?php endforeach; ?>
@@ -129,28 +123,36 @@ $filterClass = $_GET['class_id'] ?? null;
       </div>
       <?php endif; ?>
 
-      <?php if (!empty($sub['file_path']) && strpos($sub['file_path'], 'manual_completion_') !== 0): ?>
-      <div class="mb-4">
-        <a href="<?= htmlspecialchars($sub['file_path']) ?>" target="_blank" 
-           class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/30 text-blue-400 rounded-lg transition-all">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          Download File
-        </a>
-      </div>
-      <?php elseif (str_starts_with($sub['file_path'] ?? '', 'manual_completion_')): ?>
-      <div class="mb-4">
-        <span class="inline-flex items-center gap-2 px-4 py-2 bg-green-600/20 border border-green-600/30 text-green-400 rounded-lg">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          Tugas Selesai (Manual)
-        </span>
-      </div>
+      <?php if (!empty($sub['file_path'])): 
+        if (strpos($sub['file_path'], 'manual_completion_') === 0): ?>
+        <div class="mb-4">
+          <span class="inline-flex items-center gap-2 px-4 py-2 bg-green-600/20 border border-green-600/30 text-green-400 rounded-lg">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Tugas Selesai (Manual)
+          </span>
+        </div>
+        <?php else: 
+          $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+          if ($baseUrl === '/') $baseUrl = '';
+          $fileUrl = ($baseUrl !== '' ? $baseUrl . '/' : '/') . ltrim($sub['file_path'], '/');
+        ?>
+        <div class="mb-4">
+          <span class="font-semibold text-gray-300">File Terlampir:</span>
+          <a href="<?= htmlspecialchars($fileUrl, ENT_QUOTES, 'UTF-8') ?>" 
+             target="_blank" 
+             class="text-blue-400 hover:text-blue-300 hover:underline ml-2 inline-flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            Lihat/Unduh File
+          </a>
+        </div>
+        <?php endif; ?>
       <?php endif; ?>
 
-      <!-- Grading Form -->
       <form method="post" action="index.php?page=grades/grade-submission" class="mt-4 pt-4 border-t border-gray-700 grade-form" data-submission-id="<?= intval($sub['id']) ?>">
         <input type="hidden" name="submission_id" value="<?= intval($sub['id']) ?>">
         
@@ -215,4 +217,3 @@ $filterClass = $_GET['class_id'] ?? null;
   </div>
   <?php endif; ?>
 </div>
-

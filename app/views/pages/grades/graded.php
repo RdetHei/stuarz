@@ -1,12 +1,11 @@
 <?php
-// Standalone graded submissions view
-// Safe, minimal, uses mysqli connection from app config
-// Ensure DB config is loaded (allow inclusion from index.php)
+
+
+
 if (!isset($config) || !$config) {
     require_once __DIR__ . '/../../../config/config.php';
 }
 
-// Build base query and allow optional filters via GET
 $grades = [];
 $baseSql = "SELECT 
     ts.id AS submission_id,
@@ -28,7 +27,6 @@ $where = " WHERE ts.status = 'graded'";
 $params = [];
 $types = '';
 
-// Optional filters from the existing filters UI
 if (!empty($_GET['subject_id'])) {
     $where .= " AND tc.subject_id = ?";
     $params[] = (int) $_GET['subject_id'];
@@ -44,11 +42,10 @@ $order = " ORDER BY ts.submitted_at DESC";
 
 $sql = $baseSql . $where . $order;
 
-// Prepare and execute safely
 $stmt = mysqli_prepare($config, $sql);
 if ($stmt) {
     if (!empty($params)) {
-        // Bind parameters dynamically
+
         $bind_names[] = $types;
         for ($i = 0; $i < count($params); $i++) {
             $bind_names[] = &$params[$i];
@@ -68,7 +65,6 @@ if ($stmt) {
     error_log('Grades prepare failed: ' . mysqli_error($config));
 }
 
-// Helper function for grade badge
 function getGradeBadge($score) {
     if ($score >= 90) {
         return '<span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">A</span>';

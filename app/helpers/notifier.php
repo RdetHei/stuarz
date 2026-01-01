@@ -1,5 +1,5 @@
 <?php
-// Simple helper to insert notifications
+
 function notify_event($config, $eventType, $entity, $entity_id = null, $user_id = null, $message = '', $url = null) {
     static $schemaVariant = null;
 
@@ -34,7 +34,7 @@ function notify_event($config, $eventType, $entity, $entity_id = null, $user_id 
         $uurl = $url ?? '';
         mysqli_stmt_bind_param($stmt, 'ssiiss', $eventType, $entity, $eid, $uid, $msg, $uurl);
     } else {
-        // Legacy schema: columns -> user_id, type (entity-name), reference_id, message, is_read(default), created_at(default)
+
         $legacyType = $entity; // store entity name (e.g., announcement, task)
         if ($legacyType === 'general') {
             $legacyType = $eventType;

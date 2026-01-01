@@ -32,22 +32,34 @@ class TaskSubmissionsModel {
     }
 
     public function createAttempt($data) {
-        // $data: task_id, user_id, class_id, file_path, status (optional)
         $supportsAttempt = $this->hasColumn('task_submissions', 'attempt_no');
         $supportsReview = $this->hasColumn('task_submissions', 'review_status');
         $supportsBreakdown = $this->hasColumn('task_submissions', 'grade_breakdown');
         $supportsReviewMeta = $this->hasColumn('task_submissions', 'reviewed_by');
 
         $columns = ['task_id', 'user_id', 'class_id', 'file_path', 'status', 'grade', 'feedback'];
-        $placeholders = ['?', '?', '?', '?', '?', 'NULL', 'NULL'];
-        $types = 'iiiss';
-        $values = [
-            intval($data['task_id']),
-            intval($data['user_id']),
-            intval($data['class_id']),
-            $data['file_path'],
-            $data['status'] ?? 'submitted'
-        ];
+        $filePath = $data['file_path'] ?? null;
+        
+        if ($filePath === null) {
+            $placeholders = ['?', '?', '?', 'NULL', '?', 'NULL', 'NULL'];
+            $types = 'iiis';
+            $values = [
+                intval($data['task_id']),
+                intval($data['user_id']),
+                intval($data['class_id']),
+                $data['status'] ?? 'submitted'
+            ];
+        } else {
+            $placeholders = ['?', '?', '?', '?', '?', 'NULL', 'NULL'];
+            $types = 'iiiss';
+            $values = [
+                intval($data['task_id']),
+                intval($data['user_id']),
+                intval($data['class_id']),
+                $filePath,
+                $data['status'] ?? 'submitted'
+            ];
+        }
 
         if ($supportsAttempt) {
             $columns[] = 'attempt_no'; $placeholders[] = '?'; $types .= 'i'; $values[] = intval($data['attempt_no'] ?? 1);
@@ -273,7 +285,6 @@ class TaskSubmissionsModel {
         $stmt->bind_param('ii', $taskId, $userId);
         $stmt->execute();
         $stmt->close();
-        // mark latest row as final
         $sql2 = "UPDATE task_submissions SET is_final = 1 WHERE id = (
                     SELECT id FROM (
                         SELECT id FROM task_submissions WHERE task_id = ? AND user_id = ? ORDER BY submitted_at DESC LIMIT 1

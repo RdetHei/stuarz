@@ -25,7 +25,6 @@ class CertificatesController
             $certificates = $certificatesModel->getByUserId((int)$me['id']);
         }
 
-        // Set base URL for file paths
         if (!isset($baseUrl)) {
             $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
             if ($baseUrl === '/') $baseUrl = '';
@@ -50,7 +49,6 @@ class CertificatesController
         $certificatesModel = new certificates($config);
         $certificates = $certificatesModel->getByUserId($me['id']);
 
-        // Set base URL for file paths
         if (!isset($baseUrl)) {
             $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
             if ($baseUrl === '/') $baseUrl = '';
@@ -78,7 +76,6 @@ class CertificatesController
             $issued_by = mysqli_real_escape_string($config, $_POST['issued_by'] ?? '');
             $issued_at = mysqli_real_escape_string($config, $_POST['issued_at'] ?? '');
 
-            // Handle file upload
             $uploadDir = str_replace('/', DIRECTORY_SEPARATOR, dirname(__DIR__, 2) . '/public/uploads/certificates');
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
@@ -92,7 +89,7 @@ class CertificatesController
                 $filePath = $uploadDir . $fileName;
 
                 if (move_uploaded_file($_FILES['certificate_file']['tmp_name'], $filePath)) {
-                    // Debug: log file upload info
+                    
                     error_log("Certificate Upload - fileName: " . $fileName);
                     error_log("Certificate Upload - filePath: " . $filePath);
                     
@@ -137,22 +134,18 @@ class CertificatesController
             exit;
         }
 
-        // pastikan request POST (form JS mengirim POST)
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: index.php?page=certificates');
             exit;
         }
 
-        // ambil id dari POST, bukan GET
         $id = (int)($_POST['id'] ?? 0);
 
         if ($id > 0) {
             $certificatesModel = new certificates($config);
 
-            // Check if user owns this certificate or is admin
             $certificate = $certificatesModel->getById($id);
             if ($certificate && ($certificate['user_id'] == $me['id'] || $me['level'] === 'admin')) {
-                // Delete file from server
                 if ($certificate['file_path'] && file_exists(__DIR__ . '/../../public/' . $certificate['file_path'])) {
                     unlink(__DIR__ . '/../../public/' . $certificate['file_path']);
                 }

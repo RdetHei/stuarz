@@ -15,7 +15,6 @@ class NotificationController
 
         global $config;
         $nm = new NotificationsModel($config);
-        // Only retrieve notifications belonging to the current user
         $notifications = $nm->getForUser($userId, 200);
 
         $content = dirname(__DIR__) . '/views/pages/notifications/index.php';
@@ -87,7 +86,6 @@ public function clear()
     global $config;
     $nm = new NotificationsModel($config);
 
-    // Hapus hanya notifikasi milik user yang sedang login
     $ok = $nm->clearByUser($userId);
 
     $this->jsonResponse(['success' => (bool)$ok]);
